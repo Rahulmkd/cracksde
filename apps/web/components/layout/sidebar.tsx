@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -39,6 +39,10 @@ interface NavItem {
 export function Sidebar() {
   const pathname = usePathname();
   const { sidebarOpen, toggleSidebar } = useUIStore();
+
+  const [prepOpen, setPrepOpen] = useState(true);
+  const [exploreOpen, setExploreOpen] = useState(true);
+  const [spacesOpen, setSpacesOpen] = useState(true);
 
   const prepItems: NavItem[] = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -98,98 +102,158 @@ export function Sidebar() {
           </button>
         </div>
 
-        {/* Scrollable Nav Sections */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 text-xs scrollbar-thin scrollbar-thumb-zinc-800">
+        {/* Scrollable Nav Sections without visible scrollbar */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 text-xs [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {/* Section: Prep */}
           <div className="space-y-1">
             {sidebarOpen && (
-              <div className="flex items-center justify-between px-2 pb-1 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+              <button
+                type="button"
+                onClick={() => setPrepOpen((prev) => !prev)}
+                className="flex w-full items-center justify-between px-2 pb-1.5 text-[11px] font-medium text-zinc-500 hover:text-zinc-300 uppercase tracking-wider transition-colors cursor-pointer select-none"
+              >
                 <span>Prep</span>
-                <ChevronDown className="h-3 w-3" />
-              </div>
-            )}
-            {prepItems.map((item) => {
-              const Icon = item.icon;
-              const isActive =
-                item.href === "/dashboard"
-                  ? pathname === "/dashboard"
-                  : pathname.startsWith(item.href);
-
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
+                <ChevronDown
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-2.5 py-2 transition-colors",
-                    isActive
-                      ? "bg-blue-600/15 text-blue-400 font-semibold border border-blue-500/20"
-                      : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                    "h-3 w-3 transition-transform duration-200",
+                    prepOpen ? "rotate-0" : "-rotate-90"
                   )}
-                  title={!sidebarOpen ? item.name : undefined}
-                >
-                  <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-blue-400" : "text-zinc-400")} />
-                  {sidebarOpen && (
-                    <div className="flex flex-1 items-center justify-between">
-                      <span>{item.name}</span>
-                      {item.hasSubmenu && <ChevronDown className="h-3 w-3 text-zinc-600" />}
-                    </div>
-                  )}
-                </Link>
-              );
-            })}
+                />
+              </button>
+            )}
+            <div
+              className={cn(
+                "grid transition-all duration-200 ease-in-out",
+                prepOpen || !sidebarOpen
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0 pointer-events-none"
+              )}
+            >
+              <div className="overflow-hidden space-y-1">
+                {prepItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive =
+                    item.href === "/dashboard"
+                      ? pathname === "/dashboard"
+                      : pathname.startsWith(item.href);
+
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-2.5 py-2 transition-colors",
+                        isActive
+                          ? "bg-blue-600/15 text-blue-400 font-semibold border border-blue-500/20"
+                          : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                      )}
+                      title={!sidebarOpen ? item.name : undefined}
+                    >
+                      <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-blue-400" : "text-zinc-400")} />
+                      {sidebarOpen && (
+                        <div className="flex flex-1 items-center justify-between">
+                          <span>{item.name}</span>
+                          {item.hasSubmenu && <ChevronDown className="h-3 w-3 text-zinc-600" />}
+                        </div>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Section: Explore */}
           <div className="space-y-1">
             {sidebarOpen && (
-              <div className="flex items-center justify-between px-2 pb-1 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+              <button
+                type="button"
+                onClick={() => setExploreOpen((prev) => !prev)}
+                className="flex w-full items-center justify-between px-2 pb-1.5 text-[11px] font-medium text-zinc-500 hover:text-zinc-300 uppercase tracking-wider transition-colors cursor-pointer select-none"
+              >
                 <span>Explore</span>
-                <ChevronDown className="h-3 w-3" />
-              </div>
-            )}
-            {exploreItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 transition-colors"
-                  title={!sidebarOpen ? item.name : undefined}
-                >
-                  <Icon className="h-4 w-4 shrink-0 text-zinc-400" />
-                  {sidebarOpen && (
-                    <div className="flex flex-1 items-center justify-between">
-                      <span>{item.name}</span>
-                      {item.hasSubmenu && <ChevronDown className="h-3 w-3 text-zinc-600" />}
-                    </div>
+                <ChevronDown
+                  className={cn(
+                    "h-3 w-3 transition-transform duration-200",
+                    exploreOpen ? "rotate-0" : "-rotate-90"
                   )}
-                </Link>
-              );
-            })}
+                />
+              </button>
+            )}
+            <div
+              className={cn(
+                "grid transition-all duration-200 ease-in-out",
+                exploreOpen || !sidebarOpen
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0 pointer-events-none"
+              )}
+            >
+              <div className="overflow-hidden space-y-1">
+                {exploreItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 transition-colors"
+                      title={!sidebarOpen ? item.name : undefined}
+                    >
+                      <Icon className="h-4 w-4 shrink-0 text-zinc-400" />
+                      {sidebarOpen && (
+                        <div className="flex flex-1 items-center justify-between">
+                          <span>{item.name}</span>
+                          {item.hasSubmenu && <ChevronDown className="h-3 w-3 text-zinc-600" />}
+                        </div>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Section: My Spaces */}
           <div className="space-y-1">
             {sidebarOpen && (
-              <div className="flex items-center justify-between px-2 pb-1 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+              <button
+                type="button"
+                onClick={() => setSpacesOpen((prev) => !prev)}
+                className="flex w-full items-center justify-between px-2 pb-1.5 text-[11px] font-medium text-zinc-500 hover:text-zinc-300 uppercase tracking-wider transition-colors cursor-pointer select-none"
+              >
                 <span>My Spaces</span>
-                <ChevronDown className="h-3 w-3" />
-              </div>
+                <ChevronDown
+                  className={cn(
+                    "h-3 w-3 transition-transform duration-200",
+                    spacesOpen ? "rotate-0" : "-rotate-90"
+                  )}
+                />
+              </button>
             )}
-            {spacesItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 transition-colors"
-                  title={!sidebarOpen ? item.name : undefined}
-                >
-                  <Icon className="h-4 w-4 shrink-0 text-zinc-400" />
-                  {sidebarOpen && <span>{item.name}</span>}
-                </Link>
-              );
-            })}
+            <div
+              className={cn(
+                "grid transition-all duration-200 ease-in-out",
+                spacesOpen || !sidebarOpen
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0 pointer-events-none"
+              )}
+            >
+              <div className="overflow-hidden space-y-1">
+                {spacesItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 transition-colors"
+                      title={!sidebarOpen ? item.name : undefined}
+                    >
+                      <Icon className="h-4 w-4 shrink-0 text-zinc-400" />
+                      {sidebarOpen && <span>{item.name}</span>}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 

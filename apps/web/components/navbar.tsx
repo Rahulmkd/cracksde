@@ -9,8 +9,16 @@ export function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
 
-  // On dashboard and onboarding, dedicated navigation headers are rendered
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding")) {
+  // Hide marketing navbar on all app routes (dashboard, prep-hub, planly, onboarding, etc.)
+  const isAppRoute =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/prep-hub") ||
+    pathname.startsWith("/planly") ||
+    pathname.startsWith("/practice") ||
+    pathname.startsWith("/community") ||
+    pathname.startsWith("/onboarding");
+
+  if (isAppRoute) {
     return null;
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import {
   Calendar as CalendarIcon,
@@ -15,93 +15,17 @@ import {
   Database,
   Layers,
   Cpu,
-  Network,
-  Plus,
-  Trash2,
-  Check,
-  Flame,
   Info,
-  ExternalLink,
-  BookOpen,
-  ListTodo,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useStudyPlan } from "@/hooks/use-study-plan";
 import { useRoadmapSubjects } from "@/hooks/use-roadmap";
+import { DailyPlanner } from "@/components/layout/daily-planner";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-
-interface DailyTask {
-  id: string;
-  title: string;
-  duration: string;
-  completed: boolean;
-  category?: string;
-}
 
 export default function DashboardPage() {
-  const { plan, updateTask } = useStudyPlan("crack-sde");
+  const { plan } = useStudyPlan("crack-sde");
   const { data: roadmapSubjects } = useRoadmapSubjects();
-
-  // Daily Tasks state
-  const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([
-    { id: "1", title: "Two Sum & Pair with Target Sum", duration: "15m", completed: false, category: "DSA" },
-    { id: "2", title: "Review DBMS Indexing & B-Trees", duration: "25m", completed: false, category: "DBMS" },
-    { id: "3", title: "Process Synchronization & Mutex Locks", duration: "20m", completed: false, category: "OS" },
-  ]);
-  const [newTaskInput, setNewTaskInput] = useState("");
-  const [isAddingTask, setIsAddingTask] = useState(false);
-
-  // Problem of the day countdown timer
-  const [timeLeft, setTimeLeft] = useState({ hours: 9, minutes: 25, seconds: 9 });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        } else if (prev.hours > 0) {
-          return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        } else {
-          return { hours: 23, minutes: 59, seconds: 59 };
-        }
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatDigits = (num: number) => num.toString().padStart(2, "0");
-
-  const handleToggleDailyTask = (id: string) => {
-    setDailyTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
-    );
-  };
-
-  const handleDeleteDailyTask = (id: string) => {
-    setDailyTasks((prev) => prev.filter((t) => t.id !== id));
-    toast.info("Task removed");
-  };
-
-  const handleAddDailyTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTaskInput.trim()) return;
-    const newTask: DailyTask = {
-      id: Date.now().toString(),
-      title: newTaskInput.trim(),
-      duration: "15m",
-      completed: false,
-      category: "Custom",
-    };
-    setDailyTasks((prev) => [...prev, newTask]);
-    setNewTaskInput("");
-    setIsAddingTask(false);
-    toast.success("Task added to daily planner");
-  };
 
   // Calculations
   const sprints = plan?.sprints || [];
@@ -187,11 +111,11 @@ export default function DashboardPage() {
             ✦
           </span>
           <p className="truncate text-zinc-300 text-xs">
-            <strong className="text-blue-400 font-semibold">crack sde is live</strong> &middot; Your sheets have been upgraded, and your progress has moved with you
+            <strong className="text-blue-400 font-semibold">Zenkai is live</strong> &middot; Your sheets have been upgraded, and your progress has moved with you
           </p>
         </div>
         <Link
-          href="/planly"
+          href="/prep-hub"
           className="shrink-0 text-xs font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
         >
           See what&apos;s new <ArrowRight className="h-3 w-3" />
@@ -468,173 +392,13 @@ export default function DashboardPage() {
         </div>
 
         {/* ======================================================================= */}
-        {/* RIGHT COLUMN (3-4 COLS): PROBLEM OF THE DAY -> DAILY PLANNER */}
+        {/* RIGHT COLUMN (3-4 COLS): SHARED FIXED / STICKY DAILY PLANNER */}
         {/* ======================================================================= */}
-        <div className="lg:col-span-4 xl:col-span-3 space-y-4">
-          {/* PROBLEM OF THE DAY CARD (MATCHING SCREENSHOT 1) */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-4 shadow-sm hover:border-zinc-700/80 transition-all">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-200">
-                <span>Problem Of The Day</span>
-                <ExternalLink className="h-3 w-3 text-zinc-500" />
-              </div>
-              <Badge variant="brand" className="text-[10px] py-0 px-1.5 font-mono">
-                +20
-              </Badge>
-            </div>
-
-            {/* Countdown Box */}
-            <div className="flex items-center justify-center gap-2 py-2">
-              <div className="flex flex-col items-center">
-                <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100">
-                  {formatDigits(timeLeft.hours)}
-                </span>
-              </div>
-              <span className="text-zinc-600 font-bold">:</span>
-              <div className="flex flex-col items-center">
-                <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100">
-                  {formatDigits(timeLeft.minutes)}
-                </span>
-              </div>
-              <span className="text-zinc-600 font-bold">:</span>
-              <div className="flex flex-col items-center">
-                <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100">
-                  {formatDigits(timeLeft.seconds)}
-                </span>
-              </div>
-            </div>
-
-            {/* Action Button */}
-            <Button
-              asChild
-              className="w-full h-9 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20"
-            >
-              <Link href="/onboarding">
-                Solve problem <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
-              </Link>
-            </Button>
+        <aside className="lg:col-span-4 xl:col-span-3">
+          <div className="sticky top-20">
+            <DailyPlanner showProblemOfTheDay={true} />
           </div>
-
-          {/* DAILY PLANNER CARD (MATCHING SCREENSHOT 1) */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 shadow-sm">
-            <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-              <div className="flex items-center gap-2 text-xs font-bold text-zinc-200">
-                <ListTodo className="h-4 w-4 text-blue-400" />
-                <span>Daily Planner</span>
-              </div>
-              <button
-                onClick={() => setIsAddingTask((prev) => !prev)}
-                className="text-[11px] font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1"
-              >
-                <Plus className="h-3 w-3" /> Add task
-              </button>
-            </div>
-
-            {/* Inline Add Task Input */}
-            {isAddingTask && (
-              <form onSubmit={handleAddDailyTask} className="space-y-2 pt-1">
-                <input
-                  type="text"
-                  placeholder="Task title (e.g. Solve 3 Binary Tree questions)..."
-                  value={newTaskInput}
-                  onChange={(e) => setNewTaskInput(e.target.value)}
-                  autoFocus
-                  className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
-                />
-                <div className="flex items-center justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setIsAddingTask(false);
-                      setNewTaskInput("");
-                    }}
-                    className="h-6 px-2 text-[10px]"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    className="h-6 px-2 text-[10px] bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Save
-                  </Button>
-                </div>
-              </form>
-            )}
-
-            {/* Checklist of Tasks */}
-            {dailyTasks.length > 0 ? (
-              <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-800">
-                {dailyTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className={cn(
-                      "flex items-center justify-between p-2 rounded-lg border border-zinc-800/60 bg-zinc-950/50 text-xs hover:bg-zinc-900/80 transition-all group",
-                      task.completed && "opacity-60 bg-zinc-950/20"
-                    )}
-                  >
-                    <div className="flex items-center gap-2.5 overflow-hidden">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleDailyTask(task.id)}
-                        className={cn(
-                          "flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors",
-                          task.completed
-                            ? "border-emerald-500 bg-emerald-500 text-white"
-                            : "border-zinc-700 bg-zinc-900 hover:border-blue-500"
-                        )}
-                      >
-                        {task.completed && <Check className="h-3 w-3 stroke-[3]" />}
-                      </button>
-
-                      <span
-                        onClick={() => handleToggleDailyTask(task.id)}
-                        className={cn(
-                          "truncate cursor-pointer font-medium text-zinc-200 text-[11px] hover:text-blue-400",
-                          task.completed && "line-through text-zinc-500"
-                        )}
-                      >
-                        {task.title}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0 ml-1">
-                      <span className="font-mono text-[10px] text-zinc-500">
-                        {task.duration}
-                      </span>
-                      <button
-                        onClick={() => handleDeleteDailyTask(task.id)}
-                        className="text-zinc-600 hover:text-red-400 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Delete task"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              /* Empty State (Matching Screenshot 1) */
-              <div className="py-8 text-center space-y-2">
-                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 border border-zinc-800 text-zinc-500">
-                  <ListTodo className="h-5 w-5" />
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-xs font-semibold text-zinc-300">No tasks for today</p>
-                  <p
-                    onClick={() => setIsAddingTask(true)}
-                    className="text-[11px] text-zinc-500 hover:text-blue-400 cursor-pointer"
-                  >
-                    Add your tasks here
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        </aside>
       </div>
     </div>
   );
