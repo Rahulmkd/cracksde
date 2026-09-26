@@ -4,72 +4,100 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71% 4%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
-    --primary: 263 83% 55%;
+    --background: 240 6% 4%;
+    --foreground: 210 40% 98%;
+    --card: 240 5% 7%;
+    --card-foreground: 210 40% 98%;
+    --popover: 240 5% 8%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 224 71% 4%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 263 83% 55%;
+    --secondary: 240 4% 14%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 240 4% 15%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 217.2 91.2% 59.8%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 263 83% 55%;
-    --radius: 0.5rem;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 217.2 91.2% 59.8%;
+    --radius: 0.75rem;
   }
 
   .dark {
     --background: 240 6% 4%;
     --foreground: 210 40% 98%;
-    --card: 240 5% 8%;
+    --card: 240 5% 7%;
     --card-foreground: 210 40% 98%;
     --popover: 240 5% 8%;
     --popover-foreground: 210 40% 98%;
-    --primary: 252 56% 75%;
-    --primary-foreground: 240 6% 4%;
-    --secondary: 240 4% 16%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4% 14%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 240 4% 16%;
+    --muted: 240 4% 15%;
     --muted-foreground: 240 5% 65%;
-    --accent: 252 56% 75%;
-    --accent-foreground: 240 6% 4%;
-    --destructive: 0 62% 30%;
+    --accent: 217.2 91.2% 59.8%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
     --border: 240 4% 16%;
     --input: 240 4% 16%;
-    --ring: 252 56% 75%;
+    --ring: 217.2 91.2% 59.8%;
   }
 }
 
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     @apply border-border;
+    box-sizing: border-box;
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+
   *::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
+    width: 0px;
+    height: 0px;
+    background: transparent;
   }
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  html::-webkit-scrollbar {
+    display: none;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "calt" 1;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    overflow-x: hidden;
+  }
+
   body::-webkit-scrollbar {
     display: none;
   }
+
+  /* Accessible focus rings */
+  :focus-visible {
+    @apply outline-none ring-2 ring-blue-500/50 ring-offset-2 ring-offset-background;
+  }
 }
 
-/* Tiptap Editor & Typography Styles */
+/* Tiptap Editor & Content Styles */
 .tiptap {
   @apply outline-none;
 }
@@ -80,38 +108,37 @@
 }
 
 .tiptap h1 {
-  @apply text-2xl font-bold tracking-tight mt-4 mb-2;
+  @apply text-2xl font-bold tracking-tight mt-4 mb-2 text-zinc-100;
 }
 
 .tiptap h2 {
-  @apply text-xl font-semibold tracking-tight mt-3 mb-2;
+  @apply text-xl font-semibold tracking-tight mt-3 mb-2 text-zinc-100;
 }
 
 .tiptap h3 {
-  @apply text-lg font-semibold tracking-tight mt-2 mb-1;
+  @apply text-lg font-semibold tracking-tight mt-2 mb-1 text-zinc-200;
 }
 
 .tiptap ul {
-  @apply list-disc list-outside pl-6 my-2 space-y-1;
+  @apply list-disc list-outside pl-5 my-2 space-y-1 text-zinc-300;
 }
 
 .tiptap ol {
-  @apply list-decimal list-outside pl-6 my-2 space-y-1;
+  @apply list-decimal list-outside pl-5 my-2 space-y-1 text-zinc-300;
 }
 
 .tiptap blockquote {
-  @apply border-l-2 border-brand-500/60 pl-4 py-1 italic my-3 text-muted-foreground bg-muted/20 rounded-r;
+  @apply border-l-2 border-blue-500/60 pl-3.5 py-1 italic my-3 text-zinc-400 bg-zinc-900/40 rounded-r;
 }
 
 .tiptap code {
-  @apply font-mono text-sm px-1.5 py-0.5 rounded bg-muted text-brand-600 dark:text-brand-400 font-medium;
+  @apply font-mono text-xs px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-blue-400 font-medium;
 }
 
 .tiptap pre {
-  @apply font-mono text-sm p-4 rounded-lg bg-muted my-3 overflow-x-auto;
+  @apply font-mono text-xs p-3.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200 my-3 overflow-x-auto;
 }
 
 .tiptap a {
-  @apply text-brand-600 dark:text-brand-400 underline underline-offset-2 hover:opacity-80 transition-opacity;
+  @apply text-blue-400 underline underline-offset-2 hover:text-blue-300 transition-colors;
 }
-

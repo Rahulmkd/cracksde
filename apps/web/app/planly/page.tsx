@@ -6,16 +6,13 @@ import {
   Calendar as CalendarIcon,
   Clock,
   CheckCircle2,
-  Circle,
   Star,
   ChevronDown,
   ChevronRight,
   Edit2,
   Sliders,
-  Sparkles,
   TrendingUp,
   Layers,
-  Flame,
   Check,
   X,
   MoreVertical,
@@ -23,8 +20,6 @@ import {
   BarChart2,
   Target,
   ArrowRight,
-  Plus,
-  FolderOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +53,7 @@ export default function PlanlyPage() {
   const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
 
   // Detailed view toggle
-  const [isPlanDetailOpen, setIsPlanDetailOpen] = useState(false);
+  const [isPlanDetailOpen, setIsPlanDetailOpen] = useState(true);
 
   // Menu State
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
@@ -157,55 +152,54 @@ export default function PlanlyPage() {
     const slug = (subjectSlug || "dsa").toLowerCase();
     if (slug.includes("dsa")) {
       return (
-        <span className="rounded bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.5 text-[10px] font-bold text-blue-400">
+        <Badge variant="blue" className="py-0 px-1.5 font-bold">
           DSA
-        </span>
+        </Badge>
       );
     }
     if (slug.includes("dbms")) {
       return (
-        <span className="rounded bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">
+        <Badge variant="success" className="py-0 px-1.5 font-bold">
           DBMS
-        </span>
+        </Badge>
       );
     }
     if (slug.includes("operat") || slug.includes("os")) {
       return (
-        <span className="rounded bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 text-[10px] font-bold text-purple-400">
+        <Badge variant="purple" className="py-0 px-1.5 font-bold">
           OS
-        </span>
+        </Badge>
       );
     }
     if (slug.includes("netw") || slug.includes("cn")) {
       return (
-        <span className="rounded bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 text-[10px] font-bold text-amber-400">
+        <Badge variant="warning" className="py-0 px-1.5 font-bold">
           CN
-        </span>
+        </Badge>
       );
     }
     if (slug.includes("oops")) {
       return (
-        <span className="rounded bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 text-[10px] font-bold text-rose-400">
+        <Badge variant="destructive" className="py-0 px-1.5 font-bold">
           OOPS
-        </span>
+        </Badge>
       );
     }
     return (
-      <span className="rounded bg-cyan-500/15 border border-cyan-500/30 px-1.5 py-0.5 text-[10px] font-bold text-cyan-400">
+      <Badge variant="cyan" className="py-0 px-1.5 font-bold">
         LLD
-      </span>
+      </Badge>
     );
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-16 animate-in fade-in-50 duration-300">
+    <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200">
       {/* ========================================================================= */}
-      {/* TOP SECTION: WIDE PLANLY INFO BANNER (MATCHING SCREENSHOT 2) */}
+      {/* TOP SECTION: PLANLY HEADER BANNER */}
       {/* ========================================================================= */}
-      <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950 p-5 sm:p-6 shadow-sm">
-        {/* Subtle grid background overlay */}
+      <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 shadow-subtle hover:border-zinc-700/80 transition-all duration-200">
         <div
-          className="absolute inset-0 opacity-[0.07] pointer-events-none"
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
           style={{
             backgroundImage: `linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px)`,
             backgroundSize: "28px 28px",
@@ -214,39 +208,42 @@ export default function PlanlyPage() {
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           {/* Left: Heading & 4 Feature Benefits */}
-          <div className="space-y-4 max-w-3xl">
-            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-100">
+          <div className="space-y-3.5 max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+              <span>Study Planner Engine</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
               Know what to study every day and readjust as you go
-            </h2>
+            </h1>
 
             {/* 4 Benefits in a row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-1">
-              <div className="flex items-center gap-2 text-xs text-zinc-300">
-                <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/15 text-blue-400 shrink-0">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
                   <Activity className="h-3.5 w-3.5" />
                 </div>
-                <span className="leading-tight text-[11px] text-zinc-400">Personalised for your goals</span>
+                <span className="text-[11px] text-zinc-400 font-medium leading-tight">Goal-based pacing</span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-zinc-300">
-                <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/15 text-blue-400 shrink-0">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
                   <BarChart2 className="h-3.5 w-3.5" />
                 </div>
-                <span className="leading-tight text-[11px] text-zinc-400">Adjusts as you progress</span>
+                <span className="text-[11px] text-zinc-400 font-medium leading-tight">Dynamic backlog shifts</span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-zinc-300">
-                <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/15 text-blue-400 shrink-0">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
                   <Layers className="h-3.5 w-3.5" />
                 </div>
-                <span className="leading-tight text-[11px] text-zinc-400">Break goals into sprints</span>
+                <span className="text-[11px] text-zinc-400 font-medium leading-tight">9 structured sprints</span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-zinc-300">
-                <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/15 text-blue-400 shrink-0">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
                   <Target className="h-3.5 w-3.5" />
                 </div>
-                <span className="leading-tight text-[11px] text-zinc-400">Track your strengths & weaknesses</span>
+                <span className="text-[11px] text-zinc-400 font-medium leading-tight">Revision bookmarking</span>
               </div>
             </div>
           </div>
@@ -255,10 +252,11 @@ export default function PlanlyPage() {
           <div className="shrink-0 flex items-center">
             <Button
               asChild
-              className="h-10 px-5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 transition-all"
+              size="sm"
+              className="h-9 px-4 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
             >
               <Link href="/onboarding">
-                Generate my plan <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                Generate custom plan <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
               </Link>
             </Button>
           </div>
@@ -268,18 +266,18 @@ export default function PlanlyPage() {
       {/* ========================================================================= */}
       {/* TABS SECTION: ACTIVE (1) / COMPLETED (0) */}
       {/* ========================================================================= */}
-      <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-1">
+      <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-2">
         <button
           onClick={() => setActiveTab("active")}
           className={cn(
-            "flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-colors",
+            "flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors",
             activeTab === "active"
-              ? "bg-zinc-800/80 text-zinc-100 shadow-sm"
-              : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40"
+              ? "bg-zinc-800 text-zinc-100 shadow-sm"
+              : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60"
           )}
         >
-          <span>Active</span>
-          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-700 px-1.5 text-[10px] font-bold text-zinc-200">
+          <span>Active Plans</span>
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/30 px-1.5 text-[10px] font-bold text-blue-400">
             1
           </span>
         </button>
@@ -287,14 +285,14 @@ export default function PlanlyPage() {
         <button
           onClick={() => setActiveTab("completed")}
           className={cn(
-            "flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-colors",
+            "flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors",
             activeTab === "completed"
-              ? "bg-zinc-800/80 text-zinc-100 shadow-sm"
-              : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40"
+              ? "bg-zinc-800 text-zinc-100 shadow-sm"
+              : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60"
           )}
         >
           <span>Completed</span>
-          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-800 px-1.5 text-[10px] font-bold text-zinc-400">
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-800 px-1.5 text-[10px] font-bold text-zinc-500">
             0
           </span>
         </button>
@@ -305,12 +303,15 @@ export default function PlanlyPage() {
       {/* ========================================================================= */}
       {activeTab === "active" && (
         <div className="space-y-6">
-          {/* Main Active Plan Card (Matching Screenshot 2) */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 overflow-hidden shadow-sm hover:border-zinc-700/80 transition-all">
-            {/* Top Sub-header Bar: Starts in 5 days */}
-            <div className="flex items-center gap-2 border-b border-zinc-800/80 bg-zinc-950/60 px-5 py-2.5 text-xs text-blue-400 font-medium">
-              <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
-              <span>Starts in 5 days &middot; Plan is ready, not yet started</span>
+          {/* Main Active Plan Card */}
+          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle hover:border-zinc-700/80 transition-all duration-200">
+            {/* Top Sub-header Bar */}
+            <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-950/60 px-5 py-2.5 text-xs text-blue-400 font-medium">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
+                <span>Starts in 5 days &middot; Ready to begin &middot; 61 days total</span>
+              </div>
+              <span className="text-[11px] font-mono text-zinc-500">Scheduled: 1 Oct 2026</span>
             </div>
 
             {/* Plan Card Body */}
@@ -318,50 +319,47 @@ export default function PlanlyPage() {
               {/* Left Plan Meta */}
               <div className="space-y-1">
                 <div className="flex items-center gap-2.5">
-                  <h3 className="text-lg font-bold text-zinc-100 tracking-tight">
+                  <h3 className="text-base sm:text-lg font-bold text-zinc-100 tracking-tight">
                     {plan?.name || "Crack SDE"}
                   </h3>
+                  <Badge variant="blue" className="text-[10px] font-semibold">
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse mr-1" />
+                    Active Plan
+                  </Badge>
                 </div>
-                <div className="text-xs text-zinc-400 flex flex-wrap items-center gap-1.5 font-normal">
-                  <span>Scheduled: <strong className="text-zinc-300 font-medium">1 Oct 2026</strong></span>
+                <div className="text-xs text-zinc-400 flex flex-wrap items-center gap-2 font-normal">
+                  <span>Target Role: <strong className="text-zinc-300 font-medium">Software Engineer</strong></span>
                   <span>&middot;</span>
-                  <span>Software Engineer</span>
+                  <span>Pacing: <strong className="text-zinc-300 font-medium">4 hrs/day</strong></span>
                   <span>&middot;</span>
-                  <span>Open to all</span>
+                  <span>9 Sprints</span>
                 </div>
               </div>
 
               {/* Right Plan Actions */}
-              <div className="flex items-center gap-3 relative">
-                {/* Upcoming Badge */}
-                <Badge variant="blue" className="text-xs font-semibold py-1 px-2.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse mr-1.5" />
-                  Upcoming
-                </Badge>
-
-                {/* View your plan Action */}
+              <div className="flex items-center gap-2.5 relative">
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => setIsPlanDetailOpen((prev) => !prev)}
-                  className="h-8 text-xs border-zinc-800 bg-zinc-900 text-blue-400 hover:bg-zinc-800 hover:text-blue-300 font-medium"
+                  className="h-8 text-xs font-medium border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800"
                 >
-                  {isPlanDetailOpen ? "Hide plan schedule" : "View your plan"}
+                  {isPlanDetailOpen ? "Collapse schedule" : "View schedule & sprints"}
                 </Button>
 
                 {/* Three-dot dropdown menu */}
                 <div className="relative">
                   <button
                     onClick={() => setIsActionMenuOpen((prev) => !prev)}
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
-                    title="Plan options"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
+                    title="Plan settings"
                   >
                     <MoreVertical className="h-4 w-4" />
                   </button>
 
                   {isActionMenuOpen && (
                     <div
-                      className="absolute right-0 top-full mt-1.5 w-44 rounded-lg border border-zinc-800 bg-zinc-900 py-1 text-xs shadow-xl z-30 divide-y divide-zinc-800/60"
+                      className="absolute right-0 top-full mt-1.5 w-48 rounded-xl border border-zinc-800 bg-zinc-950 p-1 text-xs shadow-dialog z-30 divide-y divide-zinc-800/80 animate-in fade-in-0 duration-150"
                       onClick={() => setIsActionMenuOpen(false)}
                     >
                       <div className="py-1">
@@ -370,30 +368,30 @@ export default function PlanlyPage() {
                             setPlanNameInput(plan?.name || "Crack SDE");
                             setIsRenameModalOpen(true);
                           }}
-                          className="flex w-full items-center gap-2 px-3 py-1.5 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                          className="flex w-full items-center gap-2 px-3 py-1.5 text-zinc-300 hover:bg-zinc-900 hover:text-white rounded-md"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
                           <span>Rename plan</span>
                         </button>
                         <button
                           onClick={() => setIsStartDateModalOpen(true)}
-                          className="flex w-full items-center gap-2 px-3 py-1.5 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                          className="flex w-full items-center gap-2 px-3 py-1.5 text-zinc-300 hover:bg-zinc-900 hover:text-white rounded-md"
                         >
                           <CalendarIcon className="h-3.5 w-3.5" />
                           <span>Edit start date</span>
                         </button>
                         <button
                           onClick={() => setIsAdjustPlanModalOpen(true)}
-                          className="flex w-full items-center gap-2 px-3 py-1.5 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                          className="flex w-full items-center gap-2 px-3 py-1.5 text-zinc-300 hover:bg-zinc-900 hover:text-white rounded-md"
                         >
                           <Sliders className="h-3.5 w-3.5" />
-                          <span>Adjust plan</span>
+                          <span>Adjust daily hours</span>
                         </button>
                       </div>
                       <div className="py-1">
                         <button
                           onClick={() => setIsRevisionModalOpen(true)}
-                          className="flex w-full items-center gap-2 px-3 py-1.5 text-amber-400 hover:bg-zinc-800"
+                          className="flex w-full items-center gap-2 px-3 py-1.5 text-amber-400 hover:bg-zinc-900 rounded-md"
                         >
                           <Star className="h-3.5 w-3.5" />
                           <span>Revision list ({revisionListData?.length || 0})</span>
@@ -407,36 +405,36 @@ export default function PlanlyPage() {
 
             {/* EXPANDABLE STUDY PLAN SCHEDULE & TREE */}
             {isPlanDetailOpen && (
-              <div className="border-t border-zinc-800/80 bg-zinc-950/70 p-5 space-y-6">
+              <div className="border-t border-zinc-800/80 bg-zinc-950/60 p-5 space-y-6">
                 {/* 4 Overview KPI Metric Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                  <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-1">
+                  <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1 shadow-subtle">
                     <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
-                      <TrendingUp className="h-3.5 w-3.5 text-zinc-500" />
+                      <TrendingUp className="h-3.5 w-3.5 text-blue-400" />
                       <span>Overall progress</span>
                     </div>
                     <div className="flex items-baseline gap-2 pt-1">
-                      <span className="text-xl font-bold tracking-tight text-zinc-100">{progressPercent} %</span>
+                      <span className="text-xl font-bold tracking-tight text-zinc-100">{progressPercent}%</span>
                       <span className="text-xs text-zinc-500">{completedDaysCount} / 61 days</span>
                     </div>
-                    <Progress value={progressPercent} className="h-1 mt-2 bg-zinc-800" />
+                    <Progress value={progressPercent} className="mt-2" />
                   </div>
 
-                  <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-1">
+                  <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1 shadow-subtle">
                     <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
-                      <Clock className="h-3.5 w-3.5 text-zinc-500" />
+                      <Clock className="h-3.5 w-3.5 text-amber-400" />
                       <span>Time spent</span>
                     </div>
                     <div className="flex items-baseline gap-2 pt-1">
                       <span className="text-xl font-bold tracking-tight text-zinc-100">0m</span>
                       <span className="text-xs text-zinc-500">of {totalHours}h {remainingMinutes}m</span>
                     </div>
-                    <Progress value={0} className="h-1 mt-2 bg-zinc-800" />
+                    <Progress value={0} className="mt-2" />
                   </div>
 
-                  <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-1">
+                  <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1 shadow-subtle">
                     <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
-                      <Layers className="h-3.5 w-3.5 text-zinc-500" />
+                      <Layers className="h-3.5 w-3.5 text-purple-400" />
                       <span>Sprints completed</span>
                     </div>
                     <div className="flex items-baseline gap-2 pt-1">
@@ -445,13 +443,13 @@ export default function PlanlyPage() {
                     </div>
                     <Progress
                       value={(completedSprintsCount / totalSprintsCount) * 100}
-                      className="h-1 mt-2 bg-zinc-800"
+                      className="mt-2"
                     />
                   </div>
 
-                  <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-1">
+                  <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1 shadow-subtle">
                     <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
-                      <CalendarIcon className="h-3.5 w-3.5 text-zinc-500" />
+                      <CalendarIcon className="h-3.5 w-3.5 text-emerald-400" />
                       <span>Est. completion</span>
                     </div>
                     <div className="flex items-baseline gap-2 pt-1">
@@ -465,7 +463,7 @@ export default function PlanlyPage() {
                 </div>
 
                 {/* Main Sprint Tree Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-1 items-start">
                   {/* Left Sprints Breakdown */}
                   <div className="lg:col-span-8 space-y-3.5">
                     {sprints.map((sprint) => {
@@ -486,10 +484,10 @@ export default function PlanlyPage() {
                         <div
                           key={sprint.sprintId}
                           className={cn(
-                            "rounded-lg border transition-all overflow-hidden",
+                            "rounded-xl border transition-all duration-200 overflow-hidden shadow-subtle",
                             isSprintExpanded
-                              ? "border-blue-900/50 bg-zinc-900/40 shadow-md"
-                              : "border-zinc-800/80 bg-zinc-900/20 hover:border-zinc-700"
+                              ? "border-blue-500/30 bg-zinc-900/50"
+                              : "border-zinc-800/80 bg-zinc-900/30 hover:border-zinc-700/80"
                           )}
                         >
                           {/* Sprint Header */}
@@ -499,25 +497,25 @@ export default function PlanlyPage() {
                                 prev === sprint.sprintId ? "" : sprint.sprintId
                               )
                             }
-                            className="flex items-center justify-between p-3.5 cursor-pointer select-none"
+                            className="flex items-center justify-between p-3.5 sm:p-4 cursor-pointer select-none hover:bg-zinc-900/60 transition-colors"
                           >
                             <div className="flex items-center gap-2.5">
                               <Badge variant="blue" className="text-xs font-semibold">
                                 Sprint {sprint.sprintNo}
                               </Badge>
-                              <span className="text-xs text-zinc-400 font-medium hidden sm:inline">
+                              <span className="text-xs text-zinc-300 font-medium hidden sm:inline">
                                 • {sprintSubjects}
                               </span>
                             </div>
 
                             <div className="flex items-center gap-3 text-xs text-zinc-400">
-                              <span className="text-[11px] text-zinc-400 font-mono">
+                              <span className="text-[11px] font-mono text-zinc-400">
                                 Est. {sprintTotalHours}h {sprintRemainingMinutes}m
                               </span>
                               <ChevronDown
                                 className={cn(
                                   "h-4 w-4 text-zinc-400 transition-transform duration-200",
-                                  isSprintExpanded ? "" : "-rotate-90"
+                                  isSprintExpanded ? "rotate-0" : "-rotate-90"
                                 )}
                               />
                             </div>
@@ -525,7 +523,7 @@ export default function PlanlyPage() {
 
                           {/* Expanded Sprint Days */}
                           {isSprintExpanded && (
-                            <div className="border-t border-zinc-800/80 bg-zinc-950/70 p-3 space-y-2.5">
+                            <div className="border-t border-zinc-800/80 bg-zinc-950/70 p-3 sm:p-4 space-y-2.5">
                               {(sprint.days || []).map((day) => {
                                 const isDayExpanded = expandedDayId === day.dayId;
                                 const dayHours = Math.floor((day.estimatedMinutes || 0) / 60);
@@ -548,7 +546,7 @@ export default function PlanlyPage() {
                                         <ChevronDown
                                           className={cn(
                                             "h-3.5 w-3.5 text-blue-400 transition-transform duration-200",
-                                            isDayExpanded ? "" : "-rotate-90"
+                                            isDayExpanded ? "rotate-0" : "-rotate-90"
                                           )}
                                         />
                                         <span>Day {day.sprintDayNo}</span>
@@ -586,11 +584,12 @@ export default function PlanlyPage() {
                                                   type="button"
                                                   onClick={() => handleToggleTaskStatus(task)}
                                                   className={cn(
-                                                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors",
+                                                    "flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors",
                                                     isCompleted
                                                       ? "border-emerald-500 bg-emerald-500 text-white"
                                                       : "border-zinc-700 bg-zinc-900 hover:border-blue-500"
                                                   )}
+                                                  aria-label={`Mark task as ${isCompleted ? "incomplete" : "complete"}`}
                                                 >
                                                   {isCompleted && <Check className="h-3 w-3 stroke-[3]" />}
                                                 </button>
@@ -652,13 +651,13 @@ export default function PlanlyPage() {
                   {/* Right Study Sidebar */}
                   <div className="lg:col-span-4 space-y-4">
                     {/* Revision list preview */}
-                    <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3">
+                    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3 shadow-subtle">
                       <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                        <div className="flex items-center gap-2 text-xs font-bold text-zinc-200">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
                           <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                           <span>Revision List</span>
                           {revisionListData && revisionListData.length > 0 && (
-                            <Badge variant="brand" className="text-[10px] py-0 px-1.5">
+                            <Badge variant="blue" className="text-[10px] py-0 px-1.5 font-mono">
                               {revisionListData.length}
                             </Badge>
                           )}
@@ -676,17 +675,17 @@ export default function PlanlyPage() {
                         <div className="text-xs font-semibold text-zinc-300">
                           Day 1 Schedule Preview
                         </div>
-                        <div className="flex items-center gap-3 text-[11px] text-zinc-400 bg-zinc-950/60 p-2 rounded border border-zinc-800/80">
+                        <div className="flex items-center gap-3 text-[11px] text-zinc-400 bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/80">
                           <span>{day1Tasks.length || 20} topics</span>
                           <span>&middot;</span>
                           <span>3h 53m planned</span>
                         </div>
 
-                        <div className="space-y-1 max-h-56 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-800">
+                        <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
                           {day1Tasks.slice(0, 8).map((t, idx) => (
                             <div
                               key={t.taskId || idx}
-                              className="flex items-center justify-between py-1 px-1.5 rounded text-[11px] text-zinc-300 hover:bg-zinc-800/40"
+                              className="flex items-center justify-between py-1 px-1.5 rounded text-[11px] text-zinc-300 hover:bg-zinc-800/40 transition-colors"
                             >
                               <span className="truncate pr-2">{t.item?.title || `Task #${idx + 1}`}</span>
                               <span className="text-zinc-500 font-mono text-[10px] shrink-0">
@@ -713,7 +712,7 @@ export default function PlanlyPage() {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400">
             <CheckCircle2 className="h-6 w-6 text-zinc-500" />
           </div>
-          <h4 className="text-sm font-bold text-zinc-200">No completed plans yet</h4>
+          <h4 className="text-sm font-semibold text-zinc-200">No completed plans yet</h4>
           <p className="text-xs text-zinc-400 max-w-sm mx-auto leading-relaxed">
             When you complete all sprints in your study plan, it will be archived here with your completion certificate and stats.
           </p>
@@ -735,7 +734,7 @@ export default function PlanlyPage() {
           </DialogHeader>
 
           <div className="space-y-4 py-2">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-xs font-semibold text-zinc-200">Start Date</label>
               <input
                 type="date"
@@ -770,17 +769,17 @@ export default function PlanlyPage() {
       <Dialog open={isAdjustPlanModalOpen} onOpenChange={setIsAdjustPlanModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Adjust Plan Settings</DialogTitle>
+            <DialogTitle>Adjust Daily Study Hours</DialogTitle>
             <DialogDescription>
-              Update your daily commitment or plan parameters.
+              Update your daily commitment. Your sprint pacing will readjust automatically.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-semibold text-zinc-200">
-                <span>Daily Study Hours</span>
-                <span className="text-blue-400 font-mono">{dailyHours} hrs/day</span>
+                <span>Daily Study Commitment</span>
+                <span className="text-blue-400 font-mono font-bold">{dailyHours} hrs/day</span>
               </div>
               <Slider
                 min={1}
@@ -819,14 +818,14 @@ export default function PlanlyPage() {
         <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
+              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
               <span>Revision List</span>
               <Badge variant="blue" className="text-xs ml-2">
                 {revisionListData?.length || 0} Bookmarked
               </Badge>
             </DialogTitle>
             <DialogDescription>
-              All problems you&apos;ve starred for focused revision before interviews.
+              All problems you&apos;ve starred for focused revision before technical interviews.
             </DialogDescription>
           </DialogHeader>
 
@@ -860,7 +859,7 @@ export default function PlanlyPage() {
                   </span>
                   <button
                     onClick={() => handleToggleBookmark(task)}
-                    className="text-zinc-500 hover:text-red-400 p-1"
+                    className="text-zinc-500 hover:text-red-400 p-1 transition-colors"
                     title="Remove from revision"
                   >
                     <X className="h-4 w-4" />

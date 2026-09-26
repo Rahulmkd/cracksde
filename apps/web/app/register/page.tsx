@@ -81,40 +81,43 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md space-y-6">
-        <Card className="border-border/80 bg-card/80 backdrop-blur-sm shadow-xl">
-          <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-2xl font-bold tracking-tight">
+      <div className="w-full max-w-md space-y-5 animate-in fade-in-50 duration-200">
+        <Card className="border border-zinc-800/80 bg-zinc-900/40 p-6 sm:p-8 shadow-card">
+          <CardHeader className="text-center space-y-2 p-0 pb-6">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-sm shadow-blue-600/20 text-white font-bold text-sm">
+              ⚡
+            </div>
+            <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
               Create an account
             </CardTitle>
-            <CardDescription className="text-sm">
-              Enter your details to get started
+            <CardDescription className="text-xs text-zinc-400">
+              Get started with your personalized SDE preparation sprint
             </CardDescription>
           </CardHeader>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="p-0 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3.5">
               {error && (
-                <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive font-medium">
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-xs text-red-400 font-medium">
                   {error}
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="name" className="text-xs font-semibold text-zinc-200">Full Name</Label>
                 <Input
                   id="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Jane Doe"
+                  placeholder="Rahul"
                   required
                   autoComplete="name"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-semibold text-zinc-200">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
@@ -126,27 +129,27 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="password" className="text-xs font-semibold text-zinc-200">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="At least 6 characters"
                   required
                   autoComplete="new-password"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirmPassword" className="text-xs font-semibold text-zinc-200">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Confirm your password"
                   required
                   autoComplete="new-password"
                 />
@@ -154,12 +157,11 @@ export default function RegisterPage() {
 
               <Button
                 type="submit"
-                variant="brand"
                 disabled={loading}
-                className="w-full h-11 mt-2"
+                className="w-full h-10 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-2"
               >
                 {loading ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
                   "Create Account"
                 )}
@@ -168,11 +170,11 @@ export default function RegisterPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-xs text-zinc-400">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300 underline underline-offset-4"
+            className="font-medium text-blue-400 hover:text-blue-300 underline underline-offset-4"
           >
             Sign in
           </Link>

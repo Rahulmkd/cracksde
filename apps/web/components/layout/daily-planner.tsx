@@ -10,6 +10,7 @@ import {
   ExternalLink,
   ArrowRight,
   Clock,
+  Flame,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -81,9 +82,9 @@ export function DailyPlanner({
     return (
       <div className={cn("space-y-4", className)}>
         {showProblemOfTheDay && (
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-4 shadow-sm animate-pulse h-36" />
+          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 animate-pulse h-36" />
         )}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-4 shadow-sm animate-pulse h-72" />
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 animate-pulse h-64" />
       </div>
     );
   }
@@ -94,33 +95,33 @@ export function DailyPlanner({
       {/* PROBLEM OF THE DAY CARD (IF ENABLED) */}
       {/* ========================================================================= */}
       {showProblemOfTheDay && (
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 shadow-sm hover:border-zinc-700/80 transition-all">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 shadow-subtle hover:border-zinc-700/80 transition-all duration-200">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-200">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-200">
               <span>Problem Of The Day</span>
               <ExternalLink className="h-3 w-3 text-zinc-500" />
             </div>
-            <Badge variant="brand" className="text-[10px] py-0 px-1.5 font-mono">
-              +20
+            <Badge variant="blue" className="text-[10px] font-mono py-0 px-1.5">
+              +20 pts
             </Badge>
           </div>
 
           {/* Countdown Display */}
-          <div className="flex items-center justify-center gap-2 py-1.5">
+          <div className="flex items-center justify-center gap-2 py-1">
             <div className="flex flex-col items-center">
-              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100">
+              <span className="rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100 shadow-inner">
                 {formatDigits(timeLeft.hours)}
               </span>
             </div>
             <span className="text-zinc-600 font-bold">:</span>
             <div className="flex flex-col items-center">
-              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100">
+              <span className="rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100 shadow-inner">
                 {formatDigits(timeLeft.minutes)}
               </span>
             </div>
             <span className="text-zinc-600 font-bold">:</span>
             <div className="flex flex-col items-center">
-              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100">
+              <span className="rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100 shadow-inner">
                 {formatDigits(timeLeft.seconds)}
               </span>
             </div>
@@ -129,9 +130,10 @@ export function DailyPlanner({
           {/* Action Button */}
           <Button
             asChild
-            className="w-full h-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20"
+            size="sm"
+            className="w-full h-8 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
           >
-            <Link href="/onboarding">
+            <Link href="/practice">
               Solve problem <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
             </Link>
           </Button>
@@ -141,10 +143,10 @@ export function DailyPlanner({
       {/* ========================================================================= */}
       {/* DAILY PLANNER CARD (SHARED & PERSISTENT) */}
       {/* ========================================================================= */}
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 shadow-sm">
+      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 shadow-subtle">
         {/* Planner Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-          <div className="flex items-center gap-2 text-xs font-bold text-zinc-200">
+        <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800/80">
+          <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
             <ListTodo className="h-4 w-4 text-blue-400" />
             <span>Daily Planner</span>
           </div>
@@ -157,14 +159,14 @@ export function DailyPlanner({
 
         {/* Inline Add Task Form */}
         {isAddingTask && (
-          <form onSubmit={handleCreateTask} className="space-y-2 pt-1 border border-zinc-800 bg-zinc-950 p-2.5 rounded-lg">
+          <form onSubmit={handleCreateTask} className="space-y-2 pt-1 border border-zinc-800 bg-zinc-950/80 p-2.5 rounded-lg animate-in fade-in-0 duration-150">
             <input
               type="text"
               placeholder="Task name (e.g. Solve LRU Cache)..."
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               autoFocus
-              className="w-full rounded border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+              className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500"
             />
 
             <div className="flex items-center justify-between gap-2 pt-1">
@@ -173,7 +175,7 @@ export function DailyPlanner({
                 <select
                   value={newTaskDuration}
                   onChange={(e) => setNewTaskDuration(e.target.value)}
-                  className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-1 text-[11px] text-zinc-300 focus:outline-none"
+                  className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[11px] text-zinc-300 focus:outline-none"
                 >
                   <option value="10m">10 min</option>
                   <option value="15m">15 min</option>
@@ -211,7 +213,7 @@ export function DailyPlanner({
 
         {/* Task List / Empty State */}
         {tasks.length > 0 ? (
-          <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-800">
+          <div className="space-y-1.5 max-h-80 overflow-y-auto pr-0.5">
             {tasks.map((task) => (
               <div
                 key={task.id}
@@ -230,6 +232,7 @@ export function DailyPlanner({
                         ? "border-emerald-500 bg-emerald-500 text-white"
                         : "border-zinc-700 bg-zinc-900 hover:border-blue-500"
                     )}
+                    aria-label={`Mark ${task.title} as ${task.completed ? "incomplete" : "complete"}`}
                   >
                     {task.completed && <Check className="h-3 w-3 stroke-[3]" />}
                   </button>
@@ -237,7 +240,7 @@ export function DailyPlanner({
                   <span
                     onClick={() => handleToggle(task.id, task.title, task.completed)}
                     className={cn(
-                      "truncate cursor-pointer font-medium text-zinc-200 text-[11px] hover:text-blue-400",
+                      "truncate cursor-pointer font-medium text-zinc-200 text-[11px] hover:text-blue-400 transition-colors",
                       task.completed && "line-through text-zinc-500"
                     )}
                   >
@@ -261,29 +264,28 @@ export function DailyPlanner({
             ))}
           </div>
         ) : (
-          /* Empty State (Matching Screenshot 3 and Screenshot 1) */
-          <div className="py-8 text-center space-y-2">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 border border-zinc-800 text-zinc-500">
-              <ListTodo className="h-5 w-5" />
+          <div className="py-6 text-center space-y-2">
+            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-500">
+              <ListTodo className="h-4 w-4 text-zinc-400" />
             </div>
             <div className="space-y-0.5">
               <p className="text-xs font-semibold text-zinc-300">No tasks for today</p>
               <p
                 onClick={() => setIsAddingTask(true)}
-                className="text-[11px] text-zinc-500 hover:text-blue-400 cursor-pointer"
+                className="text-[11px] text-zinc-500 hover:text-blue-400 cursor-pointer transition-colors"
               >
-                Add your tasks here
+                Click here to add your tasks
               </p>
             </div>
           </div>
         )}
 
-        {/* Bottom "+ Add tasks" Button (Matching Screenshot 3) */}
+        {/* Bottom "+ Add tasks" Button */}
         {!isAddingTask && (
           <button
             type="button"
             onClick={() => setIsAddingTask(true)}
-            className="w-full rounded-lg border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900 hover:border-zinc-700 p-2 text-xs font-semibold text-zinc-300 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+            className="w-full rounded-lg border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900 hover:border-zinc-700/80 p-2 text-xs font-semibold text-zinc-300 flex items-center justify-center gap-1.5 transition-colors shadow-subtle"
           >
             <Plus className="h-3.5 w-3.5 text-blue-400" />
             <span>+ Add tasks</span>

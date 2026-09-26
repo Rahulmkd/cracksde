@@ -33,21 +33,21 @@ export function Slider({
     onChange?.(newVal);
   };
 
-  const percentage = ((value - min) / (max - min)) * 100;
+  const percentage = max > min ? ((value - min) / (max - min)) * 100 : 0;
 
   return (
-    <div className={cn("relative flex items-center w-full touch-none select-none", className)}>
+    <div className={cn("relative flex items-center w-full touch-none select-none py-2", className)}>
       <div className="relative w-full h-2 rounded-full bg-zinc-800/90 overflow-hidden">
         {/* Fill Track */}
         <div
-          className="absolute left-0 top-0 h-full bg-blue-600 rounded-full transition-all"
+          className="absolute left-0 top-0 h-full bg-blue-600 rounded-full transition-all duration-75"
           style={{ width: `${percentage}%` }}
         />
       </div>
 
       {/* Thumb representation */}
       <div
-        className="absolute h-4 w-4 -ml-2 rounded-full border-2 border-blue-500 bg-white shadow-md pointer-events-none transition-all"
+        className="absolute h-4 w-4 -ml-2 rounded-full border-2 border-blue-500 bg-white shadow-md pointer-events-none transition-all duration-75"
         style={{ left: `${percentage}%` }}
       />
 
