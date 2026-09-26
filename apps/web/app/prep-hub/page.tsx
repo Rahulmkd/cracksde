@@ -313,7 +313,8 @@ function PrepHubContent() {
   const renderRevisionBadge = (
     revisionText?: string,
     isDue?: boolean,
-    solveCount?: number
+    solveCount?: number,
+    nextRevisionAt?: string | null
   ) => {
     if (isDue) {
       return (
@@ -350,13 +351,26 @@ function PrepHubContent() {
       );
     }
 
+    // Upcoming format: "Next: 30 Sep"
+    let upcomingDateStr = "";
+    if (nextRevisionAt) {
+      const d = new Date(nextRevisionAt);
+      const day = d.getDate();
+      const month = d.toLocaleString("en-US", { month: "short" });
+      upcomingDateStr = `Next: ${day} ${month}`;
+    } else if (revisionText?.startsWith("Next Revision: ")) {
+      upcomingDateStr = revisionText.replace("Next Revision: ", "Next: ");
+    } else {
+      upcomingDateStr = revisionText || "Upcoming";
+    }
+
     return (
       <Badge
         variant="outline"
         className="font-medium text-[11px] py-0 px-2 text-blue-400 border-blue-500/20 bg-blue-500/10 flex items-center gap-1"
       >
         <Calendar className="h-3 w-3" />
-        <span>{revisionText}</span>
+        <span>{upcomingDateStr}</span>
       </Badge>
     );
   };
@@ -824,13 +838,23 @@ function PrepHubContent() {
                   </div>
 
                   {/* Topic Progress Statistics */}
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-lg border border-zinc-800 bg-zinc-950/80 px-3 py-1.5 text-[12px] flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="rounded-lg border border-zinc-800 bg-zinc-950/80 px-3 py-1.5 text-[12px] flex items-center gap-2 shadow-subtle">
                       <span className="text-zinc-400">Solved:</span>
                       <span className="font-mono font-semibold text-zinc-100">
                         {topicQuestionsData?.topic.solvedQuestions || 0} / {topicQuestionsData?.topic.totalQuestions || 0}
                       </span>
                     </div>
+
+                    {(topicQuestionsData?.topic.dueQuestions ?? 0) > 0 && (
+                      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-[12px] flex items-center gap-1.5 text-amber-300 shadow-subtle">
+                        <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
+                        <span className="font-semibold font-mono">
+                          {topicQuestionsData?.topic.dueQuestions}
+                        </span>
+                        <span className="text-amber-400/90 text-[11px]">Due for Review</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -999,7 +1023,8 @@ function PrepHubContent() {
                               {renderRevisionBadge(
                                 q.progress?.revisionStatusText,
                                 q.progress?.isDue,
-                                q.progress?.solveCount
+                                q.progress?.solveCount,
+                                q.progress?.nextRevisionAt
                               )}
                             </div>
                             {q.progress?.lastSolvedAt && (

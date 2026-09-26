@@ -9,16 +9,14 @@ import {
   Calendar,
   ChevronRight,
   Sparkles,
-  Layers,
-  ArrowRight,
   TrendingUp,
+  Check,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useUserRevisions } from "@/hooks/use-roadmap";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
-import type { RoadmapItemDto, UserRevisionItemDto } from "@starter/shared";
+import type { RoadmapItemDto } from "@starter/shared";
 
 interface RevisionStatusProps {
   onSelectQuestion?: (item: RoadmapItemDto) => void;
@@ -28,16 +26,34 @@ interface RevisionStatusProps {
 export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusProps) {
   const { isAuthenticated } = useAuth();
   const { data: revisionsData, isLoading } = useUserRevisions();
-  const [activeTab, setActiveTab] = useState<"due" | "all">("due");
+  const [activeTab, setActiveTab] = useState<"due" | "upcoming" | "completed">("due");
 
   const dueItems = revisionsData?.items.filter((it) => it.progress?.isDue) || [];
-  const allItems = revisionsData?.items || [];
-  const displayItems = activeTab === "due" ? dueItems : allItems;
+  const upcomingItems =
+    revisionsData?.items.filter((it) => !it.progress?.isDue && Boolean(it.progress?.nextRevisionAt)) || [];
+  const completedItems =
+    revisionsData?.items.filter((it) => (it.progress?.solveCount ?? 0) > 0) || [];
 
-  const dueCount = revisionsData?.dueCount || 0;
+  const displayItems =
+    activeTab === "due" ? dueItems : activeTab === "upcoming" ? upcomingItems : completedItems;
+
+  const dueCount = dueItems.length;
+  const upcomingCount = upcomingItems.length;
+  const completedCount = completedItems.length;
   const totalCount = revisionsData?.totalCount || 0;
 
-  const renderBadge = (revisionText: string, isDue: boolean) => {
+  // Earliest upcoming revision date
+  const earliestUpcomingDate = upcomingItems[0]?.progress?.nextRevisionAt
+    ? new Date(upcomingItems[0].progress.nextRevisionAt).toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+      })
+    : null;
+
+  const renderBadge = (item: RoadmapItemDto) => {
+    const isDue = item.progress?.isDue ?? false;
+    const revisionText = item.progress?.revisionStatusText || "";
+
     if (isDue) {
       return (
         <Badge
@@ -45,7 +61,7 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
           className="text-[10px] font-medium py-0 px-1.5 flex items-center gap-1 animate-pulse"
         >
           <AlertTriangle className="h-2.5 w-2.5" />
-          <span>Due</span>
+          <span>Due Today</span>
         </Badge>
       );
     }
@@ -57,7 +73,23 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
           className="text-[10px] font-medium py-0 px-1.5 flex items-center gap-1"
         >
           <Clock className="h-2.5 w-2.5 text-amber-400" />
-          <span>Tomorrow</span>
+          <span>Due Tomorrow</span>
+        </Badge>
+      );
+    }
+
+    if (item.progress?.nextRevisionAt) {
+      const d = new Date(item.progress.nextRevisionAt);
+      const day = d.getDate();
+      const month = d.toLocaleString("en-US", { month: "short" });
+
+      return (
+        <Badge
+          variant="outline"
+          className="text-[10px] font-medium py-0 px-1.5 text-blue-400 border-blue-500/20 bg-blue-500/10 flex items-center gap-1"
+        >
+          <Calendar className="h-2.5 w-2.5" />
+          <span>Next: {day} {month}</span>
         </Badge>
       );
     }
@@ -65,10 +97,10 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
     return (
       <Badge
         variant="outline"
-        className="text-[10px] font-medium py-0 px-1.5 text-blue-400 border-blue-500/20 bg-blue-500/10 flex items-center gap-1"
+        className="text-[10px] font-medium py-0 px-1.5 text-emerald-400 border-emerald-500/20 bg-emerald-500/10 flex items-center gap-1"
       >
-        <Calendar className="h-2.5 w-2.5" />
-        <span>{revisionText.replace("Next Revision: ", "")}</span>
+        <Check className="h-2.5 w-2.5" />
+        <span>Completed</span>
       </Badge>
     );
   };
@@ -92,6 +124,7 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
           </div>
         </div>
 
+        {/* Dynamic header badge: shows due count or next revision date instead of vague "Up to Date" */}
         {dueCount > 0 ? (
           <Badge
             variant="destructive"
@@ -100,18 +133,25 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
             <AlertTriangle className="h-2.5 w-2.5" />
             <span>{dueCount} Due</span>
           </Badge>
-        ) : totalCount > 0 ? (
+        ) : earliestUpcomingDate ? (
           <Badge
-            variant="success"
-            className="text-[10px] font-medium py-0.5 px-2 flex items-center gap-1 font-mono"
+            variant="outline"
+            className="text-[10px] font-medium py-0.5 px-2 text-blue-400 border-blue-500/20 bg-blue-500/10 flex items-center gap-1 font-mono"
           >
-            <CheckCircle2 className="h-2.5 w-2.5" />
-            <span>Up to Date</span>
+            <Calendar className="h-2.5 w-2.5" />
+            <span>Next: {earliestUpcomingDate}</span>
+          </Badge>
+        ) : upcomingCount > 0 ? (
+          <Badge
+            variant="outline"
+            className="text-[10px] font-medium py-0.5 px-2 text-blue-400 border-blue-500/20 bg-blue-500/10 flex items-center gap-1 font-mono"
+          >
+            <span>{upcomingCount} Scheduled</span>
           </Badge>
         ) : null}
       </div>
 
-      {/* Tabs Filter */}
+      {/* 3 Categories / Tabs: Due Now | Upcoming | Completed */}
       {totalCount > 0 && (
         <div className="flex items-center gap-1 border-b border-zinc-800/80 pb-2 text-[11px]">
           <button
@@ -134,17 +174,33 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
 
           <button
             type="button"
-            onClick={() => setActiveTab("all")}
+            onClick={() => setActiveTab("upcoming")}
             className={cn(
               "px-2 py-0.5 rounded-md font-medium transition-colors flex items-center gap-1",
-              activeTab === "all"
+              activeTab === "upcoming"
                 ? "bg-blue-600/15 text-blue-400 border border-blue-500/30"
                 : "text-zinc-400 hover:text-zinc-200"
             )}
           >
-            <span>All Scheduled</span>
+            <span>Upcoming</span>
             <span className="font-mono text-[10px] px-1 rounded bg-zinc-800 text-zinc-400">
-              {totalCount}
+              {upcomingCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("completed")}
+            className={cn(
+              "px-2 py-0.5 rounded-md font-medium transition-colors flex items-center gap-1",
+              activeTab === "completed"
+                ? "bg-blue-600/15 text-blue-400 border border-blue-500/30"
+                : "text-zinc-400 hover:text-zinc-200"
+            )}
+          >
+            <span>Completed</span>
+            <span className="font-mono text-[10px] px-1 rounded bg-zinc-800 text-zinc-400">
+              {completedCount}
             </span>
           </button>
         </div>
@@ -220,7 +276,7 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
 
                   {/* Right Status & Action */}
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    {renderBadge(item.progress?.revisionStatusText || "", isDue)}
+                    {renderBadge(item)}
                     <ChevronRight className="h-3.5 w-3.5 text-zinc-500 group-hover:text-zinc-200 group-hover:translate-x-0.5 transition-all duration-200" />
                   </div>
                 </div>
@@ -228,20 +284,25 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
             );
           })}
         </div>
-      ) : activeTab === "due" && totalCount > 0 ? (
-        <div className="py-4 text-center space-y-1 px-2 rounded-lg border border-zinc-800/60 bg-zinc-950/40">
+      ) : activeTab === "due" ? (
+        /* Helpful empty state when nothing is due today */
+        <div className="py-4 text-center space-y-1.5 px-3 rounded-lg border border-zinc-800/60 bg-zinc-950/40">
           <CheckCircle2 className="h-4 w-4 text-emerald-400 mx-auto" />
-          <p className="text-[12px] font-medium text-zinc-200">No revisions due today</p>
-          <p className="text-[10px] text-zinc-500">
-            {totalCount} upcoming revisions scheduled in your spaced repetition plan.
+          <p className="text-[12px] font-medium text-emerald-400">✓ No revisions due today</p>
+          <p className="text-[11px] text-zinc-400">
+            {earliestUpcomingDate
+              ? `Next revision: ${earliestUpcomingDate}`
+              : upcomingCount > 0
+              ? `${upcomingCount} revisions scheduled`
+              : "All questions up to date"}
           </p>
         </div>
       ) : (
         <div className="py-4 text-center space-y-1 px-2 rounded-lg border border-zinc-800/60 bg-zinc-950/40">
           <TrendingUp className="h-4 w-4 text-blue-400 mx-auto" />
-          <p className="text-[12px] font-medium text-zinc-200">No active revisions yet</p>
+          <p className="text-[12px] font-medium text-zinc-200">No {activeTab} questions</p>
           <p className="text-[10px] text-zinc-500">
-            Solve questions in PrepHub to start your spaced repetition cycle.
+            Solve questions in PrepHub to start your spaced repetition schedule.
           </p>
         </div>
       )}
