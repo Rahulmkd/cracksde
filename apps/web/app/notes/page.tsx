@@ -259,8 +259,8 @@ export default function NotesPage() {
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500">
               <FileText className="h-5 w-5" />
             </div>
-            <p className="text-xs font-semibold text-zinc-300">No notes found</p>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[13px] font-medium text-zinc-300">No notes found</p>
+            <p className="text-[12px] text-zinc-500">
               Create your first interview study note to start building your cheatsheet.
             </p>
           </div>
@@ -271,31 +271,31 @@ export default function NotesPage() {
       <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
         <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col p-0 overflow-hidden bg-zinc-950">
           <DialogHeader className="p-5 pb-3 border-b border-zinc-800 bg-zinc-900/50">
-            <DialogTitle>{activeNote ? "Edit Note" : "Create New Note"}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[18px] font-semibold leading-[1.3]">{activeNote ? "Edit Note" : "Create New Note"}</DialogTitle>
+            <DialogDescription className="text-[13px] text-zinc-400 leading-[1.45]">
               Write rich formatted notes, formulas, and pseudocode for rapid interview revision.
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-2 space-y-1">
-                <label className="text-xs font-semibold text-zinc-300">Note Title</label>
+              <div className="sm:col-span-2 space-y-1.5">
+                <label className="text-[13px] font-medium text-zinc-200">Note Title</label>
                 <input
                   type="text"
                   placeholder="e.g. Dynamic Programming - 0/1 Knapsack Pattern"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-zinc-300">Subject</label>
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-zinc-200">Subject</label>
                 <select
                   value={editSubject}
                   onChange={(e) => setEditSubject(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
                 >
                   <option value="DSA">DSA</option>
                   <option value="DBMS">DBMS</option>
@@ -306,19 +306,19 @@ export default function NotesPage() {
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-zinc-300">Tags (comma separated)</label>
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-zinc-200">Tags (comma separated)</label>
               <input
                 type="text"
                 placeholder="e.g. DP, Knapsack, Optimization"
                 value={editTags}
                 onChange={(e) => setEditTags(e.target.value)}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-zinc-300">Content</label>
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-zinc-200">Content</label>
               <TiptapEditor
                 value={editContent}
                 onChange={setEditContent}
@@ -332,14 +332,14 @@ export default function NotesPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsEditorOpen(false)}
-              className="text-xs"
+              className="text-[13px] font-medium h-8"
             >
               Cancel
             </Button>
             <Button
               size="sm"
               onClick={handleSaveNote}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium h-8"
             >
               <Save className="h-3.5 w-3.5 mr-1" /> Save Note
             </Button>

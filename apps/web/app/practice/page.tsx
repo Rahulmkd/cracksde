@@ -257,31 +257,31 @@ export default function PracticePage() {
   const getDifficultyBadge = (diff: "Basic" | "Core" | "Pro") => {
     if (diff === "Basic") {
       return (
-        <Badge variant="success" className="font-semibold text-[10px]">
+        <Badge variant="success" className="font-medium text-[11px]">
           Basic / Easy
         </Badge>
       );
     }
     if (diff === "Core") {
       return (
-        <Badge variant="warning" className="font-semibold text-[10px]">
+        <Badge variant="warning" className="font-medium text-[11px]">
           Core / Medium
         </Badge>
       );
     }
     return (
-      <Badge variant="destructive" className="font-semibold text-[10px]">
+      <Badge variant="destructive" className="font-medium text-[11px]">
         Pro / Hard
       </Badge>
     );
   };
 
   const getSubjectBadge = (subject: string) => {
-    if (subject === "DSA") return <Badge variant="blue">{subject}</Badge>;
-    if (subject === "DBMS") return <Badge variant="success">{subject}</Badge>;
-    if (subject === "Operating Systems") return <Badge variant="purple">{subject}</Badge>;
-    if (subject === "Computer Networks") return <Badge variant="warning">{subject}</Badge>;
-    return <Badge variant="cyan">{subject}</Badge>;
+    if (subject === "DSA") return <Badge variant="blue" className="font-medium text-[11px]">{subject}</Badge>;
+    if (subject === "DBMS") return <Badge variant="success" className="font-medium text-[11px]">{subject}</Badge>;
+    if (subject === "Operating Systems") return <Badge variant="purple" className="font-medium text-[11px]">{subject}</Badge>;
+    if (subject === "Computer Networks") return <Badge variant="warning" className="font-medium text-[11px]">{subject}</Badge>;
+    return <Badge variant="cyan" className="font-medium text-[11px]">{subject}</Badge>;
   };
 
   return (
@@ -524,7 +524,7 @@ export default function PracticePage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3.5 bg-zinc-900/50">
               <div className="flex items-center gap-3">
-                <h2 className="text-base font-bold text-zinc-100">{activeProblem.title}</h2>
+                <h2 className="text-[18px] font-semibold leading-[1.3] text-zinc-100">{activeProblem.title}</h2>
                 {getDifficultyBadge(activeProblem.difficulty)}
                 {getSubjectBadge(activeProblem.subject)}
               </div>
@@ -535,7 +535,7 @@ export default function PracticePage() {
                   variant="outline"
                   onClick={() => toggleBookmark(activeProblem.id)}
                   className={cn(
-                    "h-7 px-2.5 text-[11px]",
+                    "h-7 px-2.5 text-[12px] font-medium",
                     activeProblem.bookmarked && "text-amber-400 border-amber-500/30"
                   )}
                 >
@@ -546,13 +546,13 @@ export default function PracticePage() {
             </div>
 
             {/* Modal Tabs */}
-            <div className="flex items-center border-b border-zinc-800 bg-zinc-950 px-5 gap-4 text-xs font-medium">
+            <div className="flex items-center border-b border-zinc-800 bg-zinc-950 px-5 gap-4 text-[13px] font-medium">
               <button
                 onClick={() => setActiveTab("description")}
                 className={cn(
                   "py-2.5 border-b-2 transition-colors",
                   activeTab === "description"
-                    ? "border-blue-500 text-blue-400 font-semibold"
+                    ? "border-blue-500 text-blue-400 font-medium"
                     : "border-transparent text-zinc-400 hover:text-zinc-200"
                 )}
               >
@@ -563,7 +563,7 @@ export default function PracticePage() {
                 className={cn(
                   "py-2.5 border-b-2 transition-colors",
                   activeTab === "solution"
-                    ? "border-blue-500 text-blue-400 font-semibold"
+                    ? "border-blue-500 text-blue-400 font-medium"
                     : "border-transparent text-zinc-400 hover:text-zinc-200"
                 )}
               >
@@ -574,7 +574,7 @@ export default function PracticePage() {
                 className={cn(
                   "py-2.5 border-b-2 transition-colors",
                   activeTab === "notes"
-                    ? "border-blue-500 text-blue-400 font-semibold"
+                    ? "border-blue-500 text-blue-400 font-medium"
                     : "border-transparent text-zinc-400 hover:text-zinc-200"
                 )}
               >
@@ -585,15 +585,15 @@ export default function PracticePage() {
             {/* Modal Body */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
               {activeTab === "description" && (
-                <div className="space-y-4 text-xs leading-relaxed text-zinc-300">
+                <div className="space-y-4 text-[13px] leading-[1.5] text-zinc-300">
                   <div className="p-3.5 rounded-lg border border-zinc-800/80 bg-zinc-900/30">
                     <p>{activeProblem.description}</p>
                   </div>
 
                   {activeProblem.examples.map((ex, idx) => (
                     <div key={idx} className="space-y-1.5">
-                      <span className="font-semibold text-zinc-200">Example {idx + 1}:</span>
-                      <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 font-mono text-[11px] space-y-1">
+                      <span className="text-[13px] font-medium text-zinc-200">Example {idx + 1}:</span>
+                      <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 font-mono text-[12px] space-y-1 leading-relaxed">
                         <div>
                           <span className="text-zinc-500">Input: </span>
                           <span className="text-zinc-200">{ex.input}</span>
@@ -618,11 +618,11 @@ export default function PracticePage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-zinc-400">Language:</span>
+                      <span className="text-[13px] font-medium text-zinc-400">Language:</span>
                       <select
                         value={activeLanguage}
                         onChange={(e) => setActiveLanguage(e.target.value as "cpp" | "java" | "python" | "javascript")}
-                        className="rounded border border-zinc-800 bg-zinc-900 px-2 py-1 text-xs text-zinc-200 focus:outline-none"
+                        className="rounded border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[13px] text-zinc-200 focus:outline-none"
                       >
                         <option value="cpp">C++ 20</option>
                         <option value="java">Java 21</option>
@@ -635,7 +635,7 @@ export default function PracticePage() {
                       size="sm"
                       variant="outline"
                       onClick={() => setUserCode(activeProblem.codeSnippet)}
-                      className="h-6 text-[10px]"
+                      className="h-7 text-[12px] font-medium"
                     >
                       <RotateCcw className="h-3 w-3 mr-1" /> Reset Code
                     </Button>
@@ -645,18 +645,18 @@ export default function PracticePage() {
                     value={userCode}
                     onChange={(e) => setUserCode(e.target.value)}
                     rows={12}
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3.5 font-mono text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3.5 font-mono text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               )}
 
               {activeTab === "notes" && (
-                <div className="space-y-3 text-xs">
+                <div className="space-y-3 text-[13px]">
                   <p className="text-zinc-400">Add personal interview tips, edge cases, and time complexity thoughts:</p>
                   <textarea
                     placeholder="e.g., Handle empty array edge cases. Time complexity O(N), Space O(1)..."
                     rows={6}
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-[13px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               )}
@@ -664,7 +664,7 @@ export default function PracticePage() {
 
             {/* Modal Footer */}
             <div className="flex items-center justify-between border-t border-zinc-800 bg-zinc-950 px-5 py-3">
-              <div className="text-[11px] text-zinc-500">
+              <div className="text-[12px] text-zinc-500">
                 Estimated time: <span className="font-mono text-zinc-400">{activeProblem.estimatedMinutes} mins</span>
               </div>
 
@@ -676,7 +676,7 @@ export default function PracticePage() {
                     toggleSolveProblem(activeProblem.id);
                     setActiveProblem((prev) => prev ? { ...prev, solved: !prev.solved } : null);
                   }}
-                  className="text-xs"
+                  className="text-[13px] font-medium h-8"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
                   {activeProblem.solved ? "Mark Incomplete" : "Mark Solved"}
@@ -689,7 +689,7 @@ export default function PracticePage() {
                     toast.success("Solution submitted & test cases passed! +20 pts");
                     setActiveProblem(null);
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium h-8"
                 >
                   <Play className="h-3 w-3 mr-1 fill-white" />
                   Run &amp; Submit

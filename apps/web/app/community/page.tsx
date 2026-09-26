@@ -234,43 +234,43 @@ export default function CommunityPage() {
       <Dialog open={isNewPostModalOpen} onOpenChange={setIsNewPostModalOpen}>
         <DialogContent className="max-w-lg bg-zinc-950">
           <DialogHeader>
-            <DialogTitle>Share Interview Experience</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[18px] font-semibold leading-[1.3]">Share Interview Experience</DialogTitle>
+            <DialogDescription className="text-[13px] text-zinc-400 leading-[1.45]">
               Help the community by sharing the rounds, question topics, and helpful prep suggestions.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3.5 py-2 text-xs">
-            <div className="space-y-1">
-              <label className="font-semibold text-zinc-200">Post Title</label>
+          <div className="space-y-3.5 py-2">
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-zinc-200">Post Title</label>
               <input
                 type="text"
                 placeholder="e.g. Meta SDE II Interview Experience - Full Loop"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="font-semibold text-zinc-200">Company</label>
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-zinc-200">Company</label>
               <input
                 type="text"
                 placeholder="e.g. Google, Amazon, Microsoft, Uber"
                 value={newCompany}
                 onChange={(e) => setNewCompany(e.target.value)}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="font-semibold text-zinc-200">Experience Details &amp; Questions</label>
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-zinc-200">Experience Details &amp; Questions</label>
               <textarea
                 placeholder="Describe the interview format, coding questions asked, and key advice..."
                 value={newContent}
                 onChange={(e) => setNewContent(e.target.value)}
                 rows={5}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
           </div>
@@ -280,14 +280,14 @@ export default function CommunityPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsNewPostModalOpen(false)}
-              className="text-xs"
+              className="text-[13px] font-medium h-8"
             >
               Cancel
             </Button>
             <Button
               size="sm"
               onClick={handleCreatePost}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium h-8"
             >
               Publish Post
             </Button>

@@ -152,41 +152,41 @@ export default function PlanlyPage() {
     const slug = (subjectSlug || "dsa").toLowerCase();
     if (slug.includes("dsa")) {
       return (
-        <Badge variant="blue" className="py-0 px-1.5 font-bold">
+        <Badge variant="blue" className="py-0.5 px-1.5 font-medium text-[11px]">
           DSA
         </Badge>
       );
     }
     if (slug.includes("dbms")) {
       return (
-        <Badge variant="success" className="py-0 px-1.5 font-bold">
+        <Badge variant="success" className="py-0.5 px-1.5 font-medium text-[11px]">
           DBMS
         </Badge>
       );
     }
     if (slug.includes("operat") || slug.includes("os")) {
       return (
-        <Badge variant="purple" className="py-0 px-1.5 font-bold">
+        <Badge variant="purple" className="py-0.5 px-1.5 font-medium text-[11px]">
           OS
         </Badge>
       );
     }
     if (slug.includes("netw") || slug.includes("cn")) {
       return (
-        <Badge variant="warning" className="py-0 px-1.5 font-bold">
+        <Badge variant="warning" className="py-0.5 px-1.5 font-medium text-[11px]">
           CN
         </Badge>
       );
     }
     if (slug.includes("oops")) {
       return (
-        <Badge variant="destructive" className="py-0 px-1.5 font-bold">
+        <Badge variant="destructive" className="py-0.5 px-1.5 font-medium text-[11px]">
           OOPS
         </Badge>
       );
     }
     return (
-      <Badge variant="cyan" className="py-0 px-1.5 font-bold">
+      <Badge variant="cyan" className="py-0.5 px-1.5 font-medium text-[11px]">
         LLD
       </Badge>
     );
@@ -712,8 +712,8 @@ export default function PlanlyPage() {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400">
             <CheckCircle2 className="h-6 w-6 text-zinc-500" />
           </div>
-          <h4 className="text-sm font-semibold text-zinc-200">No completed plans yet</h4>
-          <p className="text-xs text-zinc-400 max-w-sm mx-auto leading-relaxed">
+          <h4 className="text-[16px] font-semibold text-zinc-200">No completed plans yet</h4>
+          <p className="text-[13px] text-zinc-400 max-w-sm mx-auto leading-[1.45]">
             When you complete all sprints in your study plan, it will be archived here with your completion certificate and stats.
           </p>
         </div>
@@ -727,20 +727,20 @@ export default function PlanlyPage() {
       <Dialog open={isStartDateModalOpen} onOpenChange={setIsStartDateModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Plan Start Date</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[18px] font-semibold leading-[1.3]">Edit Plan Start Date</DialogTitle>
+            <DialogDescription className="text-[13px] text-zinc-400 leading-[1.45]">
               Choose when you want your preparation schedule to begin. All sprints and days will adjust automatically.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-200">Start Date</label>
+              <label className="text-[13px] font-medium text-zinc-200">Start Date</label>
               <input
                 type="date"
                 value={newStartDate}
                 onChange={(e) => setNewStartDate(e.target.value)}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
           </div>
@@ -750,14 +750,14 @@ export default function PlanlyPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsStartDateModalOpen(false)}
-              className="text-xs"
+              className="text-[13px] font-medium h-8"
             >
               Cancel
             </Button>
             <Button
               size="sm"
               onClick={handleSaveStartDate}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium h-8"
             >
               Save Changes
             </Button>
@@ -769,17 +769,17 @@ export default function PlanlyPage() {
       <Dialog open={isAdjustPlanModalOpen} onOpenChange={setIsAdjustPlanModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Adjust Daily Study Hours</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[18px] font-semibold leading-[1.3]">Adjust Daily Study Hours</DialogTitle>
+            <DialogDescription className="text-[13px] text-zinc-400 leading-[1.45]">
               Update your daily commitment. Your sprint pacing will readjust automatically.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold text-zinc-200">
+              <div className="flex justify-between text-[13px] font-medium text-zinc-200">
                 <span>Daily Study Commitment</span>
-                <span className="text-blue-400 font-mono font-bold">{dailyHours} hrs/day</span>
+                <span className="text-blue-400 font-mono font-semibold">{dailyHours} hrs/day</span>
               </div>
               <Slider
                 min={1}
@@ -795,7 +795,7 @@ export default function PlanlyPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsAdjustPlanModalOpen(false)}
-              className="text-xs"
+              className="text-[13px] font-medium h-8"
             >
               Cancel
             </Button>
@@ -805,7 +805,7 @@ export default function PlanlyPage() {
                 setIsAdjustPlanModalOpen(false);
                 toast.success("Plan parameters adjusted");
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium h-8"
             >
               Apply Adjustments
             </Button>
@@ -817,21 +817,21 @@ export default function PlanlyPage() {
       <Dialog open={isRevisionModalOpen} onOpenChange={setIsRevisionModalOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-[18px] font-semibold leading-[1.3]">
               <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
               <span>Revision List</span>
-              <Badge variant="blue" className="text-xs ml-2">
+              <Badge variant="blue" className="text-[11px] font-medium ml-2">
                 {revisionListData?.length || 0} Bookmarked
               </Badge>
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[13px] text-zinc-400 leading-[1.45]">
               All problems you&apos;ve starred for focused revision before technical interviews.
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-2">
             {(!revisionListData || revisionListData.length === 0) && (
-              <div className="py-12 text-center text-zinc-500 text-xs">
+              <div className="py-12 text-center text-zinc-500 text-[13px]">
                 No problems starred for revision yet. Click the star icon next to any problem to bookmark it!
               </div>
             )}
@@ -839,22 +839,22 @@ export default function PlanlyPage() {
             {(revisionListData || []).map((task) => (
               <div
                 key={task.taskId}
-                className="flex items-center justify-between p-3 rounded-lg border border-zinc-800 bg-zinc-900/50 text-xs hover:bg-zinc-900 transition-colors"
+                className="flex items-center justify-between p-3 rounded-lg border border-zinc-800 bg-zinc-900/50 text-[13px] hover:bg-zinc-900 transition-colors"
               >
                 <div className="flex items-center gap-3 overflow-hidden">
                   <Star className="h-4 w-4 fill-amber-400 text-amber-400 shrink-0" />
                   <div className="truncate">
-                    <div className="font-semibold text-zinc-200 truncate">
+                    <div className="font-medium text-zinc-200 truncate">
                       {task.item?.title || "Problem Title"}
                     </div>
-                    <div className="text-[10px] text-zinc-500">
+                    <div className="text-[11px] text-zinc-400">
                       {task.item?.subjectName} &middot; {task.item?.topicName}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="font-mono text-[11px] text-zinc-400">
+                  <span className="font-mono text-[12px] text-zinc-400">
                     {task.estimatedMinutes}m
                   </span>
                   <button
@@ -873,7 +873,7 @@ export default function PlanlyPage() {
             <Button
               size="sm"
               onClick={() => setIsRevisionModalOpen(false)}
-              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs"
+              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-[13px] font-medium h-8"
             >
               Close
             </Button>
@@ -885,8 +885,8 @@ export default function PlanlyPage() {
       <Dialog open={isRenameModalOpen} onOpenChange={setIsRenameModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rename Study Plan</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[18px] font-semibold leading-[1.3]">Rename Study Plan</DialogTitle>
+            <DialogDescription className="text-[13px] text-zinc-400 leading-[1.45]">
               Give your personalized preparation plan a custom title.
             </DialogDescription>
           </DialogHeader>
@@ -897,7 +897,7 @@ export default function PlanlyPage() {
               maxLength={60}
               value={planNameInput}
               onChange={(e) => setPlanNameInput(e.target.value)}
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+              className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
             />
           </div>
 
@@ -906,14 +906,14 @@ export default function PlanlyPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsRenameModalOpen(false)}
-              className="text-xs"
+              className="text-[13px] font-medium h-8"
             >
               Cancel
             </Button>
             <Button
               size="sm"
               onClick={handleSavePlanName}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium h-8"
             >
               Save Title
             </Button>

@@ -218,31 +218,31 @@ export default function BuganizerPage() {
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
         <DialogContent className="max-w-lg bg-zinc-950">
           <DialogHeader>
-            <DialogTitle>Track Interview Edge Case</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[18px] font-semibold leading-[1.3]">Track Interview Edge Case</DialogTitle>
+            <DialogDescription className="text-[13px] text-zinc-400 leading-[1.45]">
               Record tricky bugs or interview traps you encountered so you remember the fix.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3.5 py-2 text-xs">
-            <div className="space-y-1">
-              <label className="font-semibold text-zinc-200">Bug / Issue Title</label>
+          <div className="space-y-3.5 py-2">
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-zinc-200">Bug / Issue Title</label>
               <input
                 type="text"
                 placeholder="e.g. Memory leak in cyclical shared_ptr references"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="font-semibold text-zinc-200">Category</label>
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-zinc-200">Category</label>
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
                 >
                   <option value="DSA">DSA</option>
                   <option value="DBMS">DBMS</option>
@@ -252,12 +252,12 @@ export default function BuganizerPage() {
                 </select>
               </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold text-zinc-200">Severity</label>
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-zinc-200">Severity</label>
                 <select
                   value={newSeverity}
                   onChange={(e) => setNewSeverity(e.target.value as "High" | "Medium" | "Low")}
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
                 >
                   <option value="High">High Severity</option>
                   <option value="Medium">Medium Severity</option>
@@ -266,25 +266,25 @@ export default function BuganizerPage() {
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="font-semibold text-zinc-200">Problem / Symptom</label>
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-zinc-200">Problem / Symptom</label>
               <textarea
                 placeholder="Describe why the mistake occurred during testing..."
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="font-semibold text-zinc-200">Permanent Fix / Best Practice</label>
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-medium text-zinc-200">Permanent Fix / Best Practice</label>
               <textarea
                 placeholder="Rule of thumb or pattern to prevent this in the future..."
                 value={newSolution}
                 onChange={(e) => setNewSolution(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
           </div>
@@ -294,14 +294,14 @@ export default function BuganizerPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsAddModalOpen(false)}
-              className="text-xs"
+              className="text-[13px] font-medium h-8"
             >
               Cancel
             </Button>
             <Button
               size="sm"
               onClick={handleCreateBug}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium h-8"
             >
               Save Bug Entry
             </Button>

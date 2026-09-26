@@ -140,34 +140,34 @@ export default function ToolsPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-zinc-800 bg-zinc-950 overflow-hidden text-xs">
-            <div className="grid grid-cols-4 gap-2 border-b border-zinc-800 px-3 py-2 text-[11px] font-semibold text-zinc-500 bg-zinc-900/60">
+          <div className="rounded-lg border border-zinc-800 bg-zinc-950 overflow-hidden">
+            <div className="grid grid-cols-4 gap-2 border-b border-zinc-800 px-3 py-2 text-[12px] font-medium text-zinc-400 bg-zinc-900/60 uppercase tracking-wider">
               <div>Data Structure</div>
               <div className="text-center">Access</div>
               <div className="text-center">Search</div>
               <div className="text-center">Insertion</div>
             </div>
-            <div className="divide-y divide-zinc-800/60 font-mono text-[11px]">
-              <div className="grid grid-cols-4 gap-2 px-3 py-2 text-zinc-300">
-                <span className="font-sans font-medium text-zinc-200">Array / Vector</span>
+            <div className="divide-y divide-zinc-800/60 font-mono text-[12px]">
+              <div className="grid grid-cols-4 gap-2 px-3 py-2 text-zinc-300 items-center">
+                <span className="font-sans font-normal text-[13px] text-zinc-200">Array / Vector</span>
                 <span className="text-emerald-400 text-center">O(1)</span>
                 <span className="text-amber-400 text-center">O(n)</span>
                 <span className="text-amber-400 text-center">O(n)</span>
               </div>
-              <div className="grid grid-cols-4 gap-2 px-3 py-2 text-zinc-300">
-                <span className="font-sans font-medium text-zinc-200">Hash Map</span>
+              <div className="grid grid-cols-4 gap-2 px-3 py-2 text-zinc-300 items-center">
+                <span className="font-sans font-normal text-[13px] text-zinc-200">Hash Map</span>
                 <span className="text-zinc-500 text-center">N/A</span>
                 <span className="text-emerald-400 text-center">O(1)</span>
                 <span className="text-emerald-400 text-center">O(1)</span>
               </div>
-              <div className="grid grid-cols-4 gap-2 px-3 py-2 text-zinc-300">
-                <span className="font-sans font-medium text-zinc-200">Binary Search Tree</span>
+              <div className="grid grid-cols-4 gap-2 px-3 py-2 text-zinc-300 items-center">
+                <span className="font-sans font-normal text-[13px] text-zinc-200">Binary Search Tree</span>
                 <span className="text-cyan-400 text-center">O(log n)</span>
                 <span className="text-cyan-400 text-center">O(log n)</span>
                 <span className="text-cyan-400 text-center">O(log n)</span>
               </div>
-              <div className="grid grid-cols-4 gap-2 px-3 py-2 text-zinc-300">
-                <span className="font-sans font-medium text-zinc-200">Min/Max Heap</span>
+              <div className="grid grid-cols-4 gap-2 px-3 py-2 text-zinc-300 items-center">
+                <span className="font-sans font-normal text-[13px] text-zinc-200">Min/Max Heap</span>
                 <span className="text-emerald-400 text-center">O(1)</span>
                 <span className="text-amber-400 text-center">O(n)</span>
                 <span className="text-cyan-400 text-center">O(log n)</span>
