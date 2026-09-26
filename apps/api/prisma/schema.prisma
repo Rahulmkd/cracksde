@@ -243,19 +243,24 @@ model StudyTask {
 // =====================================================================
 
 model UserItemProgress {
-  id          String      @id @default(cuid())
-  userId      String      @map("user_id")
-  itemId      Int         @map("item_id")
-  status      String      @default("not_started") @db.VarChar(50)
-  notes       String?     @db.Text
-  completedAt DateTime?   @map("completed_at") @db.Timestamptz
-  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  item        RoadmapItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  id             String      @id @default(cuid())
+  userId         String      @map("user_id")
+  itemId         Int         @map("item_id")
+  status         String      @default("not_started") @db.VarChar(50)
+  solveCount     Int         @default(0) @map("solve_count")
+  lastSolvedAt   DateTime?   @map("last_solved_at") @db.Timestamptz
+  nextRevisionAt DateTime?   @map("next_revision_at") @db.Timestamptz
+  lastScore      Boolean?    @map("last_score")
+  notes          String?     @db.Text
+  completedAt    DateTime?   @map("completed_at") @db.Timestamptz
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item           RoadmapItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   @@unique([userId, itemId], name: "uq_user_roadmap_item_progress")
   @@index([userId], map: "idx_user_item_progress_user_id")
   @@index([itemId], map: "idx_user_item_progress_item_id")
+  @@index([nextRevisionAt], map: "idx_user_item_progress_next_rev")
   @@map("user_item_progress")
 }

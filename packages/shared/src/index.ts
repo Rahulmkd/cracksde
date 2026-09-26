@@ -48,6 +48,21 @@ export interface HealthCheckResponse {
 // Roadmap Curriculum (Single Source of Truth)
 // ============================================================================
 
+export interface UserItemProgressDto {
+  id?: string;
+  userId?: string;
+  itemId: number;
+  status: string; // "not_started" | "completed" | "needs_revision" | "mastered"
+  solveCount: number;
+  lastSolvedAt?: string | null;
+  nextRevisionAt?: string | null;
+  lastScore?: boolean | null;
+  notes?: string | null;
+  completedAt?: string | null;
+  revisionStatusText: string; // "Revision Due" | "Due Tomorrow" | "Next Revision: 5 Oct" | "Not Solved Yet"
+  isDue: boolean;
+}
+
 export interface RoadmapItemDto {
   id: number;
   subjectId?: number;
@@ -62,6 +77,7 @@ export interface RoadmapItemDto {
   sortOrder?: number;
   subjectSlug?: string;
   subjectName?: string;
+  topicSlug?: string;
   topicName?: string;
   subtopicName?: string | null;
   userProgress?: {
@@ -69,6 +85,7 @@ export interface RoadmapItemDto {
     notes?: string | null;
     completedAt?: string | null;
   } | null;
+  progress?: UserItemProgressDto | null;
 }
 
 export interface RoadmapSubtopicDto {
@@ -90,6 +107,11 @@ export interface RoadmapTopicDto {
   sortOrder: number;
   subtopics: RoadmapSubtopicDto[];
   items: RoadmapItemDto[];
+  totalQuestions?: number;
+  solvedQuestions?: number;
+  dueQuestions?: number;
+  hasRevisionDue?: boolean;
+  revisionStatusText?: string;
 }
 
 export interface RoadmapSubjectSummaryDto {
@@ -103,6 +125,9 @@ export interface RoadmapSubjectSummaryDto {
   totalTopics: number;
   totalSubtopics: number;
   totalItems: number;
+  totalSolved?: number;
+  totalDue?: number;
+  hasRevisionDue?: boolean;
 }
 
 export interface RoadmapSubjectDetailDto {
@@ -113,8 +138,53 @@ export interface RoadmapSubjectDetailDto {
   estimatedHours: number;
   totalMinutes: number;
   sortOrder: number;
+  totalSolved?: number;
+  totalDue?: number;
+  hasRevisionDue?: boolean;
   topics: RoadmapTopicDto[];
 }
+
+export interface TopicQuestionsResponseDto {
+  subject: {
+    id: number;
+    slug: string;
+    name: string;
+  };
+  topic: {
+    id: number;
+    slug: string;
+    name: string;
+    estimatedMinutes: number;
+    totalQuestions: number;
+    solvedQuestions: number;
+    dueQuestions: number;
+    hasRevisionDue: boolean;
+    revisionStatusText: string;
+  };
+  questions: RoadmapItemDto[];
+}
+
+export interface UserRevisionItemDto extends RoadmapItemDto {
+  topicSlug?: string;
+  progress: UserItemProgressDto;
+}
+
+export interface UserRevisionListDto {
+  dueCount: number;
+  totalCount: number;
+  items: UserRevisionItemDto[];
+}
+
+export interface RecordQuestionSolveRequest {
+  isCorrect: boolean;
+  notes?: string;
+}
+
+export interface RecordQuestionSolveResponse {
+  progress: UserItemProgressDto;
+  message: string;
+}
+
 
 // ============================================================================
 // Study Plan & Sprints (Referencing Roadmap Items)
