@@ -19,6 +19,7 @@ import {
   ArrowRight,
   Target,
   Trophy,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,11 +37,18 @@ export default function OnboardingPage() {
   const { data: subjectsData } = useRoadmapSubjects();
   const { plan: studyPlan } = useStudyPlan("crack-sde");
 
-  const [step6Phase, setStep6Phase] = useState<"preview" | "details" | "ready">("preview");
-  const [expandedSprint, setExpandedSprint] = useState<string>("Sprint 1");
-  const [expandedDay, setExpandedDay] = useState<string>("Day 1");
   const [expandedReviewSubject, setExpandedReviewSubject] = useState<string>("dsa");
   const [expandedReviewTopic, setExpandedReviewTopic] = useState<string>("Arrays");
+
+  // Step names for Stepper
+  const stepNames = [
+    { num: 1, title: "About You" },
+    { num: 2, title: "Subjects" },
+    { num: 3, title: "Levels" },
+    { num: 4, title: "Review" },
+    { num: 5, title: "Availability" },
+    { num: 6, title: "Finalize" },
+  ];
 
   // Step 1 options
   const roles = ["SDE Intern", "Software Engineer", "Senior SDE", "Engineering Lead"];
@@ -64,43 +72,32 @@ export default function OnboardingPage() {
   // Dynamic hours & days calculations
   const totalWeeklyHours = store.getTotalWeeklyHours();
   const totalRoadmapHours = 270.8;
-  const estimatedDays = Math.round((totalRoadmapHours / totalWeeklyHours) * 7);
+  const estimatedDays = Math.round((totalRoadmapHours / Math.max(1, totalWeeklyHours)) * 7);
 
   const handleNext = () => {
     if (store.currentStep === 6) {
-      if (step6Phase === "preview") {
-        setStep6Phase("details");
-      } else if (step6Phase === "details") {
-        setStep6Phase("ready");
-      } else {
-        router.push("/dashboard");
-      }
+      toast.success("🚀 Study Plan created and activated!");
+      router.push("/planly");
     } else {
       store.nextStep();
     }
   };
 
   const handlePrev = () => {
-    if (store.currentStep === 6 && step6Phase === "details") {
-      setStep6Phase("preview");
-    } else if (store.currentStep === 6 && step6Phase === "ready") {
-      setStep6Phase("details");
-    } else {
-      store.prevStep();
-    }
+    store.prevStep();
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white">
-      {/* Top Navigation */}
-      <header className="flex h-12 items-center justify-between border-b border-zinc-800/80 px-4 sm:px-8 bg-zinc-950/85 backdrop-blur-md">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white select-none">
+      {/* Top Header */}
+      <header className="flex h-14 items-center justify-between border-b border-zinc-800/80 px-4 sm:px-8 bg-zinc-950/85 backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <Link href="/dashboard" className="flex items-center gap-2 text-[13px] font-semibold tracking-tight text-zinc-100">
-            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-600 text-white font-semibold text-[11px] shadow-sm shadow-blue-600/20">
+          <Link href="/dashboard" className="flex items-center gap-2 text-[14px] font-semibold tracking-tight text-zinc-100">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold text-[12px] shadow-sm shadow-blue-600/20">
               ⚡
             </span>
             <span>
-              Planly <span className="text-zinc-500 font-normal text-[11px]">by</span> <span className="text-zinc-100 font-semibold">Crack SDE</span>
+              Planly <span className="text-zinc-500 font-normal text-[12px]">by</span> <span className="text-zinc-100 font-semibold">Crack SDE</span>
             </span>
           </Link>
         </div>
@@ -113,30 +110,86 @@ export default function OnboardingPage() {
             }}
             className="hover:text-zinc-200 transition-colors"
           >
-            Discard plan
+            Reset draft
           </button>
           <button
             onClick={() => router.push("/dashboard")}
             className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-2.5 py-1 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors text-[11px] font-medium"
           >
-            Close
+            Exit
           </button>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-8 py-6">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-8 py-6 space-y-6">
+        {/* Horizontal Interactive Stepper Bar */}
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3 sm:p-4 shadow-subtle">
+          <div className="flex items-center justify-between">
+            {stepNames.map((s, idx) => {
+              const isCurrent = store.currentStep === s.num;
+              const isCompleted = store.currentStep > s.num;
+
+              return (
+                <div
+                  key={s.num}
+                  className="flex items-center gap-2 flex-1 last:flex-none cursor-pointer"
+                  onClick={() => {
+                    if (s.num <= store.currentStep) {
+                      store.setStep(s.num);
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={cn(
+                        "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-mono font-semibold transition-colors",
+                        isCurrent
+                          ? "bg-blue-600 text-white ring-2 ring-blue-500/40"
+                          : isCompleted
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-zinc-800 text-zinc-500"
+                      )}
+                    >
+                      {isCompleted ? <Check className="h-3 w-3 stroke-[3]" /> : s.num}
+                    </div>
+
+                    <span
+                      className={cn(
+                        "text-[12px] font-medium hidden md:inline transition-colors",
+                        isCurrent
+                          ? "text-blue-400 font-semibold"
+                          : isCompleted
+                          ? "text-zinc-200"
+                          : "text-zinc-500"
+                      )}
+                    >
+                      {s.title}
+                    </span>
+                  </div>
+
+                  {idx < stepNames.length - 1 && (
+                    <div
+                      className={cn(
+                        "h-0.5 flex-1 mx-2 transition-colors hidden sm:block",
+                        isCompleted ? "bg-emerald-500/40" : "bg-zinc-800"
+                      )}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* ========================================================================= */}
         {/* STEP 1: ABOUT YOU */}
         {/* ========================================================================= */}
         {store.currentStep === 1 && (
           <div className="space-y-6 animate-in fade-in-50 duration-200">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
-                <span>Step 1 of 6</span>
-              </div>
               <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
-                About You
+                About Your Goals &amp; Background
               </h1>
               <p className="text-[12px] font-normal leading-normal text-zinc-400">
                 Let&apos;s personalize your preparation roadmap to match your target role and timeline.
@@ -261,18 +314,14 @@ export default function OnboardingPage() {
         {store.currentStep === 2 && (
           <div className="space-y-6 animate-in fade-in-50 duration-200">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
-                <span>Step 2 of 6</span>
-              </div>
               <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
                 Recommended Subjects
               </h1>
               <p className="text-[12px] font-normal leading-normal text-zinc-400">
-                We selected the key subjects that matter most for your target. You can customize them however you like.
+                We selected key subjects based on your target role ({store.targetRole}). You can customize them freely.
               </p>
             </div>
 
-            {/* Core Selected Subjects */}
             <div className="space-y-2.5">
               <div className="text-[12px] font-medium text-zinc-300">
                 Core Recommended Track:
@@ -287,7 +336,7 @@ export default function OnboardingPage() {
                       className={cn(
                         "flex items-center justify-between rounded-xl border p-3.5 cursor-pointer transition-all duration-150 shadow-subtle",
                         isChecked
-                          ? "border-zinc-700 bg-zinc-900/80 text-zinc-100"
+                          ? "border-blue-500/40 bg-zinc-900/80 text-zinc-100 ring-1 ring-blue-500/20"
                           : "border-zinc-800/80 bg-zinc-950/40 text-zinc-400 hover:border-zinc-700"
                       )}
                     >
@@ -315,9 +364,9 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            {/* Other Additional Subjects */}
+            {/* Additional Subjects */}
             <div className="space-y-2.5 pt-3.5 border-t border-zinc-800/80">
-              <div className="text-[12px] font-medium text-zinc-300">Additional Optional Tracks:</div>
+              <div className="text-[12px] font-medium text-zinc-300">Optional Electives:</div>
               <div className="flex flex-wrap gap-2">
                 {additionalSubjects.map((sub) => {
                   const isChecked = store.selectedSubjects.includes(sub.slug);
@@ -334,11 +383,6 @@ export default function OnboardingPage() {
                       )}
                     >
                       <span>{sub.name}</span>
-                      {sub.recommended && (
-                        <span className="rounded bg-blue-500/20 px-1.5 py-0.5 text-[10px] font-medium text-blue-300">
-                          Recommended
-                        </span>
-                      )}
                       <Plus className={cn("h-3.5 w-3.5 transition-transform", isChecked && "rotate-45 text-blue-400")} />
                     </button>
                   );
@@ -349,14 +393,11 @@ export default function OnboardingPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* STEP 3: CURRENT LEVEL FOR EACH SUBJECT */}
+        {/* STEP 3: STARTING LEVELS */}
         {/* ========================================================================= */}
         {store.currentStep === 3 && (
           <div className="space-y-6 animate-in fade-in-50 duration-200">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
-                <span>Step 3 of 6</span>
-              </div>
               <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
                 Select Your Starting Level
               </h1>
@@ -397,7 +438,7 @@ export default function OnboardingPage() {
                           className={cn(
                             "flex gap-2.5 rounded-xl border p-3.5 cursor-pointer transition-all shadow-subtle select-none",
                             isSelected
-                              ? "border-blue-500 bg-blue-600/10 text-zinc-100"
+                              ? "border-blue-500 bg-blue-600/10 text-zinc-100 ring-1 ring-blue-500/20"
                               : "border-zinc-800/90 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900/80"
                           )}
                         >
@@ -443,7 +484,7 @@ export default function OnboardingPage() {
                           className={cn(
                             "flex gap-2.5 rounded-xl border p-3.5 cursor-pointer transition-all shadow-subtle select-none",
                             isSelected
-                              ? "border-blue-500 bg-blue-600/10 text-zinc-100"
+                              ? "border-blue-500 bg-blue-600/10 text-zinc-100 ring-1 ring-blue-500/20"
                               : "border-zinc-800/90 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900/80"
                           )}
                         >
@@ -474,25 +515,20 @@ export default function OnboardingPage() {
         {/* ========================================================================= */}
         {store.currentStep === 4 && (
           <div className="space-y-6 animate-in fade-in-50 duration-200">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
-                  <span>Step 4 of 6</span>
-                </div>
-                <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
-                  Review Your Personalized Roadmap
-                </h1>
-                <p className="text-[12px] font-normal leading-normal text-zinc-400">
-                  Inspect the curriculum structure and estimated topic hours tailored for your sprint.
-                </p>
-              </div>
+            <div className="space-y-1">
+              <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
+                Review Your Personalized Roadmap
+              </h1>
+              <p className="text-[12px] font-normal leading-normal text-zinc-400">
+                Inspect the curriculum structure and estimated topic hours tailored for your sprint.
+              </p>
             </div>
 
             {/* Planned Hours Banner */}
             <div className="flex items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-950/20 px-3.5 py-2.5 text-[12px] text-blue-300 shadow-subtle">
               <Zap className="h-3.5 w-3.5 text-blue-400 shrink-0" />
               <span>
-                We&apos;ve organized <strong className="text-blue-200 font-semibold">220.1 hours</strong> of structured learning across your selected tracks.
+                We&apos;ve organized <strong className="text-blue-200 font-semibold font-mono">220.1 hours</strong> of structured learning across your selected tracks.
               </span>
             </div>
 
@@ -572,9 +608,6 @@ export default function OnboardingPage() {
         {store.currentStep === 5 && (
           <div className="space-y-6 animate-in fade-in-50 duration-200">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
-                <span>Step 5 of 6</span>
-              </div>
               <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
                 Weekly Study Availability
               </h1>
@@ -591,7 +624,7 @@ export default function OnboardingPage() {
               </div>
               <div className="flex items-center gap-1.5 font-semibold text-blue-200">
                 <CalendarIcon className="h-3.5 w-3.5" />
-                <span>Est. days: <strong className="text-white text-[13px] font-semibold font-mono">{estimatedDays}</strong></span>
+                <span>Est. timeline: <strong className="text-white text-[13px] font-semibold font-mono">{estimatedDays} Days</strong></span>
               </div>
             </div>
 
@@ -634,305 +667,109 @@ export default function OnboardingPage() {
             </div>
 
             <div className="text-[12px] font-normal text-zinc-400">
-              Allocated weekly total: <strong className="text-zinc-200 font-semibold font-mono">{totalWeeklyHours} hours</strong>
+              Allocated weekly commitment: <strong className="text-zinc-200 font-semibold font-mono">{totalWeeklyHours} hours/week</strong>
             </div>
           </div>
         )}
 
         {/* ========================================================================= */}
-        {/* STEP 6: FINALISE PLAN */}
+        {/* STEP 6: FINALIZE PLAN */}
         {/* ========================================================================= */}
         {store.currentStep === 6 && (
           <div className="space-y-6 animate-in fade-in-50 duration-200">
-            {/* Phase 6A: Sprint Preview */}
-            {step6Phase === "preview" && (
-              <div className="space-y-5">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
-                      <span>Step 6 of 6 &middot; Preview</span>
-                    </div>
-                    <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
-                      Finalise Your Plan
-                    </h1>
-                    <p className="text-[12px] font-normal text-zinc-400">
-                      Here is your 9-sprint roadmap preview.
-                    </p>
-                  </div>
-                  <span className="text-[11px] font-mono text-zinc-500">9 Sprints Total</span>
-                </div>
+            <div className="space-y-1">
+              <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
+                Finalize &amp; Launch Study Plan
+              </h1>
+              <p className="text-[12px] font-normal leading-normal text-zinc-400">
+                Your customized 9-sprint roadmap is ready to activate.
+              </p>
+            </div>
 
-                <div className="space-y-2.5">
-                  {[
-                    { sprint: "Sprint 1", tags: "DSA + OOPS", time: "Est. 34h 47m" },
-                    { sprint: "Sprint 2", tags: "DSA + OOPS", time: "Est. 32h 48m" },
-                    { sprint: "Sprint 3", tags: "DSA + OOPS", time: "Est. 34h 46m" },
-                    { sprint: "Sprint 4", tags: "DSA + Operating System", time: "Est. 35h 3m" },
-                    { sprint: "Sprint 5", tags: "DSA + Operating System", time: "Est. 20h 53m" },
-                    { sprint: "Sprint 6", tags: "Computer Networks + LLD", time: "Est. 34h 14m" },
-                    { sprint: "Sprint 7", tags: "Computer Networks + LLD", time: "Est. 21h 2m" },
-                    { sprint: "Sprint 8", tags: "DBMS", time: "Est. 34h 2m" },
-                    { sprint: "Sprint 9", tags: "DBMS", time: "Est. 23h 18m" },
-                  ].map((s) => {
-                    const isExpanded = expandedSprint === s.sprint;
-                    return (
-                      <div
-                        key={s.sprint}
-                        className={cn(
-                          "rounded-xl border transition-all duration-150 overflow-hidden shadow-subtle",
-                          isExpanded
-                            ? "border-blue-500/40 bg-zinc-900/60"
-                            : "border-zinc-800 bg-zinc-900/30 hover:border-zinc-700"
-                        )}
-                      >
-                        <div
-                          onClick={() =>
-                            setExpandedSprint((prev) => (prev === s.sprint ? "" : s.sprint))
-                          }
-                          className="flex items-center justify-between p-3 cursor-pointer select-none"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Badge variant="blue" className="font-medium text-[11px] py-0 px-2">
-                              {s.sprint}
-                            </Badge>
-                            <span className="text-[12px] text-zinc-300 font-normal">• {s.tags}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-[11px] text-zinc-400">
-                            <span className="font-mono text-[11px]">{s.time}</span>
-                            <ChevronDown
-                              className={cn(
-                                "h-3.5 w-3.5 transition-transform duration-200",
-                                isExpanded ? "rotate-0" : "-rotate-90"
-                              )}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+            {/* Launch Summary Card */}
+            <div className="rounded-xl border border-blue-500/30 bg-blue-950/20 p-5 space-y-4 shadow-card">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-blue-500/20">
+                <div>
+                  <span className="text-[11px] font-mono text-blue-400 font-medium">CUSTOM ROADMAP</span>
+                  <h3 className="text-[16px] font-semibold text-zinc-100 mt-0.5">{store.planName || "Crack SDE Master Sprint"}</h3>
+                  <p className="text-[12px] text-zinc-400 font-normal">Target: {store.targetRole} &middot; {store.experience}</p>
+                </div>
+                <div className="text-left sm:text-right">
+                  <Badge variant="blue" className="text-[11px] font-medium py-0.5 px-2">
+                    Ready to Start
+                  </Badge>
                 </div>
               </div>
-            )}
 
-            {/* Phase 6B: Plan Details */}
-            {step6Phase === "details" && (
-              <div className="space-y-5">
-                <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
-                    <span>Step 6 of 6 &middot; Details</span>
-                  </div>
-                  <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
-                    Plan Details &amp; Target Start Date
-                  </h1>
+              {/* 5 KPI Metric Chips */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 rounded-lg bg-zinc-950/60 p-3 border border-zinc-800/80 font-mono text-[11px]">
+                <div>
+                  <div className="text-zinc-500 font-sans">Sprints</div>
+                  <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">9</div>
                 </div>
-
-                {/* Metrics Bar */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-3.5 text-[11px] shadow-subtle">
-                  <div>
-                    <div className="text-zinc-500 flex items-center gap-1 text-[11px] font-medium">
-                      <Layers className="h-3 w-3" /> Sprints
-                    </div>
-                    <div className="text-[16px] font-semibold text-zinc-100 mt-0.5 font-mono">9</div>
-                  </div>
-                  <div>
-                    <div className="text-zinc-500 flex items-center gap-1 text-[11px] font-medium">
-                      <BookOpen className="h-3 w-3" /> Subjects
-                    </div>
-                    <div className="text-[16px] font-semibold text-zinc-100 mt-0.5 font-mono">6</div>
-                  </div>
-                  <div>
-                    <div className="text-zinc-500 flex items-center gap-1 text-[11px] font-medium">
-                      <Clock className="h-3 w-3" /> Study hours
-                    </div>
-                    <div className="text-[16px] font-semibold text-zinc-100 mt-0.5 font-mono">270h 53m</div>
-                  </div>
-                  <div>
-                    <div className="text-zinc-500 flex items-center gap-1 text-[11px] font-medium">
-                      <Target className="h-3 w-3" /> Duration
-                    </div>
-                    <div className="text-[16px] font-semibold text-zinc-100 mt-0.5 font-mono">61 days</div>
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <div className="text-zinc-500 flex items-center gap-1 text-[11px] font-medium">
-                      <CalendarIcon className="h-3 w-3" /> Completion
-                    </div>
-                    <div className="text-[16px] font-semibold text-zinc-100 mt-0.5 font-mono">30 Nov 2026</div>
-                  </div>
+                <div>
+                  <div className="text-zinc-500 font-sans">Subjects</div>
+                  <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">{store.selectedSubjects.length}</div>
                 </div>
-
-                {/* Plan Name Input */}
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[12px] font-medium text-zinc-200">
-                    <span>Plan Name<span className="text-red-400">*</span></span>
-                    <span className="text-[11px] text-zinc-500 font-mono">
-                      {store.planName.length}/60
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    maxLength={60}
-                    value={store.planName}
-                    onChange={(e) => store.setPlanName(e.target.value)}
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-900/70 px-3 py-1.5 text-[12px] leading-[1.5] text-zinc-100 focus:border-blue-500 focus:outline-none font-normal"
-                  />
+                <div>
+                  <div className="text-zinc-500 font-sans">Curriculum</div>
+                  <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">270h</div>
                 </div>
-
-                {/* When do you want to start? */}
-                <div className="space-y-2">
-                  <label className="text-[12px] font-medium text-zinc-200 flex items-center gap-1.5">
-                    When do you want to start?<span className="text-red-400">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    {[
-                      { key: "today", label: "Today" },
-                      { key: "tomorrow", label: "Tomorrow" },
-                      { key: "custom", label: "Custom date" },
-                    ].map((opt) => (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        onClick={() => store.setStartDateOption(opt.key as "today" | "tomorrow" | "custom")}
-                        className={cn(
-                          "rounded-lg px-3 py-1.5 text-[12px] font-medium border transition-all select-none",
-                          store.startDateOption === opt.key
-                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm"
-                            : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700"
-                        )}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
+                <div>
+                  <div className="text-zinc-500 font-sans">Est. Days</div>
+                  <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">{estimatedDays}d</div>
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <div className="text-zinc-500 font-sans">Weekly Goal</div>
+                  <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">{totalWeeklyHours}h</div>
                 </div>
               </div>
-            )}
 
-            {/* Phase 6C: Celebration Screen */}
-            {step6Phase === "ready" && (
-              <div className="py-6 text-center space-y-6 animate-in zoom-in-95 duration-200">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600/20 text-2xl border border-blue-500/30 shadow-card">
-                  🎉
-                </div>
-
-                <div className="space-y-1">
-                  <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
-                    Your Personal Roadmap Is Ready
-                  </h1>
-                  <p className="text-[12px] font-normal leading-normal text-zinc-400 max-w-md mx-auto">
-                    We&apos;ve structured a day-wise sprint plan matching your target role and weekly commitments.
-                  </p>
-                </div>
-
-                {/* Plan Card */}
-                <div className="max-w-xl mx-auto rounded-xl border border-zinc-800 bg-zinc-900/70 p-5 text-left shadow-card space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold text-[14px] shadow-sm">
-                      🎯
-                    </div>
-                    <div>
-                      <h3 className="text-[14px] font-semibold leading-snug text-zinc-100">{store.planName}</h3>
-                      <p className="text-[12px] font-normal text-zinc-400">Target: Software Engineer &middot; 61 Days</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-zinc-800/80 text-[11px]">
-                    <div>
-                      <div className="text-zinc-500 flex items-center gap-1 font-medium text-[11px]">
-                        <CalendarIcon className="h-3 w-3" /> Start date
-                      </div>
-                      <div className="text-[12px] font-semibold text-zinc-200 mt-0.5 font-mono">1 Oct 2026</div>
-                    </div>
-                    <div>
-                      <div className="text-zinc-500 flex items-center gap-1 font-medium text-[11px]">
-                        <CalendarIcon className="h-3 w-3" /> End date
-                      </div>
-                      <div className="text-[12px] font-semibold text-zinc-200 mt-0.5 font-mono">30 Nov 2026</div>
-                    </div>
-                    <div>
-                      <div className="text-zinc-500 flex items-center gap-1 font-medium text-[11px]">
-                        <Layers className="h-3 w-3" /> Sprints
-                      </div>
-                      <div className="text-[12px] font-semibold text-zinc-200 mt-0.5 font-mono">9 Sprints</div>
-                    </div>
-                    <div>
-                      <div className="text-zinc-500 flex items-center gap-1 font-medium text-[11px]">
-                        <Clock className="h-3 w-3" /> Duration
-                      </div>
-                      <div className="text-[12px] font-semibold text-zinc-200 mt-0.5 font-mono">271h</div>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={() => router.push("/dashboard")}
-                    className="w-full h-8 bg-blue-600 hover:bg-blue-700 text-white font-medium text-[12px] shadow-sm"
-                  >
-                    Go to Study Dashboard <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                  </Button>
-                </div>
+              {/* Plan Name Input */}
+              <div className="space-y-1">
+                <label className="text-[12px] font-medium text-zinc-200">Plan Name</label>
+                <input
+                  type="text"
+                  maxLength={60}
+                  value={store.planName}
+                  onChange={(e) => store.setPlanName(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:border-blue-500 focus:outline-none font-normal"
+                />
               </div>
-            )}
+            </div>
           </div>
         )}
+
+        {/* Bottom Navigation Buttons */}
+        <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-between">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrev}
+            disabled={store.currentStep === 1}
+            className="h-8 px-3 text-[12px] font-medium"
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" /> Back
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={handleNext}
+            className="h-8 px-4 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+          >
+            {store.currentStep === 6 ? (
+              <>
+                <Zap className="h-3.5 w-3.5 mr-1" />
+                Launch My Roadmap
+              </>
+            ) : (
+              <>
+                Next Step <ChevronRight className="h-4 w-4 ml-1" />
+              </>
+            )}
+          </Button>
+        </div>
       </main>
-
-      {/* Floating Bottom Wizard Action Bar */}
-      {!(store.currentStep === 6 && step6Phase === "ready") && (
-        <footer className="sticky bottom-0 z-40 border-t border-zinc-800/80 bg-zinc-950/90 backdrop-blur-md px-4 sm:px-8 py-2.5">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            {/* Progress Bar & Status */}
-            <div className="flex items-center gap-3">
-              <div className="w-24 sm:w-32">
-                <Progress value={(store.currentStep / 6) * 100} className="h-1.5" />
-              </div>
-              <span className="text-[11px] text-zinc-400 font-normal">
-                Step {store.currentStep} of 6 &middot; Draft saved
-              </span>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex items-center gap-2">
-              {store.currentStep > 1 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePrev}
-                  className="h-7 px-3 text-[12px] font-medium"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Back
-                </Button>
-              )}
-
-              <Button
-                size="sm"
-                onClick={handleNext}
-                className="h-7 px-3 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-              >
-                {store.currentStep === 1 && (
-                  <>Next <ChevronRight className="h-3.5 w-3.5 ml-1" /></>
-                )}
-                {store.currentStep === 2 && (
-                  <>Continue with subjects <ChevronRight className="h-3.5 w-3.5 ml-1" /></>
-                )}
-                {store.currentStep === 3 && (
-                  <>Confirm levels <ChevronRight className="h-3.5 w-3.5 ml-1" /></>
-                )}
-                {store.currentStep === 4 && (
-                  <>Confirm content <ChevronRight className="h-3.5 w-3.5 ml-1" /></>
-                )}
-                {store.currentStep === 5 && (
-                  <>Confirm availability <ChevronRight className="h-3.5 w-3.5 ml-1" /></>
-                )}
-                {store.currentStep === 6 && step6Phase === "preview" && (
-                  <>Name my plan <ChevronRight className="h-3.5 w-3.5 ml-1" /></>
-                )}
-                {store.currentStep === 6 && step6Phase === "details" && (
-                  <>Generate roadmap <ChevronRight className="h-3.5 w-3.5 ml-1" /></>
-                )}
-              </Button>
-            </div>
-          </div>
-        </footer>
-      )}
     </div>
   );
 }

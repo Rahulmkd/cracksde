@@ -11,6 +11,11 @@ import {
   Trash2,
   Tag,
   Flame,
+  Code2,
+  Filter,
+  Check,
+  XCircle,
+  Lightbulb,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +29,8 @@ interface BugItem {
   category: string;
   severity: "High" | "Medium" | "Low";
   status: "Open" | "Resolved";
+  mistakeSnippet?: string;
+  solutionSnippet?: string;
   notes: string;
   solution: string;
 }
@@ -32,12 +39,14 @@ export default function BuganizerPage() {
   const [bugs, setBugs] = useState<BugItem[]>([
     {
       id: "b1",
-      title: "Integer Overflow on Binary Search Mid Point Calculation",
+      title: "Integer Overflow on Binary Search Mid Calculation",
       category: "DSA",
       severity: "High",
       status: "Resolved",
-      notes: "Using `(low + high) / 2` can cause signed 32-bit integer overflow when low + high > 2^31 - 1.",
-      solution: "Always write `int mid = low + (high - low) / 2;` or bitwise `low + ((high - low) >> 1)`."
+      mistakeSnippet: "int mid = (low + high) / 2; // ❌ Overflows if low + high > 2^31 - 1",
+      solutionSnippet: "int mid = low + (high - low) / 2; // ✅ Safe from 32-bit overflow",
+      notes: "In C++ and Java, signed 32-bit integers overflow into negative values when their sum exceeds 2,147,483,647.",
+      solution: "Always calculate mid using subtraction offset: `low + (high - low) / 2` or bitwise `low + ((high - low) >> 1)`.",
     },
     {
       id: "b2",
@@ -45,25 +54,35 @@ export default function BuganizerPage() {
       category: "DSA",
       severity: "Medium",
       status: "Resolved",
-      notes: "Condition check `right < n` vs `right <= n` when shrinking left window pointer.",
-      solution: "Keep window invariant: `[left, right]` inclusive, update frequencies before incrementing right."
+      mistakeSnippet: "while (right < n) {\n    if (freq[nums[right++]] > k) left++; // ❌ Updates after increment\n}",
+      solutionSnippet: "while (right < n) {\n    freq[nums[right]]++;\n    while (freq[nums[right]] > k) freq[nums[left++]]--; // ✅ Invariant preserved\n    right++;\n}",
+      notes: "Post-increment inside condition check breaks window boundary invariants during contraction.",
+      solution: "Keep clear invariants: process `nums[right]`, shrink `left` while condition violated, then increment `right` at loop end.",
     },
     {
       id: "b3",
-      title: "SQL Non-SARGable WHERE clause causing Full Table Scan",
+      title: "Non-SARGable WHERE Clause Causing Full Table Scans",
       category: "DBMS",
       severity: "High",
       status: "Open",
-      notes: "Query `WHERE YEAR(created_at) = 2026` invalidates index on `created_at`.",
-      solution: "Rewrite to `WHERE created_at >= '2026-01-01' AND created_at < '2027-01-01'` to leverage index range scan."
-    }
+      mistakeSnippet: "-- ❌ Function on indexed column disables B+ Tree index scan:\nSELECT * FROM orders WHERE EXTRACT(YEAR FROM created_at) = 2026;",
+      solutionSnippet: "-- ✅ SARGable range scan uses B+ Tree index perfectly:\nSELECT * FROM orders WHERE created_at >= '2026-01-01' AND created_at < '2027-01-01';",
+      notes: "Applying functions or math operators directly to indexed columns in SQL prevents the optimizer from executing an index seek.",
+      solution: "Isolate the column by shifting expressions to the literal comparison side.",
+    },
   ]);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedSeverity, setSelectedSeverity] = useState("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Form State
   const [newTitle, setNewTitle] = useState("");
   const [newCategory, setNewCategory] = useState("DSA");
   const [newSeverity, setNewSeverity] = useState<"High" | "Medium" | "Low">("Medium");
+  const [newMistakeSnippet, setNewMistakeSnippet] = useState("");
+  const [newSolutionSnippet, setNewSolutionSnippet] = useState("");
   const [newNotes, setNewNotes] = useState("");
   const [newSolution, setNewSolution] = useState("");
 
@@ -78,13 +97,17 @@ export default function BuganizerPage() {
       category: newCategory,
       severity: newSeverity,
       status: "Open",
+      mistakeSnippet: newMistakeSnippet.trim() || undefined,
+      solutionSnippet: newSolutionSnippet.trim() || undefined,
       notes: newNotes.trim(),
       solution: newSolution.trim(),
     };
     setBugs((prev) => [newBug, ...prev]);
-    toast.success("New tricky edge-case tracked");
+    toast.success("New interview edge-case logged");
     setIsAddModalOpen(false);
     setNewTitle("");
+    setNewMistakeSnippet("");
+    setNewSolutionSnippet("");
     setNewNotes("");
     setNewSolution("");
   };
@@ -107,16 +130,19 @@ export default function BuganizerPage() {
     toast.info("Issue removed");
   };
 
-  const filteredBugs = bugs.filter(
-    (b) =>
+  const filteredBugs = bugs.filter((b) => {
+    const matchesSearch =
       !searchQuery ||
       b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.notes.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      b.notes.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || b.category === selectedCategory;
+    const matchesSeverity = selectedSeverity === "all" || b.severity === selectedSeverity;
+    return matchesSearch && matchesCategory && matchesSeverity;
+  });
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200">
+    <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200 select-none">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
@@ -128,39 +154,73 @@ export default function BuganizerPage() {
             Interview Edge-Case &amp; Bug Tracker
           </h1>
           <p className="text-[12px] font-normal leading-normal text-zinc-400">
-            Record recurring coding mistakes, off-by-one errors, and tricky interviewer corner cases to never repeat them.
+            Record recurring coding traps, off-by-one errors, and anti-patterns with before/after code diffs.
           </p>
         </div>
 
         <Button
           size="sm"
           onClick={() => setIsAddModalOpen(true)}
-          className="h-7 px-3 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+          className="h-8 px-3 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
         >
-          <Plus className="h-3.5 w-3.5 mr-1" /> Track New Bug
+          <Plus className="h-3.5 w-3.5 mr-1" /> Log Edge Case
         </Button>
       </div>
 
-      {/* Search Bar */}
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 shadow-subtle">
+      {/* Filter & Search Bar */}
+      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-2.5 shadow-subtle">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
           <input
             type="text"
-            placeholder="Search edge cases and bug descriptions..."
+            placeholder="Search edge cases by description or topic..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal"
           />
         </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-0.5 text-[12px]">
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="text-zinc-500 text-[11px] font-medium mr-1">Category:</span>
+            {["all", "DSA", "DBMS", "Operating Systems", "System Design"].map((c) => (
+              <button
+                key={c}
+                onClick={() => setSelectedCategory(c)}
+                className={cn(
+                  "rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors select-none",
+                  selectedCategory === c
+                    ? "bg-blue-600/15 text-blue-400 border border-blue-500/30"
+                    : "border border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200"
+                )}
+              >
+                {c === "all" ? "All" : c}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-zinc-500 text-[11px]">Severity:</span>
+            <select
+              value={selectedSeverity}
+              onChange={(e) => setSelectedSeverity(e.target.value)}
+              className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-300 focus:outline-none"
+            >
+              <option value="all">All Severities</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      {/* Bug Items List */}
+      {/* Bug Cards List */}
       <div className="space-y-3">
         {filteredBugs.map((bug) => (
           <div
             key={bug.id}
-            className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-2.5 hover:border-zinc-700/80 transition-all duration-200 shadow-subtle"
+            className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3 hover:border-zinc-700/80 transition-all duration-200 shadow-subtle"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -202,10 +262,33 @@ export default function BuganizerPage() {
               <p className="text-[12px] font-normal text-zinc-400 mt-1 leading-normal">{bug.notes}</p>
             </div>
 
+            {/* Code Comparison Diffs (Mistake vs Fix) */}
+            {(bug.mistakeSnippet || bug.solutionSnippet) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] font-mono pt-1">
+                {bug.mistakeSnippet && (
+                  <div className="rounded-lg border border-red-500/30 bg-red-950/20 p-2.5 space-y-1">
+                    <span className="text-red-400 font-sans font-semibold text-[11px] flex items-center gap-1">
+                      <XCircle className="h-3 w-3" /> Anti-Pattern / Bug:
+                    </span>
+                    <pre className="text-zinc-300 whitespace-pre-wrap">{bug.mistakeSnippet}</pre>
+                  </div>
+                )}
+
+                {bug.solutionSnippet && (
+                  <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-2.5 space-y-1">
+                    <span className="text-emerald-400 font-sans font-semibold text-[11px] flex items-center gap-1">
+                      <Check className="h-3 w-3" /> Correct Solution:
+                    </span>
+                    <pre className="text-zinc-200 whitespace-pre-wrap">{bug.solutionSnippet}</pre>
+                  </div>
+                )}
+              </div>
+            )}
+
             {bug.solution && (
-              <div className="rounded-lg border border-emerald-500/20 bg-emerald-950/20 p-2.5 text-[12px] text-emerald-300 space-y-0.5 font-normal leading-normal">
-                <span className="font-semibold text-emerald-200 flex items-center gap-1 text-[12px]">
-                  💡 Fix / Preventive Rule:
+              <div className="rounded-lg border border-blue-500/20 bg-blue-950/20 p-2.5 text-[12px] text-blue-300 space-y-0.5 font-normal leading-normal">
+                <span className="font-semibold text-blue-200 flex items-center gap-1 text-[12px]">
+                  <Lightbulb className="h-3.5 w-3.5 text-amber-400" /> Preventative Rule of Thumb:
                 </span>
                 <p>{bug.solution}</p>
               </div>
@@ -216,11 +299,11 @@ export default function BuganizerPage() {
 
       {/* Add Bug Modal */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent className="max-w-lg bg-zinc-950">
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto bg-zinc-950">
           <DialogHeader className="pb-2">
-            <DialogTitle className="text-[15px] font-semibold leading-snug">Track Interview Edge Case</DialogTitle>
+            <DialogTitle className="text-[15px] font-semibold leading-snug">Log Interview Trap / Bug</DialogTitle>
             <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
-              Record tricky bugs or interview traps you encountered so you remember the fix.
+              Record tricky mistakes or edge-cases with code comparisons so you remember the fix.
             </DialogDescription>
           </DialogHeader>
 
@@ -267,23 +350,45 @@ export default function BuganizerPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[12px] font-medium text-zinc-200">Problem / Symptom</label>
+              <label className="text-[12px] font-medium text-zinc-200">Anti-Pattern / Wrong Code (optional)</label>
               <textarea
-                placeholder="Describe why the mistake occurred during testing..."
+                placeholder="e.g. while (low < high) mid = (low + high) / 2..."
+                value={newMistakeSnippet}
+                onChange={(e) => setNewMistakeSnippet(e.target.value)}
+                rows={2}
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 font-mono text-[11px] text-zinc-100 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[12px] font-medium text-zinc-200">Correct Code Snippet (optional)</label>
+              <textarea
+                placeholder="e.g. mid = low + (high - low) / 2..."
+                value={newSolutionSnippet}
+                onChange={(e) => setNewSolutionSnippet(e.target.value)}
+                rows={2}
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 font-mono text-[11px] text-zinc-100 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[12px] font-medium text-zinc-200">Why the Mistake Occurred</label>
+              <textarea
+                placeholder="Explanation of why this bug happened during testing..."
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
-                rows={3}
+                rows={2}
                 className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[12px] font-medium text-zinc-200">Permanent Fix / Best Practice</label>
+              <label className="text-[12px] font-medium text-zinc-200">Permanent Rule of Thumb</label>
               <textarea
-                placeholder="Rule of thumb or pattern to prevent this in the future..."
+                placeholder="Rule to prevent this in the future..."
                 value={newSolution}
                 onChange={(e) => setNewSolution(e.target.value)}
-                rows={3}
+                rows={2}
                 className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>

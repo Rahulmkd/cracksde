@@ -11,10 +11,13 @@ import {
   ArrowRight,
   Clock,
   Flame,
+  Sparkles,
+  DownloadCloud,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePlannerStore } from "@/store/planner-store";
+import { useStudyPlan } from "@/hooks/use-study-plan";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -27,11 +30,14 @@ export function DailyPlanner({
   showProblemOfTheDay = true,
   className,
 }: DailyPlannerProps) {
-  const { tasks, addTask, toggleTask, deleteTask } = usePlannerStore();
+  const { tasks, addTask, importTasks, toggleTask, deleteTask, points } = usePlannerStore();
+  const { plan } = useStudyPlan("crack-sde");
+
   const [mounted, setMounted] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDuration, setNewTaskDuration] = useState("15m");
+  const [newTaskCategory, setNewTaskCategory] = useState("DSA");
 
   // Problem of the day countdown
   const [timeLeft, setTimeLeft] = useState({ hours: 9, minutes: 25, seconds: 9 });
@@ -59,16 +65,16 @@ export function DailyPlanner({
   const handleCreateTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
-    addTask(newTaskTitle.trim(), newTaskDuration);
+    addTask(newTaskTitle.trim(), newTaskDuration, newTaskCategory);
     setNewTaskTitle("");
     setIsAddingTask(false);
-    toast.success("Task added to Daily Planner");
+    toast.success("Task added to Daily Planner (+15 pts on completion)");
   };
 
-  const handleToggle = (id: string, title: string, completed: boolean) => {
-    toggleTask(id);
-    if (!completed) {
-      toast.success(`Completed: ${title}`);
+  const handleToggle = (id: string, title: string) => {
+    const isCompleted = toggleTask(id);
+    if (isCompleted) {
+      toast.success(`🎉 Completed: ${title} (+15 pts!)`);
     }
   };
 
@@ -76,6 +82,31 @@ export function DailyPlanner({
     e.stopPropagation();
     deleteTask(id);
     toast.info("Task removed");
+  };
+
+  // 1-Click Import from Today's Active Sprint
+  const handleImportSprintTasks = () => {
+    const sprint1 = plan?.sprints?.[0];
+    const day1 = sprint1?.days?.[0];
+    const sprintTasks = day1?.tasks || [];
+
+    if (sprintTasks.length === 0) {
+      toast.info("No active sprint tasks found to import.");
+      return;
+    }
+
+    const tasksToImport = sprintTasks.slice(0, 3).map((t) => ({
+      title: t.item?.title || "Sprint Study Topic",
+      duration: `${t.estimatedMinutes || 20}m`,
+      category: t.item?.subjectSlug?.toUpperCase() || "DSA",
+    }));
+
+    const count = importTasks(tasksToImport);
+    if (count > 0) {
+      toast.success(`⚡ Imported ${count} sprint tasks into your Daily Planner!`);
+    } else {
+      toast.info("Today's sprint tasks are already in your planner.");
+    }
   };
 
   if (!mounted) {
@@ -89,39 +120,50 @@ export function DailyPlanner({
     );
   }
 
+  const completedCount = tasks.filter((t) => t.completed).length;
+
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-4 select-none", className)}>
       {/* ========================================================================= */}
-      {/* PROBLEM OF THE DAY CARD (IF ENABLED) */}
+      {/* PROBLEM OF THE DAY CARD */}
       {/* ========================================================================= */}
       {showProblemOfTheDay && (
         <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-3 shadow-subtle hover:border-zinc-700/80 transition-all duration-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-200">
+              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
               <span>Problem Of The Day</span>
-              <ExternalLink className="h-3 w-3 text-zinc-500" />
             </div>
             <Badge variant="blue" className="text-[10px] font-medium py-0.5 px-1.5 leading-none">
               +20 pts
             </Badge>
           </div>
 
+          <div className="space-y-1">
+            <div className="text-[12px] font-medium text-zinc-100 truncate">
+              Trapping Rain Water (Two Pointers)
+            </div>
+            <div className="text-[11px] text-zinc-400 font-normal">
+              DSA &middot; Hard / Pro &middot; 35m est.
+            </div>
+          </div>
+
           {/* Countdown Display */}
-          <div className="flex items-center justify-center gap-1.5 py-0.5">
+          <div className="flex items-center justify-center gap-1.5 py-1">
             <div className="flex flex-col items-center">
-              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-[13px] font-semibold text-zinc-100 shadow-inner">
+              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 font-mono text-[12px] font-semibold text-zinc-100 shadow-inner">
                 {formatDigits(timeLeft.hours)}
               </span>
             </div>
-            <span className="text-zinc-600 font-semibold text-[12px]">:</span>
+            <span className="text-zinc-600 font-semibold text-[11px]">:</span>
             <div className="flex flex-col items-center">
-              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-[13px] font-semibold text-zinc-100 shadow-inner">
+              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 font-mono text-[12px] font-semibold text-zinc-100 shadow-inner">
                 {formatDigits(timeLeft.minutes)}
               </span>
             </div>
-            <span className="text-zinc-600 font-semibold text-[12px]">:</span>
+            <span className="text-zinc-600 font-semibold text-[11px]">:</span>
             <div className="flex flex-col items-center">
-              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-[13px] font-semibold text-zinc-100 shadow-inner">
+              <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 font-mono text-[12px] font-semibold text-zinc-100 shadow-inner">
                 {formatDigits(timeLeft.seconds)}
               </span>
             </div>
@@ -141,7 +183,7 @@ export function DailyPlanner({
       )}
 
       {/* ========================================================================= */}
-      {/* DAILY PLANNER CARD (SHARED & PERSISTENT) */}
+      {/* DAILY PLANNER CARD */}
       {/* ========================================================================= */}
       <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-3 shadow-subtle">
         {/* Planner Header */}
@@ -151,22 +193,35 @@ export function DailyPlanner({
             <span>Daily Planner</span>
           </div>
           {tasks.length > 0 && (
-            <span className="text-[11px] font-normal text-zinc-500">
-              {tasks.filter((t) => t.completed).length}/{tasks.length} done
+            <span className="text-[11px] font-mono text-zinc-400">
+              {completedCount}/{tasks.length} done
             </span>
           )}
         </div>
 
+        {/* 1-Click Import Sprint Tasks Button */}
+        <button
+          type="button"
+          onClick={handleImportSprintTasks}
+          className="w-full rounded-lg border border-blue-500/20 bg-blue-950/20 hover:bg-blue-900/30 hover:border-blue-500/40 p-1.5 text-[11px] font-medium text-blue-300 flex items-center justify-center gap-1.5 transition-colors shadow-subtle"
+        >
+          <DownloadCloud className="h-3.5 w-3.5 text-blue-400" />
+          <span>+ Import Today&apos;s Sprint Tasks</span>
+        </button>
+
         {/* Inline Add Task Form */}
         {isAddingTask && (
-          <form onSubmit={handleCreateTask} className="space-y-2 pt-1 border border-zinc-800 bg-zinc-950/80 p-2 rounded-lg animate-in fade-in-0 duration-150">
+          <form
+            onSubmit={handleCreateTask}
+            className="space-y-2 pt-1 border border-zinc-800 bg-zinc-950/80 p-2.5 rounded-lg animate-in fade-in-0 duration-150"
+          >
             <input
               type="text"
-              placeholder="Task name (e.g. Solve LRU Cache)..."
+              placeholder="Task title (e.g. Solve LRU Cache)..."
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               autoFocus
-              className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-[12px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500 font-normal"
+              className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-[12px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500 font-normal"
             />
 
             <div className="flex items-center justify-between gap-2 pt-1">
@@ -183,6 +238,18 @@ export function DailyPlanner({
                   <option value="30m">30 min</option>
                   <option value="45m">45 min</option>
                   <option value="60m">1 hour</option>
+                </select>
+
+                <select
+                  value={newTaskCategory}
+                  onChange={(e) => setNewTaskCategory(e.target.value)}
+                  className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[11px] text-zinc-300 focus:outline-none"
+                >
+                  <option value="DSA">DSA</option>
+                  <option value="DBMS">DBMS</option>
+                  <option value="OS">OS</option>
+                  <option value="CN">CN</option>
+                  <option value="LLD">LLD</option>
                 </select>
               </div>
 
@@ -213,43 +280,50 @@ export function DailyPlanner({
 
         {/* Task List / Empty State */}
         {tasks.length > 0 ? (
-          <div className="space-y-1 max-h-80 overflow-y-auto pr-0.5">
+          <div className="space-y-1.5 max-h-80 overflow-y-auto pr-0.5">
             {tasks.map((task) => (
               <div
                 key={task.id}
                 className={cn(
-                  "flex items-center justify-between p-1.5 rounded-lg border border-zinc-800/60 bg-zinc-950/50 text-[12px] hover:bg-zinc-900/80 transition-all group",
+                  "flex items-center justify-between p-2 rounded-lg border border-zinc-800/60 bg-zinc-950/50 text-[12px] hover:bg-zinc-900/80 transition-all group",
                   task.completed && "opacity-60 bg-zinc-950/20"
                 )}
               >
                 <div className="flex items-center gap-2 overflow-hidden">
                   <button
                     type="button"
-                    onClick={() => handleToggle(task.id, task.title, task.completed)}
+                    onClick={() => handleToggle(task.id, task.title)}
                     className={cn(
-                      "flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border transition-colors",
+                      "flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors",
                       task.completed
                         ? "border-emerald-500 bg-emerald-500 text-white"
                         : "border-zinc-700 bg-zinc-900 hover:border-blue-500"
                     )}
                     aria-label={`Mark ${task.title} as ${task.completed ? "incomplete" : "complete"}`}
                   >
-                    {task.completed && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                    {task.completed && <Check className="h-3 w-3 stroke-[3]" />}
                   </button>
 
-                  <span
-                    onClick={() => handleToggle(task.id, task.title, task.completed)}
-                    className={cn(
-                      "truncate cursor-pointer font-normal text-zinc-200 text-[12px] leading-snug hover:text-blue-400 transition-colors",
-                      task.completed && "line-through text-zinc-500"
+                  <div className="truncate">
+                    <span
+                      onClick={() => handleToggle(task.id, task.title)}
+                      className={cn(
+                        "truncate cursor-pointer font-normal text-zinc-200 text-[12px] leading-snug hover:text-blue-400 transition-colors block",
+                        task.completed && "line-through text-zinc-500"
+                      )}
+                    >
+                      {task.title}
+                    </span>
+                    {task.category && (
+                      <span className="text-[10px] text-zinc-500 font-mono">
+                        {task.category}
+                      </span>
                     )}
-                  >
-                    {task.title}
-                  </span>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0 ml-1">
-                  <span className="text-[11px] text-zinc-500">
+                  <span className="text-[11px] text-zinc-500 font-mono">
                     {task.duration}
                   </span>
                   <button
@@ -257,7 +331,7 @@ export function DailyPlanner({
                     className="text-zinc-600 hover:text-red-400 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Delete task"
                   >
-                    <Trash2 className="h-3 w-3" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>
@@ -274,13 +348,13 @@ export function DailyPlanner({
                 onClick={() => setIsAddingTask(true)}
                 className="text-[11px] text-zinc-500 hover:text-blue-400 cursor-pointer transition-colors"
               >
-                Click here to add your tasks
+                Click here to add custom task
               </p>
             </div>
           </div>
         )}
 
-        {/* Bottom "+ Add tasks" Button */}
+        {/* Bottom "+ Add task" Button */}
         {!isAddingTask && (
           <button
             type="button"
@@ -288,7 +362,7 @@ export function DailyPlanner({
             className="w-full rounded-lg border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900 hover:border-zinc-700/80 p-1.5 text-[12px] font-medium text-zinc-300 flex items-center justify-center gap-1.5 transition-colors shadow-subtle"
           >
             <Plus className="h-3 w-3 text-blue-400" />
-            <span>+ Add tasks</span>
+            <span>+ Add custom task</span>
           </button>
         )}
       </div>

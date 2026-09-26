@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import {
   Calendar as CalendarIcon,
@@ -20,6 +20,11 @@ import {
   BarChart2,
   Target,
   ArrowRight,
+  Sparkles,
+  Zap,
+  CalendarDays,
+  ListTree,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +40,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { useStudyPlan } from "@/hooks/use-study-plan";
 import { useRevisionList } from "@/hooks/use-revision-list";
+import { usePlannerStore } from "@/store/planner-store";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { StudyTaskDto } from "@starter/shared";
@@ -48,9 +54,13 @@ export default function PlanlyPage() {
   } = useStudyPlan("crack-sde");
 
   const { data: revisionListData } = useRevisionList();
+  const { addPoints } = usePlannerStore();
 
-  // Tab State
+  // Tab State: Active / Completed
   const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
+
+  // View Mode: Tree View vs Timeline Calendar View
+  const [viewMode, setViewMode] = useState<"tree" | "calendar">("tree");
 
   // Detailed view toggle
   const [isPlanDetailOpen, setIsPlanDetailOpen] = useState(true);
@@ -67,11 +77,14 @@ export default function PlanlyPage() {
   const [isAdjustPlanModalOpen, setIsAdjustPlanModalOpen] = useState(false);
   const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isCatchupModalOpen, setIsCatchupModalOpen] = useState(false);
 
   // Form states
-  const [planNameInput, setPlanNameInput] = useState("Crack SDE");
+  const [planNameInput, setPlanNameInput] = useState("Crack SDE Master Sprint");
   const [newStartDate, setNewStartDate] = useState("2026-10-01");
   const [dailyHours, setDailyHours] = useState(4);
+
+  const treeRef = useRef<HTMLDivElement>(null);
 
   // Plan Calculations
   const sprints = plan?.sprints || [];
@@ -102,7 +115,8 @@ export default function PlanlyPage() {
       {
         onSuccess: () => {
           if (nextStatus === "completed") {
-            toast.success(`Completed: ${task.item?.title || "Task"}`);
+            addPoints(15);
+            toast.success(`🎉 Completed: ${task.item?.title || "Task"} (+15 pts!)`);
           }
         },
       }
@@ -125,27 +139,17 @@ export default function PlanlyPage() {
     );
   };
 
-  const handleSaveStartDate = () => {
-    updatePlan(
-      { startDate: newStartDate },
-      {
-        onSuccess: () => {
-          setIsStartDateModalOpen(false);
-        },
-      }
-    );
+  const handleJumpToToday = () => {
+    setExpandedSprintId("1");
+    setExpandedDayId("1");
+    setIsPlanDetailOpen(true);
+    treeRef.current?.scrollIntoView({ behavior: "smooth" });
+    toast.success("Navigated to Sprint 1 &bull; Day 1");
   };
 
-  const handleSavePlanName = () => {
-    if (!planNameInput.trim()) return;
-    updatePlan(
-      { name: planNameInput.trim() },
-      {
-        onSuccess: () => {
-          setIsRenameModalOpen(false);
-        },
-      }
-    );
+  const handleSmartReschedule = () => {
+    setIsCatchupModalOpen(false);
+    toast.success("⚡ Smart Catch-Up Mode applied: Backlog redistributed across Sprint 1-3.");
   };
 
   const getSubjectBadge = (subjectSlug?: string, subjectName?: string) => {
@@ -178,13 +182,6 @@ export default function PlanlyPage() {
         </Badge>
       );
     }
-    if (slug.includes("oops")) {
-      return (
-        <Badge variant="destructive" className="py-0.5 px-1.5 font-medium text-[11px]">
-          OOPS
-        </Badge>
-      );
-    }
     return (
       <Badge variant="cyan" className="py-0.5 px-1.5 font-medium text-[11px]">
         LLD
@@ -193,7 +190,7 @@ export default function PlanlyPage() {
   };
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200">
+    <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200 select-none">
       {/* ========================================================================= */}
       {/* TOP SECTION: PLANLY HEADER BANNER */}
       {/* ========================================================================= */}
@@ -207,16 +204,15 @@ export default function PlanlyPage() {
         />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          {/* Left: Heading & 4 Feature Benefits */}
           <div className="space-y-2.5 max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
               <span>Study Planner Engine</span>
             </div>
             <h1 className="text-[18px] sm:text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
-              Know what to study every day and readjust as you go
+              Personalized 61-Day Sprint Roadmap
             </h1>
 
-            {/* 4 Benefits in a row */}
+            {/* 4 Benefits Chips */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5">
               <div className="flex items-center gap-1.5 text-[12px]">
                 <div className="flex h-5 w-5 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
@@ -243,84 +239,123 @@ export default function PlanlyPage() {
                 <div className="flex h-5 w-5 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
                   <Target className="h-3 w-3" />
                 </div>
-                <span className="text-[11px] text-zinc-400 font-normal">Revision bookmarking</span>
+                <span className="text-[11px] text-zinc-400 font-normal">Revision bookmarks</span>
               </div>
             </div>
           </div>
 
-          {/* Right: Primary Call to Action Button */}
-          <div className="shrink-0 flex items-center">
+          {/* Action Buttons */}
+          <div className="shrink-0 flex items-center gap-2">
             <Button
-              asChild
               size="sm"
-              className="h-7 px-3 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+              onClick={handleJumpToToday}
+              className="h-8 px-3 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
             >
-              <Link href="/onboarding">
-                Generate custom plan <ArrowRight className="h-3 w-3 ml-1" />
-              </Link>
+              <Zap className="h-3.5 w-3.5 mr-1" />
+              Jump to Today&apos;s Sprint
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsCatchupModalOpen(true)}
+              className="h-8 px-3 text-[12px] font-medium border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:bg-zinc-800"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1 text-amber-400" />
+              Catch-Up Mode
             </Button>
           </div>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* TABS SECTION: ACTIVE (1) / COMPLETED (0) */}
+      {/* TABS & VIEW MODE TOGGLE */}
       {/* ========================================================================= */}
-      <div className="flex items-center gap-1.5 border-b border-zinc-800/80 pb-1.5">
-        <button
-          onClick={() => setActiveTab("active")}
-          className={cn(
-            "flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium rounded-lg transition-colors",
-            activeTab === "active"
-              ? "bg-zinc-800 text-zinc-100 shadow-sm"
-              : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60"
-          )}
-        >
-          <span>Active Plans</span>
-          <span className="flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/30 px-1 text-[10px] font-semibold text-blue-400 font-mono">
-            1
-          </span>
-        </button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-2">
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setActiveTab("active")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1 text-[12px] font-medium rounded-lg transition-colors",
+              activeTab === "active"
+                ? "bg-zinc-800 text-zinc-100 shadow-sm"
+                : "text-zinc-500 hover:text-zinc-300"
+            )}
+          >
+            <span>Active Sprint Plan</span>
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/30 px-1 text-[10px] font-semibold text-blue-400 font-mono">
+              1
+            </span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab("completed")}
-          className={cn(
-            "flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium rounded-lg transition-colors",
-            activeTab === "completed"
-              ? "bg-zinc-800 text-zinc-100 shadow-sm"
-              : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60"
-          )}
-        >
-          <span>Completed</span>
-          <span className="flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-zinc-800 px-1 text-[10px] font-semibold text-zinc-500 font-mono">
-            0
-          </span>
-        </button>
+          <button
+            onClick={() => setActiveTab("completed")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1 text-[12px] font-medium rounded-lg transition-colors",
+              activeTab === "completed"
+                ? "bg-zinc-800 text-zinc-100 shadow-sm"
+                : "text-zinc-500 hover:text-zinc-300"
+            )}
+          >
+            <span>Completed</span>
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-800 px-1 text-[10px] font-semibold text-zinc-500 font-mono">
+              0
+            </span>
+          </button>
+        </div>
+
+        {/* View Mode Toggle: Tree View vs Timeline Calendar */}
+        <div className="flex items-center rounded-lg border border-zinc-800 bg-zinc-950 p-0.5 text-[11px]">
+          <button
+            onClick={() => setViewMode("tree")}
+            className={cn(
+              "flex items-center gap-1 px-2.5 py-1 rounded-md transition-colors",
+              viewMode === "tree"
+                ? "bg-zinc-800 text-zinc-100 font-medium"
+                : "text-zinc-400 hover:text-zinc-200"
+            )}
+          >
+            <ListTree className="h-3 w-3" />
+            <span>Sprint Tree</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode("calendar")}
+            className={cn(
+              "flex items-center gap-1 px-2.5 py-1 rounded-md transition-colors",
+              viewMode === "calendar"
+                ? "bg-zinc-800 text-zinc-100 font-medium"
+                : "text-zinc-400 hover:text-zinc-200"
+            )}
+          >
+            <CalendarDays className="h-3 w-3" />
+            <span>Calendar Timeline</span>
+          </button>
+        </div>
       </div>
 
       {/* ========================================================================= */}
       {/* TAB CONTENT: ACTIVE PLANS */}
       {/* ========================================================================= */}
       {activeTab === "active" && (
-        <div className="space-y-4">
+        <div className="space-y-4" ref={treeRef}>
           {/* Main Active Plan Card */}
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle hover:border-zinc-700/80 transition-all duration-200">
             {/* Top Sub-header Bar */}
             <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-950/60 px-4 py-2 text-[12px] text-blue-400 font-normal">
               <div className="flex items-center gap-1.5">
                 <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
-                <span>Starts in 5 days &middot; Ready to begin &middot; 61 days total</span>
+                <span>Sprint 1 In Progress &middot; Day 1 Focus &middot; 61 days total</span>
               </div>
-              <span className="text-[11px] text-zinc-500">Scheduled: 1 Oct 2026</span>
+              <span className="text-[11px] text-zinc-500 font-mono">Completion Target: 30 Nov 2026</span>
             </div>
 
             {/* Plan Card Body */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 p-4">
-              {/* Left Plan Meta */}
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-[14px] font-semibold text-zinc-100">
-                    {plan?.name || "Crack SDE"}
+                  <h3 className="text-[15px] font-semibold text-zinc-100">
+                    {plan?.name || "Crack SDE Master Sprint"}
                   </h3>
                   <Badge variant="blue" className="text-[10px] font-medium py-0.5 px-1.5 leading-none">
                     <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse mr-1" />
@@ -328,11 +363,11 @@ export default function PlanlyPage() {
                   </Badge>
                 </div>
                 <div className="text-[12px] text-zinc-400 flex flex-wrap items-center gap-2 font-normal leading-normal">
-                  <span>Target Role: <strong className="text-zinc-300 font-normal">Software Engineer</strong></span>
+                  <span>Role: <strong className="text-zinc-300 font-normal">Software Engineer</strong></span>
                   <span>&middot;</span>
                   <span>Pacing: <strong className="text-zinc-300 font-normal">4 hrs/day</strong></span>
                   <span>&middot;</span>
-                  <span>9 Sprints</span>
+                  <span>9 Sprints &middot; 847 Problems</span>
                 </div>
               </div>
 
@@ -344,10 +379,9 @@ export default function PlanlyPage() {
                   onClick={() => setIsPlanDetailOpen((prev) => !prev)}
                   className="h-7 text-[12px] font-medium border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800 px-2.5"
                 >
-                  {isPlanDetailOpen ? "Collapse schedule" : "View schedule & sprints"}
+                  {isPlanDetailOpen ? "Collapse Sprints" : "View Sprints"}
                 </Button>
 
-                {/* Three-dot dropdown menu */}
                 <div className="relative">
                   <button
                     onClick={() => setIsActionMenuOpen((prev) => !prev)}
@@ -364,10 +398,7 @@ export default function PlanlyPage() {
                     >
                       <div className="py-1">
                         <button
-                          onClick={() => {
-                            setPlanNameInput(plan?.name || "Crack SDE");
-                            setIsRenameModalOpen(true);
-                          }}
+                          onClick={() => setIsRenameModalOpen(true)}
                           className="flex w-full items-center gap-2 px-2.5 py-1 text-zinc-300 hover:bg-zinc-900 hover:text-white rounded-md"
                         >
                           <Edit2 className="h-3 w-3" />
@@ -388,15 +419,6 @@ export default function PlanlyPage() {
                           <span>Adjust daily hours</span>
                         </button>
                       </div>
-                      <div className="py-1">
-                        <button
-                          onClick={() => setIsRevisionModalOpen(true)}
-                          className="flex w-full items-center gap-2 px-2.5 py-1 text-amber-400 hover:bg-zinc-900 rounded-md"
-                        >
-                          <Star className="h-3 w-3" />
-                          <span>Revision list ({revisionListData?.length || 0})</span>
-                        </button>
-                      </div>
                     </div>
                   )}
                 </div>
@@ -411,7 +433,7 @@ export default function PlanlyPage() {
                   <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3 space-y-1 shadow-subtle">
                     <div className="flex items-center gap-1.5 text-[12px] font-medium text-zinc-400">
                       <TrendingUp className="h-3 w-3 text-blue-400" />
-                      <span>Overall progress</span>
+                      <span>Overall Progress</span>
                     </div>
                     <div className="flex items-baseline gap-1.5 pt-0.5">
                       <span className="text-[16px] font-semibold font-mono text-zinc-100">{progressPercent}%</span>
@@ -423,10 +445,10 @@ export default function PlanlyPage() {
                   <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3 space-y-1 shadow-subtle">
                     <div className="flex items-center gap-1.5 text-[12px] font-medium text-zinc-400">
                       <Clock className="h-3 w-3 text-amber-400" />
-                      <span>Time spent</span>
+                      <span>Curriculum Time</span>
                     </div>
                     <div className="flex items-baseline gap-1.5 pt-0.5">
-                      <span className="text-[16px] font-semibold font-mono text-zinc-100">0m</span>
+                      <span className="text-[16px] font-semibold font-mono text-zinc-100">0h</span>
                       <span className="text-[11px] text-zinc-500 font-mono">of {totalHours}h {remainingMinutes}m</span>
                     </div>
                     <Progress value={0} className="mt-1.5" />
@@ -435,7 +457,7 @@ export default function PlanlyPage() {
                   <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3 space-y-1 shadow-subtle">
                     <div className="flex items-center gap-1.5 text-[12px] font-medium text-zinc-400">
                       <Layers className="h-3 w-3 text-purple-400" />
-                      <span>Sprints completed</span>
+                      <span>Sprints Completed</span>
                     </div>
                     <div className="flex items-baseline gap-1.5 pt-0.5">
                       <span className="text-[16px] font-semibold font-mono text-zinc-100">{completedSprintsCount}</span>
@@ -450,472 +472,328 @@ export default function PlanlyPage() {
                   <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3 space-y-1 shadow-subtle">
                     <div className="flex items-center gap-1.5 text-[12px] font-medium text-zinc-400">
                       <CalendarIcon className="h-3 w-3 text-emerald-400" />
-                      <span>Est. completion</span>
+                      <span>Est. Completion</span>
                     </div>
                     <div className="flex items-baseline gap-1.5 pt-0.5">
                       <span className="text-[16px] font-semibold text-zinc-100">30 Nov</span>
-                      <span className="text-[11px] text-zinc-500">2026</span>
+                      <span className="text-[11px] text-zinc-500 font-mono">2026</span>
                     </div>
                     <div className="text-[11px] text-emerald-400 font-normal pt-0.5 flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> On schedule
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> On Schedule
                     </div>
                   </div>
                 </div>
 
-                {/* Main Sprint Tree Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-1 items-start">
-                  {/* Left Sprints Breakdown */}
-                  <div className="lg:col-span-8 space-y-3">
-                    {sprints.map((sprint) => {
-                      const isSprintExpanded = expandedSprintId === sprint.sprintId;
-                      const sprintTotalHours = Math.floor((sprint.totalEstimatedMinutes || 0) / 60);
-                      const sprintRemainingMinutes = (sprint.totalEstimatedMinutes || 0) % 60;
+                {/* VIEW 1: SPRINT TREE VIEW */}
+                {viewMode === "tree" && (
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-1 items-start">
+                    {/* Left Sprints Breakdown */}
+                    <div className="lg:col-span-8 space-y-3">
+                      {sprints.map((sprint) => {
+                        const isSprintExpanded = expandedSprintId === sprint.sprintId;
+                        const sprintTotalHours = Math.floor((sprint.totalEstimatedMinutes || 0) / 60);
+                        const sprintRemainingMinutes = (sprint.totalEstimatedMinutes || 0) % 60;
 
-                      const sprintSubjects =
-                        sprint.sprintNo <= 3
-                          ? "DSA + OOPS"
-                          : sprint.sprintNo <= 5
-                          ? "DSA + Operating System"
-                          : sprint.sprintNo <= 7
-                          ? "Computer Networks + LLD"
-                          : "DBMS";
+                        const sprintSubjects =
+                          sprint.sprintNo <= 3
+                            ? "DSA + OOPS"
+                            : sprint.sprintNo <= 5
+                            ? "DSA + Operating System"
+                            : sprint.sprintNo <= 7
+                            ? "Computer Networks + LLD"
+                            : "DBMS";
 
-                      return (
-                        <div
-                          key={sprint.sprintId}
-                          className={cn(
-                            "rounded-xl border transition-all duration-200 overflow-hidden shadow-subtle",
-                            isSprintExpanded
-                              ? "border-blue-500/30 bg-zinc-900/50"
-                              : "border-zinc-800/80 bg-zinc-900/30 hover:border-zinc-700/80"
-                          )}
-                        >
-                          {/* Sprint Header */}
+                        return (
                           <div
-                            onClick={() =>
-                              setExpandedSprintId((prev) =>
-                                prev === sprint.sprintId ? "" : sprint.sprintId
-                              )
-                            }
-                            className="flex items-center justify-between p-3 sm:p-3.5 cursor-pointer select-none hover:bg-zinc-900/60 transition-colors"
+                            key={sprint.sprintId}
+                            className={cn(
+                              "rounded-xl border transition-all duration-200 overflow-hidden shadow-subtle",
+                              isSprintExpanded
+                                ? "border-blue-500/30 bg-zinc-900/50"
+                                : "border-zinc-800/80 bg-zinc-900/30 hover:border-zinc-700/80"
+                            )}
                           >
-                            <div className="flex items-center gap-2">
-                              <Badge variant="blue" className="text-[10px] font-medium py-0.5 px-1.5 leading-none">
-                                Sprint {sprint.sprintNo}
-                              </Badge>
-                              <span className="text-[12px] text-zinc-300 font-normal hidden sm:inline">
-                                • {sprintSubjects}
-                              </span>
+                            {/* Sprint Header */}
+                            <div
+                              onClick={() =>
+                                setExpandedSprintId((prev) =>
+                                  prev === sprint.sprintId ? "" : sprint.sprintId
+                                )
+                              }
+                              className="flex items-center justify-between p-3 sm:p-3.5 cursor-pointer select-none hover:bg-zinc-900/60 transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Badge variant="blue" className="text-[10px] font-medium py-0.5 px-1.5 leading-none">
+                                  Sprint {sprint.sprintNo}
+                                </Badge>
+                                <span className="text-[12px] text-zinc-300 font-normal hidden sm:inline">
+                                  • {sprintSubjects}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2.5 text-[11px] text-zinc-400">
+                                <span className="font-mono text-[11px] text-zinc-400">
+                                  Est. {sprintTotalHours}h {sprintRemainingMinutes}m
+                                </span>
+                                <ChevronDown
+                                  className={cn(
+                                    "h-3.5 w-3.5 text-zinc-400 transition-transform duration-200",
+                                    isSprintExpanded ? "rotate-0" : "-rotate-90"
+                                  )}
+                                />
+                              </div>
                             </div>
 
-                            <div className="flex items-center gap-2.5 text-[11px] text-zinc-400">
-                              <span className="font-mono text-[11px] text-zinc-400">
-                                Est. {sprintTotalHours}h {sprintRemainingMinutes}m
-                              </span>
-                              <ChevronDown
-                                className={cn(
-                                  "h-3.5 w-3.5 text-zinc-400 transition-transform duration-200",
-                                  isSprintExpanded ? "rotate-0" : "-rotate-90"
-                                )}
-                              />
-                            </div>
-                          </div>
+                            {/* Expanded Sprint Days */}
+                            {isSprintExpanded && (
+                              <div className="border-t border-zinc-800/80 bg-zinc-950/70 p-2.5 sm:p-3 space-y-2">
+                                {(sprint.days || []).map((day) => {
+                                  const isDayExpanded = expandedDayId === day.dayId;
+                                  const dayHours = Math.floor((day.estimatedMinutes || 0) / 60);
+                                  const dayMinutes = (day.estimatedMinutes || 0) % 60;
 
-                          {/* Expanded Sprint Days */}
-                          {isSprintExpanded && (
-                            <div className="border-t border-zinc-800/80 bg-zinc-950/70 p-2.5 sm:p-3 space-y-2">
-                              {(sprint.days || []).map((day) => {
-                                const isDayExpanded = expandedDayId === day.dayId;
-                                const dayHours = Math.floor((day.estimatedMinutes || 0) / 60);
-                                const dayMinutes = (day.estimatedMinutes || 0) % 60;
-
-                                return (
-                                  <div
-                                    key={day.dayId}
-                                    className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 overflow-hidden"
-                                  >
+                                  return (
                                     <div
-                                      onClick={() =>
-                                        setExpandedDayId((prev) =>
-                                          prev === day.dayId ? "" : day.dayId
-                                        )
-                                      }
-                                      className="flex items-center justify-between p-2.5 cursor-pointer hover:bg-zinc-900/80 transition-colors"
+                                      key={day.dayId}
+                                      className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 overflow-hidden"
                                     >
-                                      <div className="flex items-center gap-2 text-[12px] font-medium text-zinc-200">
-                                        <ChevronDown
-                                          className={cn(
-                                            "h-3 w-3 text-blue-400 transition-transform duration-200",
-                                            isDayExpanded ? "rotate-0" : "-rotate-90"
-                                          )}
-                                        />
-                                        <span>Day {day.sprintDayNo}</span>
-                                        <span className="text-[11px] text-zinc-500 font-normal">
-                                          ({day.tasksCompleted} / {day.tasksTotal} completed)
-                                        </span>
+                                      <div
+                                        onClick={() =>
+                                          setExpandedDayId((prev) =>
+                                            prev === day.dayId ? "" : day.dayId
+                                          )
+                                        }
+                                        className="flex items-center justify-between p-2.5 cursor-pointer hover:bg-zinc-900/80 transition-colors"
+                                      >
+                                        <div className="flex items-center gap-2 text-[12px] font-medium text-zinc-200">
+                                          <ChevronDown
+                                            className={cn(
+                                              "h-3 w-3 text-blue-400 transition-transform duration-200",
+                                              isDayExpanded ? "rotate-0" : "-rotate-90"
+                                            )}
+                                          />
+                                          <span>Day {day.sprintDayNo}</span>
+                                          <span className="text-[11px] text-zinc-500 font-normal font-mono">
+                                            ({day.tasksCompleted} / {day.tasksTotal} done)
+                                          </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono">
+                                          <span>
+                                            Est. {dayHours > 0 ? `${dayHours}h ` : ""}{dayMinutes}m
+                                          </span>
+                                          <ChevronRight className="h-3 w-3 text-blue-400" />
+                                        </div>
                                       </div>
 
-                                      <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono">
-                                        <span>
-                                          Est. {dayHours > 0 ? `${dayHours}h ` : ""}{dayMinutes}m
-                                        </span>
-                                        <ChevronRight className="h-3 w-3 text-blue-400" />
-                                      </div>
-                                    </div>
+                                      {isDayExpanded && (
+                                        <div className="border-t border-zinc-800/60 bg-zinc-950/90 divide-y divide-zinc-800/40">
+                                          {(day.tasks || []).map((task) => {
+                                            const isCompleted = task.status === "completed";
+                                            const isStarred = task.isRevision;
+                                            const subjectName = task.item?.subjectName || "DSA";
+                                            const topicName = task.item?.topicName || "Arrays";
 
-                                    {isDayExpanded && (
-                                      <div className="border-t border-zinc-800/60 bg-zinc-950/90 divide-y divide-zinc-800/40">
-                                        {(day.tasks || []).map((task) => {
-                                          const isCompleted = task.status === "completed";
-                                          const isStarred = task.isRevision;
-                                          const subjectName = task.item?.subjectName || "DSA";
-                                          const topicName = task.item?.topicName || "Arrays";
+                                            return (
+                                              <div
+                                                key={task.taskId}
+                                                className={cn(
+                                                  "flex items-center justify-between px-3 py-2 text-[12px] transition-colors hover:bg-zinc-900/60 group",
+                                                  isCompleted && "bg-zinc-900/20 opacity-70"
+                                                )}
+                                              >
+                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handleToggleTaskStatus(task)}
+                                                    className={cn(
+                                                      "flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border transition-colors",
+                                                      isCompleted
+                                                        ? "border-emerald-500 bg-emerald-500 text-white"
+                                                        : "border-zinc-700 bg-zinc-900 hover:border-blue-500"
+                                                    )}
+                                                    aria-label={`Mark task as ${isCompleted ? "incomplete" : "complete"}`}
+                                                  >
+                                                    {isCompleted && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                                                  </button>
 
-                                          return (
-                                            <div
-                                              key={task.taskId}
-                                              className={cn(
-                                                "flex items-center justify-between px-3 py-2 text-[12px] transition-colors hover:bg-zinc-900/60 group",
-                                                isCompleted && "bg-zinc-900/20 opacity-70"
-                                              )}
-                                            >
-                                              <div className="flex items-center gap-2 overflow-hidden">
-                                                <button
-                                                  type="button"
-                                                  onClick={() => handleToggleTaskStatus(task)}
-                                                  className={cn(
-                                                    "flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border transition-colors",
-                                                    isCompleted
-                                                      ? "border-emerald-500 bg-emerald-500 text-white"
-                                                      : "border-zinc-700 bg-zinc-900 hover:border-blue-500"
-                                                  )}
-                                                  aria-label={`Mark task as ${isCompleted ? "incomplete" : "complete"}`}
-                                                >
-                                                  {isCompleted && <Check className="h-2.5 w-2.5 stroke-[3]" />}
-                                                </button>
+                                                  <div className="flex items-center gap-1 shrink-0">
+                                                    {getSubjectBadge(task.item?.subjectSlug, subjectName)}
+                                                    <span className="text-[11px] text-zinc-500 font-normal hidden sm:inline">
+                                                      {topicName} &middot;
+                                                    </span>
+                                                  </div>
 
-                                                <div className="flex items-center gap-1 shrink-0">
-                                                  {getSubjectBadge(task.item?.subjectSlug, subjectName)}
-                                                  <span className="text-[11px] text-zinc-500 font-normal hidden sm:inline">
-                                                    {topicName} &middot;
+                                                  <span
+                                                    className={cn(
+                                                      "font-normal text-zinc-200 truncate cursor-pointer hover:text-blue-400 transition-colors text-[12px] leading-snug",
+                                                      isCompleted && "line-through text-zinc-500"
+                                                    )}
+                                                    onClick={() => handleToggleTaskStatus(task)}
+                                                  >
+                                                    {task.item?.title || `Task #${task.taskOrder}`}
                                                   </span>
                                                 </div>
 
-                                                <span
-                                                  className={cn(
-                                                    "font-normal text-zinc-200 truncate cursor-pointer hover:text-blue-400 transition-colors text-[12px] leading-snug",
-                                                    isCompleted && "line-through text-zinc-500"
-                                                  )}
-                                                  onClick={() => handleToggleTaskStatus(task)}
-                                                >
-                                                  {task.item?.title || `Task #${task.taskOrder}`}
-                                                </span>
-                                              </div>
+                                                <div className="flex items-center gap-2 shrink-0 ml-2">
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handleToggleBookmark(task)}
+                                                    className={cn(
+                                                      "p-0.5 rounded transition-colors",
+                                                      isStarred
+                                                        ? "text-amber-400 hover:text-amber-300"
+                                                        : "text-zinc-600 hover:text-amber-400 group-hover:text-zinc-400"
+                                                    )}
+                                                    title={isStarred ? "Remove from Revision" : "Add to Revision"}
+                                                  >
+                                                    <Star
+                                                      className={cn("h-3 w-3", isStarred && "fill-amber-400")}
+                                                    />
+                                                  </button>
 
-                                              <div className="flex items-center gap-2 shrink-0 ml-2">
-                                                <button
-                                                  type="button"
-                                                  onClick={() => handleToggleBookmark(task)}
-                                                  className={cn(
-                                                    "p-0.5 rounded transition-colors",
-                                                    isStarred
-                                                      ? "text-amber-400 hover:text-amber-300"
-                                                      : "text-zinc-600 hover:text-amber-400 group-hover:text-zinc-400"
-                                                  )}
-                                                  title={isStarred ? "Remove from Revision" : "Add to Revision"}
-                                                >
-                                                  <Star
-                                                    className={cn("h-3 w-3", isStarred && "fill-amber-400")}
-                                                  />
-                                                </button>
-
-                                                <span className="text-[11px] text-zinc-500 bg-zinc-900 border border-zinc-800 px-1 py-0.5 rounded font-mono">
-                                                  {task.estimatedMinutes}m
-                                                </span>
+                                                  <span className="text-[11px] text-zinc-500 bg-zinc-900 border border-zinc-800 px-1 py-0.5 rounded font-mono">
+                                                    {task.estimatedMinutes}m
+                                                  </span>
+                                                </div>
                                               </div>
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Right Study Sidebar */}
+                    <div className="lg:col-span-4 space-y-3.5">
+                      {/* Revision List Box */}
+                      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-2.5 shadow-subtle">
+                        <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
+                          <div className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-200">
+                            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                            <span>Revision List</span>
+                            {revisionListData && revisionListData.length > 0 && (
+                              <Badge variant="blue" className="text-[10px] py-0.5 px-1.5 font-medium leading-none font-mono">
+                                {revisionListData.length}
+                              </Badge>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => setIsRevisionModalOpen(true)}
+                            className="text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                          >
+                            View all
+                          </button>
                         </div>
-                      );
-                    })}
+
+                        {/* Day 1 Preview */}
+                        <div className="space-y-1.5 pt-0.5">
+                          <div className="text-[12px] font-medium text-zinc-300">
+                            Sprint 1 &middot; Day 1 Focus
+                          </div>
+                          <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-950/60 p-1.5 rounded-lg border border-zinc-800/80 font-mono">
+                            <span>{day1Tasks.length || 20} topics</span>
+                            <span>&middot;</span>
+                            <span>3h 53m planned</span>
+                          </div>
+
+                          <div className="space-y-0.5 max-h-56 overflow-y-auto pr-1">
+                            {day1Tasks.slice(0, 6).map((t, idx) => (
+                              <div
+                                key={t.taskId || idx}
+                                className="flex items-center justify-between py-1 px-1.5 rounded text-[11px] text-zinc-300 hover:bg-zinc-800/40 transition-colors"
+                              >
+                                <span className="truncate pr-2">{t.item?.title || `Task #${idx + 1}`}</span>
+                                <span className="text-zinc-500 text-[10px] shrink-0 font-mono">
+                                  {t.estimatedMinutes}m
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                )}
 
-                  {/* Right Study Sidebar */}
-                  <div className="lg:col-span-4 space-y-3.5">
-                    {/* Revision list preview */}
-                    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-2.5 shadow-subtle">
-                      <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                        <div className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-200">
-                          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                          <span>Revision List</span>
-                          {revisionListData && revisionListData.length > 0 && (
-                            <Badge variant="blue" className="text-[10px] py-0.5 px-1.5 font-medium leading-none">
-                              {revisionListData.length}
-                            </Badge>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => setIsRevisionModalOpen(true)}
-                          className="text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                {/* VIEW 2: TIMELINE CALENDAR VIEW */}
+                {viewMode === "calendar" && (
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-semibold text-zinc-100">9-Sprint Schedule Timeline</span>
+                      <span className="text-[11px] text-zinc-400 font-mono">Oct 2026 – Nov 2026</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {sprints.map((s) => (
+                        <div
+                          key={s.sprintId}
+                          onClick={() => {
+                            setExpandedSprintId(s.sprintId);
+                            setViewMode("tree");
+                          }}
+                          className="rounded-lg border border-zinc-800 bg-zinc-950/70 p-3 space-y-2 hover:border-blue-500/40 cursor-pointer transition-all shadow-subtle group"
                         >
-                          View all
-                        </button>
-                      </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[12px] font-semibold text-zinc-200 group-hover:text-blue-400 transition-colors">
+                              Sprint {s.sprintNo}
+                            </span>
+                            <Badge variant={s.sprintNo === 1 ? "blue" : "secondary"} className="text-[10px] py-0 px-1.5">
+                              {s.sprintNo === 1 ? "In Progress" : "Upcoming"}
+                            </Badge>
+                          </div>
 
-                      {/* Day 1 Schedule Preview */}
-                      <div className="space-y-1.5 pt-0.5">
-                        <div className="text-[12px] font-medium text-zinc-300">
-                          Day 1 Schedule Preview
-                        </div>
-                        <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-950/60 p-1.5 rounded-lg border border-zinc-800/80 font-mono">
-                          <span>{day1Tasks.length || 20} topics</span>
-                          <span>&middot;</span>
-                          <span>3h 53m planned</span>
-                        </div>
+                          <div className="text-[11px] text-zinc-400">
+                            {s.sprintNo <= 3 ? "DSA & Algorithms" : s.sprintNo <= 5 ? "Operating Systems" : s.sprintNo <= 7 ? "Networks & LLD" : "DBMS & SQL"}
+                          </div>
 
-                        <div className="space-y-0.5 max-h-56 overflow-y-auto pr-1">
-                          {day1Tasks.slice(0, 8).map((t, idx) => (
-                            <div
-                              key={t.taskId || idx}
-                              className="flex items-center justify-between py-1 px-1.5 rounded text-[11px] text-zinc-300 hover:bg-zinc-800/40 transition-colors"
-                            >
-                              <span className="truncate pr-2">{t.item?.title || `Task #${idx + 1}`}</span>
-                              <span className="text-zinc-500 text-[10px] shrink-0 font-mono">
-                                {t.estimatedMinutes}m
-                              </span>
-                            </div>
-                          ))}
+                          <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono pt-1 border-t border-zinc-800/60">
+                            <span>{(s.days || []).length} Days</span>
+                            <span>{Math.floor((s.totalEstimatedMinutes || 0) / 60)}h</span>
+                          </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* TAB CONTENT: COMPLETED PLANS */}
-      {/* ========================================================================= */}
-      {activeTab === "completed" && (
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/20 p-10 text-center space-y-2.5">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400">
-            <CheckCircle2 className="h-5 w-5 text-zinc-500" />
-          </div>
-          <h4 className="text-[14px] font-semibold text-zinc-200">No completed plans yet</h4>
-          <p className="text-[12px] text-zinc-400 max-w-sm mx-auto leading-normal">
-            When you complete all sprints in your study plan, it will be archived here with your completion certificate and stats.
-          </p>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* MODALS */}
-      {/* ========================================================================= */}
-
-      {/* Modal 1: Edit Start Date */}
-      <Dialog open={isStartDateModalOpen} onOpenChange={setIsStartDateModalOpen}>
-        <DialogContent>
+      {/* Catch-Up Modal */}
+      <Dialog open={isCatchupModalOpen} onOpenChange={setIsCatchupModalOpen}>
+        <DialogContent className="max-w-md bg-zinc-950">
           <DialogHeader>
-            <DialogTitle className="text-[15px] font-semibold leading-tight">Edit Plan Start Date</DialogTitle>
+            <DialogTitle className="text-[15px] font-semibold leading-tight">Smart Catch-Up &amp; Reschedule</DialogTitle>
             <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
-              Choose when you want your preparation schedule to begin. All sprints and days will adjust automatically.
+              Fell behind your planned study pace? Catch-up mode redistributes any missed tasks across remaining days without overloading you.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 py-1.5">
-            <div className="space-y-1">
-              <label className="text-[12px] font-medium text-zinc-200">Start Date</label>
-              <input
-                type="date"
-                value={newStartDate}
-                onChange={(e) => setNewStartDate(e.target.value)}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
-              />
+          <div className="py-2 space-y-2 text-[12px] text-zinc-300">
+            <div className="rounded-lg border border-blue-500/20 bg-blue-950/20 p-2.5 space-y-1">
+              <span className="font-semibold text-blue-200">Rebalancing Strategy:</span>
+              <p className="text-[11px] text-zinc-300 font-normal">
+                +15 mins added to upcoming 4 weekdays. Weekend pacing adjusted.
+              </p>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsStartDateModalOpen(false)}
-              className="text-[12px] font-medium h-7 px-3"
-            >
+          <DialogFooter className="pt-2">
+            <Button variant="outline" size="sm" onClick={() => setIsCatchupModalOpen(false)} className="text-[12px] h-7">
               Cancel
             </Button>
-            <Button
-              size="sm"
-              onClick={handleSaveStartDate}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium h-7 px-3"
-            >
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal 2: Adjust Plan */}
-      <Dialog open={isAdjustPlanModalOpen} onOpenChange={setIsAdjustPlanModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-[15px] font-semibold leading-tight">Adjust Daily Study Hours</DialogTitle>
-            <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
-              Update your daily commitment. Your sprint pacing will readjust automatically.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3 py-1.5">
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-[12px] font-medium text-zinc-200">
-                <span>Daily Study Commitment</span>
-                <span className="text-blue-400 font-mono font-semibold">{dailyHours} hrs/day</span>
-              </div>
-              <Slider
-                min={1}
-                max={10}
-                value={dailyHours}
-                onChange={setDailyHours}
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsAdjustPlanModalOpen(false)}
-              className="text-[12px] font-medium h-7 px-3"
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                setIsAdjustPlanModalOpen(false);
-                toast.success("Plan parameters adjusted");
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium h-7 px-3"
-            >
-              Apply Adjustments
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal 3: Revision List View All */}
-      <Dialog open={isRevisionModalOpen} onOpenChange={setIsRevisionModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-[15px] font-semibold leading-tight">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-              <span>Revision List</span>
-              <Badge variant="blue" className="text-[10px] font-medium ml-1.5 py-0.5 px-1.5 leading-none">
-                {revisionListData?.length || 0} Bookmarked
-              </Badge>
-            </DialogTitle>
-            <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
-              All problems you&apos;ve starred for focused revision before technical interviews.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 my-2">
-            {(!revisionListData || revisionListData.length === 0) && (
-              <div className="py-10 text-center text-zinc-500 text-[12px]">
-                No problems starred for revision yet. Click the star icon next to any problem to bookmark it!
-              </div>
-            )}
-
-            {(revisionListData || []).map((task) => (
-              <div
-                key={task.taskId}
-                className="flex items-center justify-between p-2.5 rounded-lg border border-zinc-800 bg-zinc-900/50 text-[12px] hover:bg-zinc-900 transition-colors"
-              >
-                <div className="flex items-center gap-2.5 overflow-hidden">
-                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                  <div className="truncate">
-                    <div className="font-medium text-zinc-200 truncate text-[12px]">
-                      {task.item?.title || "Problem Title"}
-                    </div>
-                    <div className="text-[11px] text-zinc-400">
-                      {task.item?.subjectName} &middot; {task.item?.topicName}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="font-mono text-[11px] text-zinc-400">
-                    {task.estimatedMinutes}m
-                  </span>
-                  <button
-                    onClick={() => handleToggleBookmark(task)}
-                    className="text-zinc-500 hover:text-red-400 p-1 transition-colors"
-                    title="Remove from revision"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <DialogFooter>
-            <Button
-              size="sm"
-              onClick={() => setIsRevisionModalOpen(false)}
-              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-[12px] font-medium h-7 px-3"
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal 4: Rename Plan */}
-      <Dialog open={isRenameModalOpen} onOpenChange={setIsRenameModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-[15px] font-semibold leading-tight">Rename Study Plan</DialogTitle>
-            <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
-              Give your personalized preparation plan a custom title.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-2.5 py-1.5">
-            <input
-              type="text"
-              maxLength={60}
-              value={planNameInput}
-              onChange={(e) => setPlanNameInput(e.target.value)}
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
-            />
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsRenameModalOpen(false)}
-              className="text-[12px] font-medium h-7 px-3"
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSavePlanName}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium h-7 px-3"
-            >
-              Save Title
+            <Button size="sm" onClick={handleSmartReschedule} className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] h-7">
+              Apply Smart Reschedule
             </Button>
           </DialogFooter>
         </DialogContent>

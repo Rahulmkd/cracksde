@@ -57,10 +57,8 @@ export function Dialog({
 export function DialogContent({
   className,
   children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   const context = React.useContext(DialogContext);
 
   return (
@@ -70,6 +68,7 @@ export function DialogContent({
         className
       )}
       onClick={(e) => e.stopPropagation()}
+      {...props}
     >
       <button
         onClick={() => context?.onOpenChange(false)}

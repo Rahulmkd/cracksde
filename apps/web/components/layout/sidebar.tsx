@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -22,7 +22,7 @@ import {
   PanelLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useUIStore, type NavRect } from "@/store/ui-store";
+import { useUIStore } from "@/store/ui-store";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -30,7 +30,6 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
   badge?: string;
-  hasSubmenu?: boolean;
 }
 
 export function Sidebar() {
@@ -44,14 +43,9 @@ export function Sidebar() {
     togglePrepOpen,
     toggleExploreOpen,
     toggleSpacesOpen,
-    activeNavRect,
-    activeNavHref,
-    setActiveNavRect,
-    setActiveNavHref,
   } = useUIStore();
 
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const itemRefs = React.useRef<Record<string, HTMLAnchorElement | null>>({});
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const prepItems: NavItem[] = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -73,110 +67,6 @@ export function Sidebar() {
     { name: "CodeSpace", href: "/codespace", icon: FolderCode },
     { name: "Buganizer", href: "/buganizer", icon: CalendarCheck2 },
   ];
-
-  const allNavItems = [...prepItems, ...exploreItems, ...spacesItems];
-
-  const matchedItem = allNavItems.find((item) =>
-    item.href === "/dashboard"
-      ? pathname === "/dashboard"
-      : pathname === item.href || pathname.startsWith(`${item.href}/`)
-  );
-  const currentPathHref = matchedItem?.href;
-
-  const measureNavElement = React.useCallback(
-    (href: string): NavRect | null => {
-      const activeEl = itemRefs.current[href];
-      const container = containerRef.current;
-      if (!activeEl || !container) return null;
-
-      const containerRect = container.getBoundingClientRect();
-      const itemRect = activeEl.getBoundingClientRect();
-
-      if (itemRect.height === 0 || itemRect.width === 0) return null;
-
-      return {
-        top: itemRect.top - containerRect.top + container.scrollTop,
-        left: itemRect.left - containerRect.left,
-        width: itemRect.width,
-        height: itemRect.height,
-        opacity: 1,
-      };
-    },
-    []
-  );
-
-  // Sync position on mount, route change, and state changes
-  React.useEffect(() => {
-    const targetHref = activeNavHref || currentPathHref;
-    if (!targetHref) {
-      setActiveNavRect(null);
-      return;
-    }
-
-    const syncPosition = () => {
-      const rect = measureNavElement(targetHref);
-      if (rect) {
-        setActiveNavRect(rect);
-      }
-    };
-
-    syncPosition();
-    const r1 = requestAnimationFrame(syncPosition);
-    const t1 = setTimeout(syncPosition, 50);
-    const t2 = setTimeout(syncPosition, 220);
-
-    return () => {
-      cancelAnimationFrame(r1);
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [
-    pathname,
-    prepOpen,
-    exploreOpen,
-    spacesOpen,
-    sidebarOpen,
-    currentPathHref,
-    activeNavHref,
-    measureNavElement,
-    setActiveNavRect,
-  ]);
-
-  // Sync position on resize
-  React.useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleSync = () => {
-      const targetHref = activeNavHref || currentPathHref;
-      if (targetHref) {
-        const rect = measureNavElement(targetHref);
-        if (rect) {
-          setActiveNavRect(rect);
-        }
-      }
-    };
-
-    window.addEventListener("resize", handleSync);
-    let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(handleSync);
-      resizeObserver.observe(container);
-    }
-
-    return () => {
-      window.removeEventListener("resize", handleSync);
-      if (resizeObserver) resizeObserver.disconnect();
-    };
-  }, [activeNavHref, currentPathHref, measureNavElement, setActiveNavRect]);
-
-  const handleItemClick = (href: string) => {
-    setActiveNavHref(href);
-    const nextRect = measureNavElement(href);
-    if (nextRect) {
-      setActiveNavRect(nextRect);
-    }
-  };
 
   const renderNavGroup = (
     title: string,
@@ -201,7 +91,7 @@ export function Sidebar() {
             />
           </button>
         ) : (
-          <div className="mx-auto my-1 h-px w-6 bg-zinc-800" />
+          <div className="mx-auto my-1.5 h-px w-6 bg-zinc-800" />
         )}
 
         <div
@@ -215,42 +105,53 @@ export function Sidebar() {
           <div className="overflow-hidden space-y-0.5">
             {items.map((item) => {
               const Icon = item.icon;
-              const isMatch =
+              const isActive =
                 item.href === "/dashboard"
                   ? pathname === "/dashboard"
                   : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-              const isActive = activeNavHref ? activeNavHref === item.href : isMatch;
-
               return (
-                <Link
+                <div
                   key={item.name}
-                  href={item.href}
-                  ref={(el) => {
-                    itemRefs.current[item.href] = el;
-                  }}
-                  onClick={() => handleItemClick(item.href)}
-                  className={cn(
-                    "relative z-10 flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] leading-snug transition-colors duration-150 group select-none",
-                    isActive
-                      ? "text-blue-400 font-medium"
-                      : "text-zinc-400 font-normal hover:bg-zinc-900/60 hover:text-zinc-100",
-                    !sidebarOpen && "justify-center px-0 py-1.5"
-                  )}
-                  title={!sidebarOpen ? item.name : undefined}
+                  className="relative"
+                  onMouseEnter={() => setHoveredItem(item.name)}
+                  onMouseLeave={() => setHoveredItem(null)}
                 >
-                  <Icon
+                  <Link
+                    href={item.href}
                     className={cn(
-                      "h-3.5 w-3.5 shrink-0 transition-colors",
+                      "relative z-10 flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] leading-snug transition-all duration-150 group select-none",
                       isActive
-                        ? "text-blue-400"
-                        : "text-zinc-400 group-hover:text-zinc-200"
+                        ? "bg-blue-600/10 text-blue-400 font-medium border border-blue-500/25 shadow-sm"
+                        : "text-zinc-400 font-normal hover:bg-zinc-900/60 hover:text-zinc-100 border border-transparent",
+                      !sidebarOpen && "justify-center px-0 py-1.5"
                     )}
-                  />
-                  {sidebarOpen && (
-                    <span className="truncate">{item.name}</span>
+                  >
+                    {/* Active Bar on left edge */}
+                    {isActive && sidebarOpen && (
+                      <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+                    )}
+
+                    <Icon
+                      className={cn(
+                        "h-3.5 w-3.5 shrink-0 transition-colors",
+                        isActive
+                          ? "text-blue-400"
+                          : "text-zinc-400 group-hover:text-zinc-200"
+                      )}
+                    />
+                    {sidebarOpen && (
+                      <span className="truncate">{item.name}</span>
+                    )}
+                  </Link>
+
+                  {/* Collapsed Tooltip on Hover */}
+                  {!sidebarOpen && hoveredItem === item.name && (
+                    <div className="fixed left-16 ml-2 z-50 px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700 text-[11px] font-medium text-zinc-100 shadow-dialog pointer-events-none whitespace-nowrap animate-in fade-in-0 duration-150">
+                      {item.name}
+                    </div>
                   )}
-                </Link>
+                </div>
               );
             })}
           </div>
@@ -271,18 +172,17 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          "fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-zinc-800/80 bg-zinc-950 text-zinc-300 transition-all duration-300 select-none",
+          "fixed top-0 bottom-0 left-0 z-40 flex flex-col border-r border-zinc-800/80 bg-zinc-950 text-zinc-300 transition-all duration-300 select-none",
           sidebarOpen ? "w-64 translate-x-0" : "-translate-x-full lg:translate-x-0 lg:w-16"
         )}
       >
         {/* Brand Header */}
-        <div className="flex h-13 items-center justify-between px-3.5 border-b border-zinc-800/80 bg-zinc-950">
+        <div className="flex h-14 items-center justify-between px-3.5 border-b border-zinc-800/80 bg-zinc-950">
           <Link
             href="/dashboard"
-            onClick={() => handleItemClick("/dashboard")}
             className="flex items-center gap-2 overflow-hidden group focus-visible:outline-none"
           >
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white font-semibold text-[12px] shadow-sm shadow-blue-600/20 group-hover:bg-blue-500 transition-colors">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold text-[13px] shadow-sm shadow-blue-600/20 group-hover:bg-blue-500 transition-colors">
               ⚡
             </div>
             {sidebarOpen && (
@@ -305,30 +205,8 @@ export function Sidebar() {
           </button>
         </div>
 
-        {/* Scrollable Nav Sections without visible scrollbar */}
-        <div
-          ref={containerRef}
-          className="relative flex-1 overflow-y-auto px-2.5 py-3 space-y-3.5 text-[13px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {/* Sliding Active Navigation Highlight & Indicator */}
-          {activeNavRect && activeNavRect.opacity > 0 && (
-            <div
-              className="pointer-events-none absolute z-0 transition-all duration-[220ms] ease-[cubic-bezier(0.2,0,0,1)] will-change-transform"
-              style={{
-                transform: `translate3d(${activeNavRect.left}px, ${activeNavRect.top}px, 0)`,
-                width: `${activeNavRect.width}px`,
-                height: `${activeNavRect.height}px`,
-                top: 0,
-                left: 0,
-              }}
-            >
-              <div className="relative h-full w-full rounded-lg bg-blue-600/10 border border-blue-500/25 shadow-sm overflow-hidden">
-                {/* Blue active indicator bar on the left edge */}
-                <div className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-              </div>
-            </div>
-          )}
-
+        {/* Scrollable Nav Sections */}
+        <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-3.5 text-[13px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {renderNavGroup("Prep", prepItems, prepOpen, togglePrepOpen)}
           {renderNavGroup("Explore", exploreItems, exploreOpen, toggleExploreOpen)}
           {renderNavGroup("My Spaces", spacesItems, spacesOpen, toggleSpacesOpen)}
@@ -364,23 +242,27 @@ export function Sidebar() {
                   </div>
                 </div>
                 <Button
+                  asChild
                   size="sm"
                   variant="outline"
                   className="h-5 px-1.5 text-[10px] font-medium border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
                 >
-                  <Sparkles className="h-2.5 w-2.5 mr-1 text-amber-400" />
-                  Upgrade
+                  <Link href="/unlock">
+                    <Sparkles className="h-2.5 w-2.5 mr-1 text-amber-400" />
+                    Upgrade
+                  </Link>
                 </Button>
               </div>
             </>
           ) : (
             <div className="flex flex-col items-center gap-2 py-1">
-              <div
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 cursor-pointer"
+              <Link
+                href="/dashboard"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 cursor-pointer hover:scale-105 transition-transform"
                 title="Rahul (Free Plan)"
               >
                 RA
-              </div>
+              </Link>
             </div>
           )}
         </div>

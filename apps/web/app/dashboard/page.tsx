@@ -14,37 +14,73 @@ import {
   Cpu,
   Info,
   Sparkles,
+  Zap,
+  Target,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useStudyPlan } from "@/hooks/use-study-plan";
 import { useRoadmapSubjects } from "@/hooks/use-roadmap";
+import { usePlannerStore } from "@/store/planner-store";
 import { DailyPlanner } from "@/components/layout/daily-planner";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const { plan } = useStudyPlan("crack-sde");
+  const { points, streak } = usePlannerStore();
   const { data: roadmapSubjects } = useRoadmapSubjects();
 
-  // Calculations
+  // Calculations from active plan
   const sprints = plan?.sprints || [];
   const allDays = sprints.flatMap((s) => s.days || []);
   const allTasks = allDays.flatMap((d) => d.tasks || []);
   const totalTasks = allTasks.length || 847;
   const completedTasks = allTasks.filter((t) => t.status === "completed").length;
+  const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  // Categories progress data
+  // Donut SVG circumference calculation
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius; // 238.76
+  const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
+
+  // Active Sprint
+  const currentSprint = sprints.find((s) => s.status === "in_progress") || sprints[0];
+  const currentDay = currentSprint?.days?.[0];
+
+  // Dynamic Category Stats
+  const dsaTasks = allTasks.filter((t) => (t.item?.subjectSlug || "").toLowerCase().includes("dsa"));
+  const dsaTotal = dsaTasks.length || 412;
+  const dsaCompleted = dsaTasks.filter((t) => t.status === "completed").length;
+  const dsaPercent = Math.round((dsaCompleted / dsaTotal) * 100);
+
+  const sysDesignTasks = allTasks.filter((t) => (t.item?.subjectSlug || "").toLowerCase().includes("system") || (t.item?.subjectSlug || "").toLowerCase().includes("lld"));
+  const sysDesignTotal = sysDesignTasks.length || 104;
+  const sysDesignCompleted = sysDesignTasks.filter((t) => t.status === "completed").length;
+  const sysDesignPercent = Math.round((sysDesignCompleted / sysDesignTotal) * 100);
+
+  const coreTasks = allTasks.filter((t) => (t.item?.subjectSlug || "").toLowerCase().includes("os") || (t.item?.subjectSlug || "").toLowerCase().includes("operat") || (t.item?.subjectSlug || "").toLowerCase().includes("netw"));
+  const coreTotal = coreTasks.length || 186;
+  const coreCompleted = coreTasks.filter((t) => t.status === "completed").length;
+  const corePercent = Math.round((coreCompleted / coreTotal) * 100);
+
+  const dbmsTasks = allTasks.filter((t) => (t.item?.subjectSlug || "").toLowerCase().includes("dbms"));
+  const dbmsTotal = dbmsTasks.length || 145;
+  const dbmsCompleted = dbmsTasks.filter((t) => t.status === "completed").length;
+  const dbmsPercent = Math.round((dbmsCompleted / dbmsTotal) * 100);
+
   const categories = [
-    { name: "DSA", count: "0 / 1007", percent: 0, icon: Code2, color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" },
-    { name: "System Design", count: "0 / 104", percent: 0, icon: Layers, color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
-    { name: "Core Subjects", count: "0 / 944", percent: 0, icon: Cpu, color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
-    { name: "Data Engineering", count: "0 / 334", percent: 0, icon: Database, color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
+    { name: "DSA", count: `${dsaCompleted} / ${dsaTotal}`, percent: dsaPercent, icon: Code2, color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" },
+    { name: "System Design & LLD", count: `${sysDesignCompleted} / ${sysDesignTotal}`, percent: sysDesignPercent, icon: Layers, color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
+    { name: "Core Subjects (OS + CN)", count: `${coreCompleted} / ${coreTotal}`, percent: corePercent, icon: Cpu, color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
+    { name: "Database & SQL", count: `${dbmsCompleted} / ${dbmsTotal}`, percent: dbmsPercent, icon: Database, color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
   ];
 
   // Popular topics list
   const popularTopics = [
     {
-      title: "Arrays & Strings",
+      title: "Arrays & Strings Patterns",
       category: "DSA",
       desc: "Two Pointers, Sliding Window, Prefix Sums, and Matrix manipulations.",
       problems: 36,
@@ -52,7 +88,7 @@ export default function DashboardPage() {
       link: "/practice?subject=dsa&topic=Arrays",
     },
     {
-      title: "Dynamic Programming",
+      title: "Dynamic Programming Patterns",
       category: "DSA",
       desc: "0/1 Knapsack, Subsequences, Grid DP, and Interval State transitions.",
       problems: 42,
@@ -60,7 +96,7 @@ export default function DashboardPage() {
       link: "/practice?subject=dsa&topic=Dynamic-Programming",
     },
     {
-      title: "Trees & Graphs",
+      title: "Binary Trees & Graphs",
       category: "DSA",
       desc: "DFS, BFS, Dijkstra, Topological Sort, Disjoint Set Union, and MST.",
       problems: 58,
@@ -68,7 +104,7 @@ export default function DashboardPage() {
       link: "/practice?subject=dsa&topic=Trees-Graphs",
     },
     {
-      title: "System Design Essentials",
+      title: "System Design & LLD Primer",
       category: "System Design",
       desc: "Load Balancing, Caching Layers, Sharding, Message Queues & CAP Theorem.",
       problems: 18,
@@ -76,7 +112,7 @@ export default function DashboardPage() {
       link: "/practice?subject=system-design",
     },
     {
-      title: "Operating Systems Core",
+      title: "Operating Systems Internals",
       category: "Core Subjects",
       desc: "Virtual Memory, Paging, Concurrency, Deadlocks, Mutex & Linux commands.",
       problems: 24,
@@ -94,38 +130,53 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200">
+    <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200 select-none">
       {/* ========================================================================= */}
       {/* 1. TOP ANNOUNCEMENT BANNER */}
       {/* ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-xl border border-blue-500/20 bg-blue-950/20 px-3.5 py-2 text-[12px] text-zinc-300 shadow-subtle">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-xl border border-blue-500/20 bg-blue-950/20 px-3.5 py-2.5 text-[12px] text-zinc-300 shadow-subtle">
         <div className="flex items-center gap-2 overflow-hidden">
           <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-500/20 text-blue-400 font-semibold text-[10px] shrink-0">
             ✦
           </span>
           <p className="truncate text-zinc-300 text-[12px] font-normal leading-normal">
-            <strong className="text-blue-400 font-medium">Zenkai Curriculum Active</strong> &middot; Your problem sheets have been structured with day-wise sprint goals.
+            <strong className="text-blue-400 font-medium">Sprint 1 Active</strong> &middot; Focus: Data Structures &amp; OOPS Foundations.
           </p>
         </div>
         <Link
-          href="/prep-hub"
+          href="/planly"
           className="shrink-0 text-[12px] font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors self-start sm:self-auto"
         >
-          Explore Curriculum <ArrowRight className="h-3 w-3" />
+          View Sprint Schedule <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. GREETING SECTION */}
+      {/* 2. GREETING & STREAK HUD */}
       {/* ========================================================================= */}
-      <div className="space-y-0.5">
-        <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100 flex items-center gap-2">
-          <span>Good afternoon, Rahul</span>
-          <span className="inline-block text-[18px]">👋</span>
-        </h1>
-        <p className="text-[12px] font-normal leading-normal text-zinc-400">
-          The day gets heavy around now. Good to see you still going. Keep up the momentum!
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100 flex items-center gap-2">
+            <span>Welcome back, Rahul</span>
+            <span className="inline-block text-[18px]">👋</span>
+          </h1>
+          <p className="text-[12px] font-normal leading-normal text-zinc-400">
+            You&apos;re on a <strong className="text-orange-400 font-semibold">{streak}-day study streak</strong>. Keep the momentum going!
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-3 py-1 text-[12px] flex items-center gap-1.5 text-amber-300 font-mono font-medium shadow-subtle">
+            <span>🟡</span>
+            <span>{points} Pts</span>
+          </div>
+
+          <Button asChild size="sm" className="h-7 px-3 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+            <Link href="/planly">
+              <Zap className="h-3 w-3 mr-1" /> Resume Study Sprint
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -138,7 +189,6 @@ export default function DashboardPage() {
         <div className="lg:col-span-8 xl:col-span-9 space-y-5">
           {/* PLANLY HERO CARD */}
           <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 sm:p-5 shadow-subtle hover:border-zinc-700/80 transition-all duration-200">
-            {/* Subtle grid pattern background */}
             <div
               className="absolute inset-0 opacity-[0.04] pointer-events-none"
               style={{
@@ -167,8 +217,8 @@ export default function DashboardPage() {
                     size="sm"
                     className="h-7 px-3 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                   >
-                    <Link href="/onboarding">
-                      Build my plan <ArrowRight className="h-3 w-3 ml-1.5" />
+                    <Link href="/planly">
+                      Resume Sprint 1 <ArrowRight className="h-3 w-3 ml-1.5" />
                     </Link>
                   </Button>
 
@@ -178,7 +228,7 @@ export default function DashboardPage() {
                     variant="outline"
                     className="h-7 px-3 text-[12px] font-medium"
                   >
-                    <Link href="/planly">View Plan Schedule</Link>
+                    <Link href="/onboarding">Reconfigure Plan</Link>
                   </Button>
                 </div>
               </div>
@@ -189,13 +239,13 @@ export default function DashboardPage() {
                 <p className="font-normal text-zinc-300 text-[12px]">
                   Target: <strong className="text-blue-400 font-semibold">61 Days</strong>
                 </p>
-                <span className="text-[11px] text-zinc-500 font-normal">9 structured sprints</span>
+                <span className="text-[11px] text-zinc-500 font-normal font-mono">9 structured sprints</span>
               </div>
             </div>
           </div>
 
           {/* ===================================================================== */}
-          {/* YOUR PROGRESS SECTION (2 COMPACT CARDS) */}
+          {/* YOUR PROGRESS SECTION (DYNAMIC DONUT & CATEGORY BREAKDOWN) */}
           {/* ===================================================================== */}
           <div className="space-y-2.5">
             <h2 className="text-[15px] font-semibold tracking-tight text-zinc-100">
@@ -203,11 +253,11 @@ export default function DashboardPage() {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {/* CARD 1: DSA PROGRESS (CENTERED DONUT RADIAL METER) */}
+              {/* CARD 1: DYNAMIC PROGRESS DONUT */}
               <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3 hover:border-zinc-700/80 transition-all duration-200 shadow-subtle flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[14px] font-semibold text-zinc-100">DSA Progress</span>
-                  <div className="text-zinc-500 hover:text-zinc-300 cursor-pointer" title="DSA problem solving progress">
+                  <span className="text-[14px] font-semibold text-zinc-100">Curriculum Completion</span>
+                  <div className="text-zinc-500 hover:text-zinc-300 cursor-pointer" title="Problem solving progress across all sprints">
                     <Info className="h-3 w-3" />
                   </div>
                 </div>
@@ -220,20 +270,20 @@ export default function DashboardPage() {
                       <circle
                         cx="50"
                         cy="50"
-                        r="38"
+                        r={radius}
                         className="stroke-zinc-800"
                         strokeWidth="7"
                         fill="none"
                       />
-                      {/* Segment (emerald / completed indicator) */}
+                      {/* Segment */}
                       <circle
                         cx="50"
                         cy="50"
-                        r="38"
+                        r={radius}
                         className="stroke-blue-500 transition-all duration-700 ease-out"
                         strokeWidth="7"
-                        strokeDasharray="238.76"
-                        strokeDashoffset="238.76"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
                         strokeLinecap="round"
                         fill="none"
                       />
@@ -244,8 +294,8 @@ export default function DashboardPage() {
                       <span className="text-[18px] font-semibold text-zinc-100 tracking-tight leading-none font-mono">
                         {completedTasks}
                       </span>
-                      <span className="text-[11px] text-zinc-500 mt-1">
-                        / 1369
+                      <span className="text-[11px] text-zinc-500 mt-1 font-mono">
+                        / {totalTasks}
                       </span>
                     </div>
                   </div>
@@ -265,7 +315,7 @@ export default function DashboardPage() {
                         <span className="h-2 w-2 rounded-sm bg-amber-400" />
                         <span className="text-zinc-300 font-normal text-[12px]">Core</span>
                       </div>
-                      <span className="text-[11px] text-zinc-400 font-mono">0 / 843</span>
+                      <span className="text-[11px] text-zinc-400 font-mono">0 / 412</span>
                     </div>
 
                     <div className="flex items-center justify-between gap-4">
@@ -273,15 +323,15 @@ export default function DashboardPage() {
                         <span className="h-2 w-2 rounded-sm bg-rose-500" />
                         <span className="text-zinc-300 font-normal text-[12px]">Pro</span>
                       </div>
-                      <span className="text-[11px] text-zinc-400 font-mono">0 / 312</span>
+                      <span className="text-[11px] text-zinc-400 font-mono">0 / 221</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-500">
-                  <span>Accuracy: --</span>
+                  <span>Overall: {progressPercent}%</span>
                   <Link href="/practice" className="text-blue-400 hover:text-blue-300 font-medium">
-                    View full problem list &rarr;
+                    Solve problems &rarr;
                   </Link>
                 </div>
               </div>
@@ -290,36 +340,36 @@ export default function DashboardPage() {
               <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-2.5 hover:border-zinc-700/80 transition-all duration-200 shadow-subtle flex flex-col justify-between">
                 <span className="text-[14px] font-semibold text-zinc-100">Category-wise Progress</span>
 
-                <div className="space-y-1.5 pt-0.5">
+                <div className="space-y-2 pt-0.5">
                   {categories.map((cat) => {
                     const Icon = cat.icon;
                     return (
                       <div
                         key={cat.name}
-                        className="flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-950/40 p-2 hover:bg-zinc-900/60 transition-colors"
+                        className="space-y-1 rounded-lg border border-zinc-800/60 bg-zinc-950/40 p-2 hover:bg-zinc-900/60 transition-colors"
                       >
-                        <div className="flex items-center gap-2 overflow-hidden">
-                          <div className={cn("flex h-6 w-6 items-center justify-center rounded border shrink-0", cat.color)}>
-                            <Icon className="h-3 w-3" />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <div className={cn("flex h-5 w-5 items-center justify-center rounded border shrink-0", cat.color)}>
+                              <Icon className="h-3 w-3" />
+                            </div>
+                            <span className="text-[12px] font-medium text-zinc-200 truncate">{cat.name}</span>
                           </div>
-                          <div className="truncate">
-                            <div className="text-[12px] font-medium text-zinc-200 truncate">{cat.name}</div>
-                            <div className="text-[11px] text-zinc-500">{cat.count}</div>
-                          </div>
-                        </div>
 
-                        <div className="text-[12px] font-medium text-zinc-400 font-mono shrink-0">
-                          {cat.percent}%
+                          <div className="text-[11px] font-medium text-zinc-400 font-mono shrink-0">
+                            {cat.count}
+                          </div>
                         </div>
+                        <Progress value={cat.percent} className="h-1" />
                       </div>
                     );
                   })}
                 </div>
 
                 <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-500">
-                  <span>4 core subject areas</span>
+                  <span>4 core tracks</span>
                   <Link href="/prep-hub" className="text-blue-400 hover:text-blue-300 font-medium">
-                    Explore modules &rarr;
+                    Explore knowledge trees &rarr;
                   </Link>
                 </div>
               </div>
@@ -328,7 +378,7 @@ export default function DashboardPage() {
 
           {/* ===================================================================== */}
           {/* 4. EXPLORE POPULAR TOPICS SECTION */}
-          {/* ===================================================================== */}
+          {/* ========================================================================= */}
           <div className="space-y-3 pt-0.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-[15px] font-semibold tracking-tight text-zinc-100">

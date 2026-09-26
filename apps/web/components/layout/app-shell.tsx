@@ -3,6 +3,7 @@
 import React from "react";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
+import { MobileNav } from "./mobile-nav";
 import { useUIStore } from "@/store/ui-store";
 import { cn } from "@/lib/utils";
 
@@ -22,10 +23,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
       >
         <Header />
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 max-w-7xl w-full mx-auto">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 max-w-7xl w-full mx-auto pb-20 lg:pb-8">
           {children}
         </main>
       </div>
+
+      {/* Mobile Fixed Bottom Navigation Bar */}
+      <MobileNav />
     </div>
   );
 }
