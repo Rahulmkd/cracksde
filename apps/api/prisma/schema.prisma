@@ -1,0 +1,261 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// =====================================================================
+// Domain 1: Authentication & User Accounts (Better Auth)
+// =====================================================================
+
+model User {
+  id            String             @id @default(cuid())
+  name          String
+  email         String             @unique
+  emailVerified Boolean            @default(false)
+  image         String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  itemProgress  UserItemProgress[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("accounts")
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verifications")
+}
+
+// =====================================================================
+// Domain 2: Roadmap Curriculum & Knowledge Tree (Single Source of Truth)
+// =====================================================================
+
+model RoadmapSubject {
+  id             Int            @id @default(autoincrement())
+  slug           String         @unique @db.VarChar(100)
+  name           String         @db.VarChar(255)
+  description    String?        @db.Text
+  estimatedHours Decimal        @default(0) @map("estimated_hours") @db.Decimal(6, 2)
+  totalMinutes   Int            @default(0) @map("total_minutes")
+  sortOrder      Int            @default(0) @map("sort_order")
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  topics         RoadmapTopic[]
+  items          RoadmapItem[]
+
+  @@map("roadmap_subjects")
+}
+
+model RoadmapTopic {
+  id               Int                @id @default(autoincrement())
+  subjectId        Int                @map("subject_id")
+  slug             String             @db.VarChar(150)
+  name             String             @db.VarChar(255)
+  estimatedMinutes Int                @default(0) @map("estimated_minutes")
+  sortOrder        Int                @default(0) @map("sort_order")
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  subject          RoadmapSubject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subtopics        RoadmapSubtopic[]
+  items            RoadmapItem[]
+
+  @@unique([subjectId, slug], name: "uq_roadmap_topic_subject_slug")
+  @@index([subjectId], map: "idx_roadmap_topics_subject_id")
+  @@map("roadmap_topics")
+}
+
+model RoadmapSubtopic {
+  id               Int           @id @default(autoincrement())
+  topicId          Int           @map("topic_id")
+  slug             String        @db.VarChar(150)
+  name             String        @db.VarChar(255)
+  estimatedMinutes Int           @default(0) @map("estimated_minutes")
+  sortOrder        Int           @default(0) @map("sort_order")
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  topic            RoadmapTopic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  items            RoadmapItem[]
+
+  @@unique([topicId, slug], name: "uq_roadmap_subtopic_topic_slug")
+  @@index([topicId], map: "idx_roadmap_subtopics_topic_id")
+  @@map("roadmap_subtopics")
+}
+
+model RoadmapItem {
+  id               Int                @id @default(autoincrement())
+  subjectId        Int                @map("subject_id")
+  topicId          Int                @map("topic_id")
+  subtopicId       Int?               @map("subtopic_id")
+  itemNo           Int                @map("item_no")
+  title            String             @db.VarChar(255)
+  slug             String             @db.VarChar(255)
+  type             String?            @default("Concept") @db.VarChar(50)
+  difficulty       String?            @db.VarChar(50)
+  estimatedMinutes Int                @default(0) @map("estimated_minutes")
+  sortOrder        Int                @default(0) @map("sort_order")
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  subject          RoadmapSubject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topic            RoadmapTopic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  subtopic         RoadmapSubtopic?   @relation(fields: [subtopicId], references: [id], onDelete: Cascade)
+  scheduledTasks   StudyTask[]
+  userProgress     UserItemProgress[]
+
+  @@index([subjectId], map: "idx_roadmap_items_subject_id")
+  @@index([topicId], map: "idx_roadmap_items_topic_id")
+  @@index([subtopicId], map: "idx_roadmap_items_subtopic_id")
+  @@index([type], map: "idx_roadmap_items_type")
+  @@index([difficulty], map: "idx_roadmap_items_difficulty")
+  @@map("roadmap_items")
+}
+
+// =====================================================================
+// Domain 3: Study Sprints & Calendar Scheduling
+// =====================================================================
+
+model StudyPlan {
+  id        Int           @id @default(autoincrement())
+  slug      String        @unique @db.VarChar(100)
+  name      String        @db.VarChar(255)
+  sourceUrl String?       @map("source_url")
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  sprints   StudySprint[]
+
+  @@map("study_plans")
+}
+
+model StudySprint {
+  sprintId              BigInt      @id @map("sprint_id")
+  planId                Int         @map("plan_id")
+  sprintNo              Int         @map("sprint_no")
+  status                String?     @default("upcoming") @db.VarChar(50)
+  plannedStartDate      DateTime?   @map("planned_start_date") @db.Date
+  plannedEndDate        DateTime?   @map("planned_end_date") @db.Date
+  initialDaysAssigned   Int?        @default(0) @map("initial_days_assigned")
+  actualDaysTaken       Int?        @default(0) @map("actual_days_taken")
+  totalEstimatedMinutes Int?        @default(0) @map("total_estimated_minutes")
+  totalActualMinutes    Int?        @default(0) @map("total_actual_minutes")
+  createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  plan                  StudyPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  days                  StudyDay[]
+  tasks                 StudyTask[]
+
+  @@unique([planId, sprintNo], name: "uq_study_plan_sprint_no")
+  @@index([planId], map: "idx_study_sprints_plan_id")
+  @@map("study_sprints")
+}
+
+model StudyDay {
+  dayId            BigInt      @id @map("day_id")
+  sprintId         BigInt      @map("sprint_id")
+  planDayNo        Int         @map("plan_day_no")
+  sprintDayNo      Int         @map("sprint_day_no")
+  calendarDate     DateTime?   @map("calendar_date") @db.Date
+  status           String?     @default("upcoming") @db.VarChar(50)
+  estimatedMinutes Int?        @default(0) @map("estimated_minutes")
+  actualMinutes    Int?        @default(0) @map("actual_minutes")
+  tasksTotal       Int?        @default(0) @map("tasks_total")
+  tasksCompleted   Int?        @default(0) @map("tasks_completed")
+  isCatchUpDay     Boolean?    @default(false) @map("is_catch_up_day")
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  sprint           StudySprint @relation(fields: [sprintId], references: [sprintId], onDelete: Cascade)
+  tasks            StudyTask[]
+
+  @@index([sprintId], map: "idx_study_days_sprint_id")
+  @@index([calendarDate], map: "idx_study_days_calendar_date")
+  @@map("study_days")
+}
+
+model StudyTask {
+  taskId           BigInt       @id @map("task_id")
+  dayId            BigInt       @map("day_id")
+  sprintId         BigInt       @map("sprint_id")
+  itemId           Int?         @map("item_id")
+  taskOrder        Int          @default(1) @map("task_order")
+  status           String?      @default("not_started") @db.VarChar(50)
+  estimatedMinutes Int?         @default(0) @map("estimated_minutes")
+  actualMinutes    Int?         @default(0) @map("actual_minutes")
+  isCarriedForward Boolean?     @default(false) @map("is_carried_forward")
+  isBacklog        Boolean?     @default(false) @map("is_backlog")
+  isRevision       Boolean?     @default(false) @map("is_revision")
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  day              StudyDay     @relation(fields: [dayId], references: [dayId], onDelete: Cascade)
+  sprint           StudySprint  @relation(fields: [sprintId], references: [sprintId], onDelete: Cascade)
+  item             RoadmapItem? @relation(fields: [itemId], references: [id], onDelete: SetNull)
+
+  @@index([dayId], map: "idx_study_tasks_day_id")
+  @@index([sprintId], map: "idx_study_tasks_sprint_id")
+  @@index([itemId], map: "idx_study_tasks_item_id")
+  @@index([status], map: "idx_study_tasks_status")
+  @@map("study_tasks")
+}
+
+// =====================================================================
+// Domain 4: User Progress Tracking
+// =====================================================================
+
+model UserItemProgress {
+  id          String      @id @default(cuid())
+  userId      String      @map("user_id")
+  itemId      Int         @map("item_id")
+  status      String      @default("not_started") @db.VarChar(50)
+  notes       String?     @db.Text
+  completedAt DateTime?   @map("completed_at") @db.Timestamptz
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item        RoadmapItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId], name: "uq_user_roadmap_item_progress")
+  @@index([userId], map: "idx_user_item_progress_user_id")
+  @@index([itemId], map: "idx_user_item_progress_item_id")
+  @@map("user_item_progress")
+}

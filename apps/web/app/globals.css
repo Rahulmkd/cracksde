@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 224 71% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 263 83% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 224 71% 4%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 263 83% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 263 83% 55%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 6% 4%;
+    --foreground: 210 40% 98%;
+    --card: 240 5% 8%;
+    --card-foreground: 210 40% 98%;
+    --popover: 240 5% 8%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 252 56% 75%;
+    --primary-foreground: 240 6% 4%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 252 56% 75%;
+    --accent-foreground: 240 6% 4%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 252 56% 75%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Tiptap Editor & Typography Styles */
+.tiptap {
+  @apply outline-none;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  @apply text-muted-foreground pointer-events-none float-left h-0;
+  content: attr(data-placeholder);
+}
+
+.tiptap h1 {
+  @apply text-2xl font-bold tracking-tight mt-4 mb-2;
+}
+
+.tiptap h2 {
+  @apply text-xl font-semibold tracking-tight mt-3 mb-2;
+}
+
+.tiptap h3 {
+  @apply text-lg font-semibold tracking-tight mt-2 mb-1;
+}
+
+.tiptap ul {
+  @apply list-disc list-outside pl-6 my-2 space-y-1;
+}
+
+.tiptap ol {
+  @apply list-decimal list-outside pl-6 my-2 space-y-1;
+}
+
+.tiptap blockquote {
+  @apply border-l-2 border-brand-500/60 pl-4 py-1 italic my-3 text-muted-foreground bg-muted/20 rounded-r;
+}
+
+.tiptap code {
+  @apply font-mono text-sm px-1.5 py-0.5 rounded bg-muted text-brand-600 dark:text-brand-400 font-medium;
+}
+
+.tiptap pre {
+  @apply font-mono text-sm p-4 rounded-lg bg-muted my-3 overflow-x-auto;
+}
+
+.tiptap a {
+  @apply text-brand-600 dark:text-brand-400 underline underline-offset-2 hover:opacity-80 transition-opacity;
+}
+
