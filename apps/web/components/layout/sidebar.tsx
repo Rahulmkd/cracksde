@@ -44,7 +44,7 @@ export function Sidebar() {
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Prep Hub", href: "/prep-hub", icon: Compass },
     { name: "Practice", href: "/practice", icon: Code2, hasSubmenu: true },
-    { name: "Planly", href: "/onboarding", icon: GitBranch },
+    { name: "Planly", href: "/planly", icon: GitBranch },
     { name: "Community", href: "/community", icon: Users },
   ];
 
@@ -58,7 +58,7 @@ export function Sidebar() {
     { name: "NoteSpace", href: "#", icon: FileText },
     { name: "All Lists", href: "#", icon: ListTodo },
     { name: "CodeSpace", href: "#", icon: FolderCode },
-    { name: "Organizer", href: "#", icon: CalendarCheck2 },
+    { name: "Buganizer", href: "#", icon: CalendarCheck2 },
   ];
 
   return (
@@ -197,16 +197,19 @@ export function Sidebar() {
         {sidebarOpen && (
           <div className="p-3 border-t border-zinc-800/80 space-y-2.5 bg-zinc-950/60">
             {/* Notification Badge */}
-            <div className="rounded-lg border border-zinc-800/90 bg-zinc-900/60 p-2.5 text-[11px]">
-              <div className="flex items-center justify-between text-zinc-400 mb-1">
-                <span className="text-[10px] text-blue-400 font-semibold flex items-center gap-1">
-                  <Bell className="h-3 w-3" /> 3 unread
+            <div className="rounded-lg border border-zinc-800/90 bg-zinc-900/60 p-2.5 text-[11px] space-y-1.5">
+              <div className="flex items-center justify-between text-zinc-400">
+                <span className="text-[10px] text-zinc-400 font-medium flex items-center gap-1">
+                  4 unread
                 </span>
-                <span className="text-[10px] text-zinc-600">22h</span>
+                <span className="text-[10px] text-zinc-600 font-mono">• 1d</span>
               </div>
-              <p className="text-zinc-200 line-clamp-2 text-[11px] leading-tight">
-                Hi Rahul, your account is ready. Start preparing on Crack SDE.
+              <p className="text-zinc-300 line-clamp-2 text-[11px] leading-tight font-normal">
+                Hi rahulmakd, your Planly roadmap is ready. You have 36 hours of free...
               </p>
+              <div className="pt-1 text-[10px] text-zinc-500 hover:text-zinc-300 cursor-pointer text-center border-t border-zinc-800/60">
+                Notifications
+              </div>
             </div>
 
             {/* Profile Drawer */}

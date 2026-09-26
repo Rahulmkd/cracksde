@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Calendar as CalendarIcon,
@@ -8,784 +8,634 @@ import {
   CheckCircle2,
   Circle,
   Star,
-  ChevronDown,
   ChevronRight,
-  Edit2,
-  Sliders,
   Sparkles,
-  TrendingUp,
+  ArrowRight,
+  Code2,
+  Database,
   Layers,
-  Flame,
+  Cpu,
+  Network,
+  Plus,
+  Trash2,
   Check,
-  X,
+  Flame,
+  Info,
   ExternalLink,
+  BookOpen,
+  ListTodo,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Slider } from "@/components/ui/slider";
 import { useStudyPlan } from "@/hooks/use-study-plan";
-import { useRevisionList } from "@/hooks/use-revision-list";
+import { useRoadmapSubjects } from "@/hooks/use-roadmap";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import type { StudyTaskDto, StudySprintDto, StudyDayDto } from "@starter/shared";
+
+interface DailyTask {
+  id: string;
+  title: string;
+  duration: string;
+  completed: boolean;
+  category?: string;
+}
 
 export default function DashboardPage() {
-  const {
-    plan,
-    isLoading,
-    updateTask,
-    updatePlan,
-    isUpdatingTask,
-  } = useStudyPlan("crack-sde");
+  const { plan, updateTask } = useStudyPlan("crack-sde");
+  const { data: roadmapSubjects } = useRoadmapSubjects();
 
-  const { data: revisionListData, refetch: refetchRevisionList } = useRevisionList();
+  // Daily Tasks state
+  const [dailyTasks, setDailyTasks] = useState<DailyTask[]>([
+    { id: "1", title: "Two Sum & Pair with Target Sum", duration: "15m", completed: false, category: "DSA" },
+    { id: "2", title: "Review DBMS Indexing & B-Trees", duration: "25m", completed: false, category: "DBMS" },
+    { id: "3", title: "Process Synchronization & Mutex Locks", duration: "20m", completed: false, category: "OS" },
+  ]);
+  const [newTaskInput, setNewTaskInput] = useState("");
+  const [isAddingTask, setIsAddingTask] = useState(false);
 
-  // Local UI State
-  const [expandedSprintId, setExpandedSprintId] = useState<string>("1");
-  const [expandedDayId, setExpandedDayId] = useState<string>("1");
-  const [isStartDateModalOpen, setIsStartDateModalOpen] = useState(false);
-  const [isAdjustPlanModalOpen, setIsAdjustPlanModalOpen] = useState(false);
-  const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  // Problem of the day countdown timer
+  const [timeLeft, setTimeLeft] = useState({ hours: 9, minutes: 25, seconds: 9 });
 
-  // Form states
-  const [planNameInput, setPlanNameInput] = useState("Crack SDE");
-  const [newStartDate, setNewStartDate] = useState("2026-10-01");
-  const [dailyHours, setDailyHours] = useState(4);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev.seconds > 0) {
+          return { ...prev, seconds: prev.seconds - 1 };
+        } else if (prev.minutes > 0) {
+          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        } else if (prev.hours > 0) {
+          return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        } else {
+          return { hours: 23, minutes: 59, seconds: 59 };
+        }
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDigits = (num: number) => num.toString().padStart(2, "0");
+
+  const handleToggleDailyTask = (id: string) => {
+    setDailyTasks((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
+    );
+  };
+
+  const handleDeleteDailyTask = (id: string) => {
+    setDailyTasks((prev) => prev.filter((t) => t.id !== id));
+    toast.info("Task removed");
+  };
+
+  const handleAddDailyTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskInput.trim()) return;
+    const newTask: DailyTask = {
+      id: Date.now().toString(),
+      title: newTaskInput.trim(),
+      duration: "15m",
+      completed: false,
+      category: "Custom",
+    };
+    setDailyTasks((prev) => [...prev, newTask]);
+    setNewTaskInput("");
+    setIsAddingTask(false);
+    toast.success("Task added to daily planner");
+  };
 
   // Calculations
   const sprints = plan?.sprints || [];
   const allDays = sprints.flatMap((s) => s.days || []);
   const allTasks = allDays.flatMap((d) => d.tasks || []);
+  const totalTasks = allTasks.length || 847;
+  const completedTasks = allTasks.filter((t) => t.status === "completed").length;
 
-  const totalTasksCount = allTasks.length || 847;
-  const completedTasksCount = allTasks.filter((t) => t.status === "completed").length;
-  const progressPercent = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
-  const completedDaysCount = allDays.filter((d) => d.tasksCompleted >= (d.tasksTotal || 1) && d.tasksTotal > 0).length;
+  // Categories progress data
+  const categories = [
+    { name: "DSA", count: "0 / 1007", percent: 0, icon: Code2 },
+    { name: "System Design", count: "0 / 104", percent: 0, icon: Layers },
+    { name: "Core Subjects", count: "0 / 944", percent: 0, icon: Cpu },
+    { name: "Data Engineering", count: "0 / 334", percent: 0, icon: Database },
+  ];
 
-  const totalMinutes = sprints.reduce((acc, s) => acc + (s.totalEstimatedMinutes || 0), 0) || 16253;
-  const totalHours = Math.floor(totalMinutes / 60);
-  const remainingMinutes = totalMinutes % 60;
-
-  const completedSprintsCount = sprints.filter((s) => s.status === "completed").length;
-  const totalSprintsCount = sprints.length || 9;
-
-  // Active Sprint 1 & Day 1 for preview
-  const sprint1 = sprints.find((s) => s.sprintNo === 1) || sprints[0];
-  const day1 = sprint1?.days?.find((d) => d.sprintDayNo === 1) || sprint1?.days?.[0];
-  const day1Tasks = day1?.tasks || [];
-
-  const handleToggleTaskStatus = (task: StudyTaskDto) => {
-    const nextStatus = task.status === "completed" ? "not_started" : "completed";
-    updateTask(
-      { taskId: task.taskId, status: nextStatus },
-      {
-        onSuccess: () => {
-          if (nextStatus === "completed") {
-            toast.success(`Completed: ${task.item?.title || "Task"}`);
-          }
-        },
-      }
-    );
-  };
-
-  const handleToggleBookmark = (task: StudyTaskDto) => {
-    const nextRevision = !task.isRevision;
-    updateTask(
-      { taskId: task.taskId, isRevision: nextRevision },
-      {
-        onSuccess: () => {
-          if (nextRevision) {
-            toast.success(`Added to Revision List: ${task.item?.title || "Task"}`);
-          } else {
-            toast.info(`Removed from Revision List: ${task.item?.title || "Task"}`);
-          }
-        },
-      }
-    );
-  };
-
-  const handleSaveStartDate = () => {
-    updatePlan(
-      { startDate: newStartDate },
-      {
-        onSuccess: () => {
-          setIsStartDateModalOpen(false);
-        },
-      }
-    );
-  };
-
-  const handleSavePlanName = () => {
-    if (!planNameInput.trim()) return;
-    updatePlan(
-      { name: planNameInput.trim() },
-      {
-        onSuccess: () => {
-          setIsRenameModalOpen(false);
-        },
-      }
-    );
-  };
-
-  // Helper badge color by subject
-  const getSubjectBadge = (subjectSlug?: string, subjectName?: string) => {
-    const name = subjectName || subjectSlug?.toUpperCase() || "DSA";
-    const slug = (subjectSlug || "dsa").toLowerCase();
-
-    if (slug.includes("dsa")) {
-      return (
-        <span className="rounded bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.5 text-[10px] font-bold text-blue-400">
-          DSA
-        </span>
-      );
-    }
-    if (slug.includes("dbms")) {
-      return (
-        <span className="rounded bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">
-          DBMS
-        </span>
-      );
-    }
-    if (slug.includes("operat") || slug.includes("os")) {
-      return (
-        <span className="rounded bg-purple-500/15 border border-purple-500/30 px-1.5 py-0.5 text-[10px] font-bold text-purple-400">
-          OS
-        </span>
-      );
-    }
-    if (slug.includes("netw") || slug.includes("cn")) {
-      return (
-        <span className="rounded bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 text-[10px] font-bold text-amber-400">
-          CN
-        </span>
-      );
-    }
-    if (slug.includes("oops")) {
-      return (
-        <span className="rounded bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 text-[10px] font-bold text-rose-400">
-          OOPS
-        </span>
-      );
-    }
-    return (
-      <span className="rounded bg-cyan-500/15 border border-cyan-500/30 px-1.5 py-0.5 text-[10px] font-bold text-cyan-400">
-        LLD
-      </span>
-    );
-  };
+  // Popular topics list
+  const popularTopics = [
+    {
+      title: "Arrays & Strings",
+      category: "DSA",
+      desc: "Two Pointers, Sliding Window, Prefix Sums, and Matrix manipulations.",
+      problems: 36,
+      badge: "Fundamental",
+      color: "border-blue-500/30 text-blue-400 bg-blue-500/10",
+      link: "/onboarding",
+    },
+    {
+      title: "Dynamic Programming",
+      category: "DSA",
+      desc: "0/1 Knapsack, Subsequences, Grid DP, and Interval State transitions.",
+      problems: 42,
+      badge: "High Frequency",
+      color: "border-purple-500/30 text-purple-400 bg-purple-500/10",
+      link: "/onboarding",
+    },
+    {
+      title: "Trees & Graphs",
+      category: "DSA",
+      desc: "DFS, BFS, Dijkstra, Topological Sort, Disjoint Set Union, and MST.",
+      problems: 58,
+      badge: "Essential",
+      color: "border-emerald-500/30 text-emerald-400 bg-emerald-500/10",
+      link: "/onboarding",
+    },
+    {
+      title: "System Design Essentials",
+      category: "System Design",
+      desc: "Load Balancing, Caching Layers, Sharding, Message Queues & Cap Theorem.",
+      problems: 18,
+      badge: "Architecture",
+      color: "border-cyan-500/30 text-cyan-400 bg-cyan-500/10",
+      link: "/onboarding",
+    },
+    {
+      title: "Operating Systems Core",
+      category: "Core Subjects",
+      desc: "Virtual Memory, Paging, Concurrency, Deadlocks, Mutex & Linux commands.",
+      problems: 24,
+      badge: "Interview Core",
+      color: "border-amber-500/30 text-amber-400 bg-amber-500/10",
+      link: "/onboarding",
+    },
+    {
+      title: "Database Internals & SQL",
+      category: "Core Subjects",
+      desc: "B+ Trees, ACID Properties, Transaction Isolation Levels & Indexing.",
+      problems: 28,
+      badge: "Interview Core",
+      color: "border-rose-500/30 text-rose-400 bg-rose-500/10",
+      link: "/onboarding",
+    },
+  ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-12 animate-in fade-in-50 duration-300">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-xs text-zinc-500">
-        <Link href="/onboarding" className="hover:text-zinc-300 transition-colors">
-          Planly
+    <div className="mx-auto max-w-7xl space-y-5 pb-16 animate-in fade-in-50 duration-300">
+      {/* ========================================================================= */}
+      {/* 1. TOP ANNOUNCEMENT BANNER (MATCHING SCREENSHOT 1) */}
+      {/* ========================================================================= */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg border border-blue-900/40 bg-zinc-950/80 px-4 py-2.5 text-xs text-zinc-300 shadow-sm backdrop-blur-md">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 text-blue-400 font-bold text-[11px] shrink-0">
+            ✦
+          </span>
+          <p className="truncate text-zinc-300 text-xs">
+            <strong className="text-blue-400 font-semibold">crack sde is live</strong> &middot; Your sheets have been upgraded, and your progress has moved with you
+          </p>
+        </div>
+        <Link
+          href="/planly"
+          className="shrink-0 text-xs font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+        >
+          See what&apos;s new <ArrowRight className="h-3 w-3" />
         </Link>
-        <span>/</span>
-        <span className="text-zinc-300 font-medium">{plan?.name || "Crack SDE"}</span>
       </div>
 
-      {/* Page Title & Controls Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <span>{plan?.name || "Crack SDE"}</span>
-            <button
-              onClick={() => {
-                setPlanNameInput(plan?.name || "Crack SDE");
-                setIsRenameModalOpen(true);
-              }}
-              className="text-zinc-500 hover:text-zinc-300 p-1 rounded hover:bg-zinc-900 transition-colors"
-              title="Rename Plan"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
-          </h1>
-        </div>
-
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setIsStartDateModalOpen(true)}
-            className="h-8 text-xs border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:bg-zinc-800 hover:text-white"
-          >
-            <CalendarIcon className="h-3.5 w-3.5 mr-1.5 text-blue-400" />
-            Edit start date
-          </Button>
-
-          <Badge variant="blue" className="h-8 px-2.5 text-xs flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
-            Upcoming
-          </Badge>
-
-          <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-1.5 text-xs text-zinc-400">
-            <CalendarIcon className="h-3.5 w-3.5 text-zinc-500" />
-            <span>Scheduled: <strong className="text-zinc-200 font-medium">1 Oct 2026</strong></span>
-          </div>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setIsAdjustPlanModalOpen(true)}
-            className="h-8 text-xs border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:bg-zinc-800 hover:text-white"
-          >
-            <Sliders className="h-3.5 w-3.5 mr-1.5 text-zinc-400" />
-            Adjust plan
-          </Button>
-        </div>
+      {/* ========================================================================= */}
+      {/* 2. GREETING SECTION */}
+      {/* ========================================================================= */}
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
+          <span>Good afternoon, Rahul</span>
+          <span className="inline-block animate-bounce">👋</span>
+        </h1>
+        <p className="text-xs sm:text-sm text-zinc-400">
+          The day gets heavy around now. Good to see you still going.
+        </p>
       </div>
 
-      {/* 4 Overview KPI Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* Card 1: Overall Progress */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1">
-          <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
-            <TrendingUp className="h-3.5 w-3.5 text-zinc-500" />
-            <span>Overall progress</span>
-          </div>
-          <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-2xl font-bold tracking-tight text-zinc-100">{progressPercent} %</span>
-            <span className="text-xs text-zinc-500">{completedDaysCount} / 61 days</span>
-          </div>
-          <Progress value={progressPercent} className="h-1 mt-2 bg-zinc-800" />
-        </div>
-
-        {/* Card 2: Time Spent */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1">
-          <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
-            <Clock className="h-3.5 w-3.5 text-zinc-500" />
-            <span>Time spent</span>
-          </div>
-          <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-2xl font-bold tracking-tight text-zinc-100">0m</span>
-            <span className="text-xs text-zinc-500">of {totalHours}h {remainingMinutes}m</span>
-          </div>
-          <Progress value={0} className="h-1 mt-2 bg-zinc-800" />
-        </div>
-
-        {/* Card 3: Sprints Completed */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1">
-          <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
-            <Layers className="h-3.5 w-3.5 text-zinc-500" />
-            <span>Sprints completed</span>
-          </div>
-          <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-2xl font-bold tracking-tight text-zinc-100">{completedSprintsCount}</span>
-            <span className="text-xs text-zinc-500">of {totalSprintsCount} sprints</span>
-          </div>
-          <Progress
-            value={(completedSprintsCount / totalSprintsCount) * 100}
-            className="h-1 mt-2 bg-zinc-800"
-          />
-        </div>
-
-        {/* Card 4: Est. Completion */}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1">
-          <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
-            <CalendarIcon className="h-3.5 w-3.5 text-zinc-500" />
-            <span>Est. completion</span>
-          </div>
-          <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-2xl font-bold tracking-tight text-zinc-100">30 Nov</span>
-            <span className="text-xs text-zinc-500">2026</span>
-          </div>
-          <div className="text-[11px] text-emerald-400 font-medium pt-1 flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> On schedule
-          </div>
-        </div>
-      </div>
-
-      {/* Main Grid: Left Sprint Tree (7 cols) + Right Study Sidebar (5 cols) */}
+      {/* ========================================================================= */}
+      {/* 3. RESPONSIVE 2-COLUMN DASHBOARD LAYOUT */}
+      {/* ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left / Center Main Area: Sprint & Day Tree */}
-        <div className="lg:col-span-8 space-y-4">
-          {sprints.map((sprint) => {
-            const isSprintExpanded = expandedSprintId === sprint.sprintId;
-            const sprintTotalHours = Math.floor((sprint.totalEstimatedMinutes || 0) / 60);
-            const sprintRemainingMinutes = (sprint.totalEstimatedMinutes || 0) % 60;
+        {/* ======================================================================= */}
+        {/* MAIN COLUMN (LEFT / 8-9 COLS): BANNER -> YOUR PROGRESS -> POPULAR TOPICS */}
+        {/* ======================================================================= */}
+        <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+          {/* PLANLY HERO CARD (MATCHING SCREENSHOT 1) */}
+          <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950 p-6 shadow-sm">
+            {/* Subtle grid background */}
+            <div
+              className="absolute inset-0 opacity-[0.06] pointer-events-none"
+              style={{
+                backgroundImage: `linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px)`,
+                backgroundSize: "32px 32px",
+              }}
+            />
 
-            // Generate subject labels for sprint header
-            const sprintSubjects =
-              sprint.sprintNo <= 3
-                ? "DSA + OOPS"
-                : sprint.sprintNo <= 5
-                ? "DSA + Operating System"
-                : sprint.sprintNo <= 7
-                ? "Computer Networks + LLD"
-                : "DBMS";
+            {/* Ambient center sparkle */}
+            <div className="absolute right-1/3 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+              <div className="h-32 w-32 rounded-full bg-blue-500/10 blur-2xl" />
+              <div className="absolute inset-0 flex items-center justify-center text-blue-300 font-bold text-lg animate-pulse">
+                ✦
+              </div>
+            </div>
 
-            return (
-              <div
-                key={sprint.sprintId}
-                className={cn(
-                  "rounded-xl border transition-all overflow-hidden",
-                  isSprintExpanded
-                    ? "border-blue-900/50 bg-zinc-900/40 shadow-lg shadow-blue-950/10"
-                    : "border-zinc-800/80 bg-zinc-900/20 hover:border-zinc-700"
-                )}
-              >
-                {/* Sprint Row Header */}
-                <div
-                  onClick={() =>
-                    setExpandedSprintId((prev) => (prev === sprint.sprintId ? "" : sprint.sprintId))
-                  }
-                  className="flex items-center justify-between p-4 cursor-pointer select-none"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-4 w-4 rounded-full border border-zinc-700 flex items-center justify-center">
-                      <div className="h-1.5 w-1.5 rounded-full bg-transparent" />
-                    </div>
-                    <Badge variant="blue" className="text-xs font-semibold">
-                      Sprint {sprint.sprintNo}
-                    </Badge>
-                    <span className="text-xs text-zinc-400 font-medium hidden sm:inline">
-                      • {sprintSubjects}
-                    </span>
-                  </div>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-3 max-w-lg">
+                <span className="inline-block rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+                  PLANLY - Your personal planner
+                </span>
 
-                  <div className="flex items-center gap-3 text-xs text-zinc-400">
-                    <Badge variant="secondary" className="text-[10px] hidden sm:inline-flex">
-                      • Upcoming
-                    </Badge>
-                    <span className="text-[11px] text-zinc-400 font-mono">
-                      Est. {sprintTotalHours}h {sprintRemainingMinutes}m &middot; Time spent : 0 sec
-                    </span>
-                    <ChevronDown
-                      className={cn(
-                        "h-4 w-4 text-zinc-400 transition-transform duration-200",
-                        isSprintExpanded ? "" : "-rotate-90"
-                      )}
-                    />
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100 leading-snug">
+                  Know what to study every day and readjust as you go
+                </h2>
+
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <Button
+                    asChild
+                    size="sm"
+                    className="h-9 px-4 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20"
+                  >
+                    <Link href="/onboarding">
+                      Build my plan <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                    </Link>
+                  </Button>
+
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="h-9 px-4 text-xs font-medium border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                  >
+                    <Link href="/planly">Know more</Link>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Right Tagline */}
+              <div className="hidden md:flex flex-col items-end justify-center text-right text-xs text-zinc-400 pr-2">
+                <p className="font-normal text-zinc-400">
+                  Get a plan based on your <strong className="italic font-serif font-bold text-zinc-200">prep timeline</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ===================================================================== */}
+          {/* YOUR PROGRESS SECTION (2 COMPACT CARDS MATCHING SCREENSHOT 1) */}
+          {/* ===================================================================== */}
+          <div className="space-y-3">
+            <h2 className="text-sm font-bold tracking-tight text-zinc-200">
+              Your Progress
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* CARD 1: DSA PROGRESS (DONUT RADIAL METER) */}
+              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-4 space-y-4 hover:border-zinc-700/80 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-zinc-200">DSA Progress</span>
+                  <div className="text-zinc-500 hover:text-zinc-300 cursor-pointer" title="DSA problem solving progress">
+                    <Info className="h-3.5 w-3.5" />
                   </div>
                 </div>
 
-                {/* Expanded Sprint Days */}
-                {isSprintExpanded && (
-                  <div className="border-t border-zinc-800/80 bg-zinc-950/60 p-3 sm:p-4 space-y-3">
-                    {(sprint.days || []).map((day) => {
-                      const isDayExpanded = expandedDayId === day.dayId;
-                      const dayHours = Math.floor((day.estimatedMinutes || 0) / 60);
-                      const dayMinutes = (day.estimatedMinutes || 0) % 60;
+                <div className="flex items-center justify-around gap-4 py-2">
+                  {/* Circular Radial Donut Meter */}
+                  <div className="relative flex h-28 w-28 items-center justify-center shrink-0">
+                    <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
+                      {/* Background track */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="38"
+                        className="stroke-zinc-800/80"
+                        strokeWidth="7"
+                        fill="none"
+                      />
+                      {/* Basic progress segment (emerald) */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="38"
+                        className="stroke-emerald-500/80 transition-all duration-700 ease-out"
+                        strokeWidth="7"
+                        strokeDasharray="238.76"
+                        strokeDashoffset="238.76"
+                        strokeLinecap="round"
+                        fill="none"
+                      />
+                      {/* Core progress segment (amber) */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="38"
+                        className="stroke-amber-400/80 transition-all duration-700 ease-out"
+                        strokeWidth="7"
+                        strokeDasharray="238.76"
+                        strokeDashoffset="238.76"
+                        strokeLinecap="round"
+                        fill="none"
+                      />
+                      {/* Pro progress segment (rose) */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="38"
+                        className="stroke-rose-500/80 transition-all duration-700 ease-out"
+                        strokeWidth="7"
+                        strokeDasharray="238.76"
+                        strokeDashoffset="238.76"
+                        strokeLinecap="round"
+                        fill="none"
+                      />
+                    </svg>
 
-                      return (
-                        <div
-                          key={day.dayId}
-                          className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 overflow-hidden"
-                        >
-                          {/* Day Row Header */}
-                          <div
-                            onClick={() =>
-                              setExpandedDayId((prev) => (prev === day.dayId ? "" : day.dayId))
-                            }
-                            className="flex items-center justify-between p-3.5 cursor-pointer hover:bg-zinc-900/80 transition-colors"
-                          >
-                            <div className="flex items-center gap-2.5 text-xs font-semibold text-zinc-200">
-                              <ChevronDown
-                                className={cn(
-                                  "h-4 w-4 text-blue-400 transition-transform duration-200",
-                                  isDayExpanded ? "" : "-rotate-90"
-                                )}
-                              />
-                              <span>Day {day.sprintDayNo}</span>
-                              <span className="text-[10px] text-zinc-500 font-normal">
-                                ({day.tasksCompleted} / {day.tasksTotal} completed)
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-xs text-zinc-400">
-                              <span className="font-mono text-[11px]">
-                                Est. {dayHours > 0 ? `${dayHours}h ` : ""}{dayMinutes}m
-                              </span>
-                              <ChevronRight className="h-3.5 w-3.5 text-blue-400" />
-                            </div>
-                          </div>
-
-                          {/* Expanded Day Tasks with Subject & Topic Name Badges */}
-                          {isDayExpanded && (
-                            <div className="border-t border-zinc-800/60 bg-zinc-950/90 divide-y divide-zinc-800/40">
-                              {(day.tasks || []).map((task) => {
-                                const isCompleted = task.status === "completed";
-                                const isStarred = task.isRevision;
-                                const subjectName = task.item?.subjectName || "DSA";
-                                const topicName = task.item?.topicName || "Arrays";
-
-                                return (
-                                  <div
-                                    key={task.taskId}
-                                    className={cn(
-                                      "flex items-center justify-between px-4 py-3 text-xs transition-colors hover:bg-zinc-900/60 group",
-                                      isCompleted && "bg-zinc-900/20 opacity-70"
-                                    )}
-                                  >
-                                    {/* Left: Checkbox + Subject & Topic Badge + Problem Title */}
-                                    <div className="flex items-center gap-3 overflow-hidden">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleToggleTaskStatus(task)}
-                                        className={cn(
-                                          "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors",
-                                          isCompleted
-                                            ? "border-emerald-500 bg-emerald-500 text-white"
-                                            : "border-zinc-700 bg-zinc-900 hover:border-blue-500"
-                                        )}
-                                      >
-                                        {isCompleted && <Check className="h-3 w-3 stroke-[3]" />}
-                                      </button>
-
-                                      {/* Subject & Topic Badges */}
-                                      <div className="flex items-center gap-1.5 shrink-0">
-                                        {getSubjectBadge(task.item?.subjectSlug, subjectName)}
-                                        <span className="text-[10px] text-zinc-500 font-medium hidden sm:inline">
-                                          {topicName} &middot;
-                                        </span>
-                                      </div>
-
-                                      {/* Problem Title */}
-                                      <span
-                                        className={cn(
-                                          "font-medium text-zinc-200 truncate cursor-pointer hover:text-blue-400 transition-colors",
-                                          isCompleted && "line-through text-zinc-500"
-                                        )}
-                                        onClick={() => handleToggleTaskStatus(task)}
-                                      >
-                                        {task.item?.title || `Task #${task.taskOrder}`}
-                                      </span>
-                                    </div>
-
-                                    {/* Right: Star (Revision List) + Duration Tag */}
-                                    <div className="flex items-center gap-3 shrink-0 ml-2">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleToggleBookmark(task)}
-                                        className={cn(
-                                          "p-1 rounded transition-colors",
-                                          isStarred
-                                            ? "text-amber-400 hover:text-amber-300"
-                                            : "text-zinc-600 hover:text-amber-400 group-hover:text-zinc-400"
-                                        )}
-                                        title={isStarred ? "Remove from Revision List" : "Add to Revision List"}
-                                      >
-                                        <Star
-                                          className={cn("h-3.5 w-3.5", isStarred && "fill-amber-400")}
-                                        />
-                                      </button>
-
-                                      <div className="flex items-center gap-1 text-[11px] font-mono text-zinc-400 bg-zinc-900/60 border border-zinc-800/80 px-2 py-0.5 rounded">
-                                        <span>Est. {task.estimatedMinutes} min</span>
-                                        <ChevronRight className="h-3 w-3 text-zinc-600" />
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                    {/* Center stats count */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                      <span className="text-2xl font-extrabold text-zinc-100 tracking-tight leading-none">
+                        {completedTasks}
+                      </span>
+                      <span className="text-[10px] font-mono text-zinc-500 mt-0.5">
+                        / 1369
+                      </span>
+                    </div>
                   </div>
-                )}
+
+                  {/* Level Breakdown Legend */}
+                  <div className="space-y-2.5 text-xs">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-sm bg-emerald-500" />
+                        <span className="text-zinc-300 font-medium text-xs">Basic</span>
+                      </div>
+                      <span className="font-mono text-[11px] text-zinc-400">0 / 214</span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-sm bg-amber-400" />
+                        <span className="text-zinc-300 font-medium text-xs">Core</span>
+                      </div>
+                      <span className="font-mono text-[11px] text-zinc-400">0 / 843</span>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-sm bg-rose-500" />
+                        <span className="text-zinc-300 font-medium text-xs">Pro</span>
+                      </div>
+                      <span className="font-mono text-[11px] text-zinc-400">0 / 312</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            );
-          })}
+
+              {/* CARD 2: CATEGORY-WISE PROGRESS */}
+              <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-4 space-y-3 hover:border-zinc-700/80 transition-all">
+                <span className="text-xs font-bold text-zinc-200">Category-wise Progress</span>
+
+                <div className="space-y-2.5 pt-1">
+                  {categories.map((cat) => (
+                    <div
+                      key={cat.name}
+                      className="flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-950/40 p-2.5 hover:bg-zinc-900/40 transition-colors"
+                    >
+                      <div className="flex items-center gap-2.5 overflow-hidden">
+                        <div className="flex h-7 w-7 items-center justify-center rounded bg-zinc-900 border border-zinc-800 text-zinc-400 shrink-0">
+                          <Code2 className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="truncate">
+                          <div className="text-xs font-semibold text-zinc-200 truncate">{cat.name}</div>
+                          <div className="text-[10px] font-mono text-zinc-500">{cat.count}</div>
+                        </div>
+                      </div>
+
+                      <div className="text-xs font-mono font-semibold text-zinc-400 shrink-0">
+                        {cat.percent}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ===================================================================== */}
+          {/* 4. EXPLORE POPULAR TOPICS SECTION */}
+          {/* ===================================================================== */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center gap-1.5 text-sm font-bold tracking-tight text-zinc-200">
+              <span className="text-blue-400 text-xs">✦</span>
+              <h2>Explore Popular Topics</h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5">
+              {popularTopics.map((topic) => (
+                <div
+                  key={topic.title}
+                  className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-4 space-y-3 hover:border-zinc-700/80 hover:bg-zinc-900/50 transition-all group flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded border border-zinc-800 bg-zinc-900 text-zinc-400">
+                        {topic.category}
+                      </span>
+                      <span className="text-[10px] text-zinc-500 font-mono">
+                        {topic.problems} items
+                      </span>
+                    </div>
+
+                    <h3 className="text-sm font-bold text-zinc-200 group-hover:text-blue-400 transition-colors">
+                      {topic.title}
+                    </h3>
+
+                    <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                      {topic.desc}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-xs">
+                    <span className="text-[10px] text-zinc-500">{topic.badge}</span>
+                    <Link
+                      href={topic.link}
+                      className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 text-xs"
+                    >
+                      Explore <ChevronRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Right Study Sidebar (Matches Screenshot) */}
-        <div className="lg:col-span-4 space-y-4">
-          {/* Header with Revision List Drawer Link */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+        {/* ======================================================================= */}
+        {/* RIGHT COLUMN (3-4 COLS): PROBLEM OF THE DAY -> DAILY PLANNER */}
+        {/* ======================================================================= */}
+        <div className="lg:col-span-4 xl:col-span-3 space-y-4">
+          {/* PROBLEM OF THE DAY CARD (MATCHING SCREENSHOT 1) */}
+          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-4 shadow-sm hover:border-zinc-700/80 transition-all">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-200">
+                <span>Problem Of The Day</span>
+                <ExternalLink className="h-3 w-3 text-zinc-500" />
+              </div>
+              <Badge variant="brand" className="text-[10px] py-0 px-1.5 font-mono">
+                +20
+              </Badge>
+            </div>
+
+            {/* Countdown Box */}
+            <div className="flex items-center justify-center gap-2 py-2">
+              <div className="flex flex-col items-center">
+                <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100">
+                  {formatDigits(timeLeft.hours)}
+                </span>
+              </div>
+              <span className="text-zinc-600 font-bold">:</span>
+              <div className="flex flex-col items-center">
+                <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100">
+                  {formatDigits(timeLeft.minutes)}
+                </span>
+              </div>
+              <span className="text-zinc-600 font-bold">:</span>
+              <div className="flex flex-col items-center">
+                <span className="rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 font-mono text-sm font-bold text-zinc-100">
+                  {formatDigits(timeLeft.seconds)}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Button */}
+            <Button
+              asChild
+              className="w-full h-9 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-md shadow-blue-600/20"
+            >
+              <Link href="/onboarding">
+                Solve problem <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+              </Link>
+            </Button>
+          </div>
+
+          {/* DAILY PLANNER CARD (MATCHING SCREENSHOT 1) */}
+          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 shadow-sm">
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
               <div className="flex items-center gap-2 text-xs font-bold text-zinc-200">
-                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                <span>Revision list</span>
-                {revisionListData && revisionListData.length > 0 && (
-                  <Badge variant="brand" className="text-[10px] py-0 px-1.5">
-                    {revisionListData.length}
-                  </Badge>
-                )}
+                <ListTodo className="h-4 w-4 text-blue-400" />
+                <span>Daily Planner</span>
               </div>
               <button
-                onClick={() => setIsRevisionModalOpen(true)}
-                className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                onClick={() => setIsAddingTask((prev) => !prev)}
+                className="text-[11px] font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1"
               >
-                View all
+                <Plus className="h-3 w-3" /> Add task
               </button>
             </div>
 
-            {/* Starts in 5 days Blue Alert Card */}
-            <div className="rounded-lg border border-blue-900/50 bg-blue-950/30 p-3.5 space-y-1.5">
-              <div className="flex items-center gap-2 text-xs font-bold text-blue-300">
-                <CalendarIcon className="h-4 w-4 text-blue-400" />
-                <span>Starts in 5 days</span>
-              </div>
-              <p className="text-[11px] text-zinc-400 leading-relaxed">
-                Your plan is ready. Study sessions begin on <strong className="text-zinc-200 font-medium">1 Oct 2026</strong>.
-              </p>
-            </div>
-
-            {/* Day 1 Schedule Preview */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-zinc-200">Scheduled for 1 Oct 2026</div>
-                  <div className="text-[11px] text-zinc-500">Day 1 &middot; Schedule preview</div>
-                </div>
-              </div>
-
-              {/* Day 1 Quick Stats */}
-              <div className="flex items-center gap-4 text-[11px] text-zinc-400 bg-zinc-950/60 p-2.5 rounded-lg border border-zinc-800/80">
-                <div className="flex items-center gap-1.5">
-                  <Layers className="h-3.5 w-3.5 text-zinc-500" />
-                  <span>{day1Tasks.length || 20} topics</span>
-                </div>
-                <span>&middot;</span>
-                <div className="flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5 text-zinc-500" />
-                  <span>3h 53m planned</span>
-                </div>
-              </div>
-
-              {/* Compact Task List Preview */}
-              <div className="space-y-1 max-h-72 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-800">
-                {day1Tasks.slice(0, 10).map((t, idx) => (
-                  <div
-                    key={t.taskId || idx}
-                    className="flex items-center justify-between py-1.5 px-2 rounded text-[11px] text-zinc-300 hover:bg-zinc-800/40"
+            {/* Inline Add Task Input */}
+            {isAddingTask && (
+              <form onSubmit={handleAddDailyTask} className="space-y-2 pt-1">
+                <input
+                  type="text"
+                  placeholder="Task title (e.g. Solve 3 Binary Tree questions)..."
+                  value={newTaskInput}
+                  onChange={(e) => setNewTaskInput(e.target.value)}
+                  autoFocus
+                  className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                />
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setIsAddingTask(false);
+                      setNewTaskInput("");
+                    }}
+                    className="h-6 px-2 text-[10px]"
                   >
-                    <span className="truncate pr-2">{t.item?.title || `Task #${idx + 1}`}</span>
-                    <span className="text-zinc-500 font-mono text-[10px] shrink-0">
-                      {t.estimatedMinutes}m
-                    </span>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="h-6 px-2 text-[10px] bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Save
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {/* Checklist of Tasks */}
+            {dailyTasks.length > 0 ? (
+              <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-800">
+                {dailyTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className={cn(
+                      "flex items-center justify-between p-2 rounded-lg border border-zinc-800/60 bg-zinc-950/50 text-xs hover:bg-zinc-900/80 transition-all group",
+                      task.completed && "opacity-60 bg-zinc-950/20"
+                    )}
+                  >
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleDailyTask(task.id)}
+                        className={cn(
+                          "flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors",
+                          task.completed
+                            ? "border-emerald-500 bg-emerald-500 text-white"
+                            : "border-zinc-700 bg-zinc-900 hover:border-blue-500"
+                        )}
+                      >
+                        {task.completed && <Check className="h-3 w-3 stroke-[3]" />}
+                      </button>
+
+                      <span
+                        onClick={() => handleToggleDailyTask(task.id)}
+                        className={cn(
+                          "truncate cursor-pointer font-medium text-zinc-200 text-[11px] hover:text-blue-400",
+                          task.completed && "line-through text-zinc-500"
+                        )}
+                      >
+                        {task.title}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0 ml-1">
+                      <span className="font-mono text-[10px] text-zinc-500">
+                        {task.duration}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteDailyTask(task.id)}
+                        className="text-zinc-600 hover:text-red-400 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Delete task"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
-
-              {/* Info Footer Note */}
-              <p className="text-[11px] text-zinc-500 leading-snug pt-2 border-t border-zinc-800/80">
-                Browse your schedule now. Task timers and progress tracking become available when your plan starts.
-              </p>
-            </div>
+            ) : (
+              /* Empty State (Matching Screenshot 1) */
+              <div className="py-8 text-center space-y-2">
+                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 border border-zinc-800 text-zinc-500">
+                  <ListTodo className="h-5 w-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs font-semibold text-zinc-300">No tasks for today</p>
+                  <p
+                    onClick={() => setIsAddingTask(true)}
+                    className="text-[11px] text-zinc-500 hover:text-blue-400 cursor-pointer"
+                  >
+                    Add your tasks here
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      {/* ========================================================================= */}
-      {/* MODAL 1: EDIT START DATE */}
-      {/* ========================================================================= */}
-      <Dialog open={isStartDateModalOpen} onOpenChange={setIsStartDateModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Plan Start Date</DialogTitle>
-            <DialogDescription>
-              Choose when you want your preparation schedule to begin. All 61 days will be automatically recalibrated.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-zinc-200">Start Date</label>
-              <input
-                type="date"
-                value={newStartDate}
-                onChange={(e) => setNewStartDate(e.target.value)}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsStartDateModalOpen(false)}
-              className="text-xs"
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSaveStartDate}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
-            >
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ========================================================================= */}
-      {/* MODAL 2: ADJUST PLAN */}
-      {/* ========================================================================= */}
-      <Dialog open={isAdjustPlanModalOpen} onOpenChange={setIsAdjustPlanModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Adjust Plan Settings</DialogTitle>
-            <DialogDescription>
-              Update your daily commitment or plan configurations.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold text-zinc-200">
-                <span>Daily Study Hours</span>
-                <span className="text-blue-400 font-mono">{dailyHours} hrs/day</span>
-              </div>
-              <Slider
-                min={1}
-                max={10}
-                value={dailyHours}
-                onChange={setDailyHours}
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsAdjustPlanModalOpen(false)}
-              className="text-xs"
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                setIsAdjustPlanModalOpen(false);
-                toast.success("Plan parameters adjusted");
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
-            >
-              Apply Adjustments
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ========================================================================= */}
-      {/* MODAL 3: REVISION LIST VIEW ALL */}
-      {/* ========================================================================= */}
-      <Dialog open={isRevisionModalOpen} onOpenChange={setIsRevisionModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
-              <span>Revision List</span>
-              <Badge variant="blue" className="text-xs ml-2">
-                {revisionListData?.length || 0} Bookmarked
-              </Badge>
-            </DialogTitle>
-            <DialogDescription>
-              All problems you&apos;ve starred for focused revision before interviews.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-2">
-            {(!revisionListData || revisionListData.length === 0) && (
-              <div className="py-12 text-center text-zinc-500 text-xs">
-                No problems starred for revision yet. Click the star icon next to any problem to bookmark it!
-              </div>
-            )}
-
-            {(revisionListData || []).map((task) => (
-              <div
-                key={task.taskId}
-                className="flex items-center justify-between p-3 rounded-lg border border-zinc-800 bg-zinc-900/50 text-xs hover:bg-zinc-900 transition-colors"
-              >
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400 shrink-0" />
-                  <div className="truncate">
-                    <div className="font-semibold text-zinc-200 truncate">
-                      {task.item?.title || "Problem Title"}
-                    </div>
-                    <div className="text-[10px] text-zinc-500">
-                      {task.item?.subjectName} &middot; {task.item?.topicName}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="font-mono text-[11px] text-zinc-400">
-                    {task.estimatedMinutes}m
-                  </span>
-                  <button
-                    onClick={() => handleToggleBookmark(task)}
-                    className="text-zinc-500 hover:text-red-400 p-1"
-                    title="Remove from revision"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <DialogFooter>
-            <Button
-              size="sm"
-              onClick={() => setIsRevisionModalOpen(false)}
-              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs"
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ========================================================================= */}
-      {/* MODAL 4: RENAME PLAN */}
-      {/* ========================================================================= */}
-      <Dialog open={isRenameModalOpen} onOpenChange={setIsRenameModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rename Study Plan</DialogTitle>
-            <DialogDescription>
-              Give your personalized preparation plan a custom title.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3 py-2">
-            <input
-              type="text"
-              maxLength={60}
-              value={planNameInput}
-              onChange={(e) => setPlanNameInput(e.target.value)}
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsRenameModalOpen(false)}
-              className="text-xs"
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSavePlanName}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
-            >
-              Save Title
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
