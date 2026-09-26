@@ -3,14 +3,14 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg text-xs font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 disabled:pointer-events-none disabled:opacity-50 select-none [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg text-[14px] leading-[1.4] font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 disabled:pointer-events-none disabled:opacity-50 select-none [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-blue-600 text-white shadow-sm hover:bg-blue-700 active:scale-[0.99] font-medium",
+          "bg-blue-600 text-white shadow-sm hover:bg-blue-700 active:scale-[0.99]",
         brand:
-          "bg-blue-600 text-white shadow-sm hover:bg-blue-700 active:scale-[0.99] font-medium",
+          "bg-blue-600 text-white shadow-sm hover:bg-blue-700 active:scale-[0.99]",
         destructive:
           "bg-red-500/15 border border-red-500/30 text-red-400 hover:bg-red-500/25 hover:border-red-500/40",
         outline:
@@ -23,9 +23,9 @@ const buttonVariants = cva(
           "text-blue-400 underline-offset-4 hover:underline p-0 h-auto",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 px-3 text-xs",
-        lg: "h-11 px-6 text-sm font-semibold",
+        default: "h-9 px-3.5 py-1.5 text-[14px]",
+        sm: "h-8 px-3 py-1 text-[13px]",
+        lg: "h-10 px-5 text-[14px]",
         icon: "h-8 w-8 p-0",
       },
     },

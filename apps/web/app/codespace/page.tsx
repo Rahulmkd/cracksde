@@ -63,14 +63,14 @@ export default function CodespacePage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
             <FolderCode className="h-3.5 w-3.5 text-blue-400" />
             <span>CodeSpace</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+          <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
             Interactive Code Scratchpad
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400">
+          <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
             Test algorithms, dry run data structures, and prototype solutions in an instant online sandbox.
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function CodespacePage() {
             size="sm"
             variant="outline"
             onClick={handleCopy}
-            className="h-8 text-xs font-medium"
+            className="h-8 text-[13px] font-medium"
           >
             <Copy className="h-3.5 w-3.5 mr-1" /> Copy Code
           </Button>
@@ -88,7 +88,7 @@ export default function CodespacePage() {
             size="sm"
             onClick={handleRunCode}
             disabled={isRunning}
-            className="h-8 px-4 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            className="h-8 px-4 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
           >
             <Play className="h-3 w-3 mr-1 fill-white" />
             {isRunning ? "Running..." : "Run Code"}
@@ -103,11 +103,11 @@ export default function CodespacePage() {
           {/* Editor Toolbar */}
           <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-950/70 px-4 py-2.5">
             <div className="flex items-center gap-3">
-              <span className="text-xs text-zinc-400 font-medium">Language:</span>
+              <span className="text-[13px] text-zinc-400 font-normal">Language:</span>
               <select
                 value={language}
                 onChange={(e) => handleLanguageChange(e.target.value as "cpp" | "java" | "python" | "javascript")}
-                className="rounded-md border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
+                className="rounded-md border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[12px] text-zinc-200 focus:outline-none focus:border-blue-500"
               >
                 <option value="cpp">C++ 20 (GCC 13)</option>
                 <option value="java">Java 21 (OpenJDK)</option>
@@ -120,7 +120,7 @@ export default function CodespacePage() {
               size="sm"
               variant="ghost"
               onClick={() => setCode(defaultCodeSnippets[language])}
-              className="h-7 text-[11px] text-zinc-400 hover:text-zinc-200"
+              className="h-7 text-[12px] text-zinc-400 hover:text-zinc-200 font-normal"
             >
               <RotateCcw className="h-3 w-3 mr-1" /> Reset Template
             </Button>
@@ -132,7 +132,7 @@ export default function CodespacePage() {
             onChange={(e) => setCode(e.target.value)}
             rows={18}
             spellCheck={false}
-            className="w-full bg-zinc-950 p-4 font-mono text-xs text-zinc-100 leading-relaxed focus:outline-none resize-none selection:bg-blue-600/30"
+            className="w-full bg-zinc-950 p-4 font-mono text-[13px] text-zinc-100 leading-relaxed focus:outline-none resize-none selection:bg-blue-600/30"
           />
         </div>
 
@@ -140,24 +140,24 @@ export default function CodespacePage() {
         <div className="lg:col-span-4 space-y-4">
           {/* Output Terminal Card */}
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle flex flex-col">
-            <div className="flex items-center gap-2 border-b border-zinc-800/80 bg-zinc-950/70 px-4 py-2.5 text-xs font-semibold text-zinc-200">
+            <div className="flex items-center gap-2 border-b border-zinc-800/80 bg-zinc-950/70 px-4 py-2.5 text-[13px] font-semibold text-zinc-200">
               <Terminal className="h-3.5 w-3.5 text-blue-400" />
               <span>Console Output</span>
             </div>
-            <pre className="p-4 bg-zinc-950 text-xs font-mono text-zinc-300 leading-relaxed min-h-[160px] max-h-[240px] overflow-y-auto whitespace-pre-wrap">
+            <pre className="p-4 bg-zinc-950 text-[12px] font-mono text-zinc-300 leading-relaxed min-h-[160px] max-h-[240px] overflow-y-auto whitespace-pre-wrap">
               {stdout}
             </pre>
           </div>
 
           {/* Stdin Card */}
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle p-4 space-y-2">
-            <span className="text-xs font-semibold text-zinc-200">Custom Input (stdin)</span>
+            <span className="text-[13px] font-semibold text-zinc-200">Custom Input (stdin)</span>
             <textarea
               placeholder="Enter standard input values (optional)..."
               value={stdin}
               onChange={(e) => setStdin(e.target.value)}
               rows={4}
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 font-mono text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500"
+              className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 font-mono text-[12px] text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500"
             />
           </div>
         </div>

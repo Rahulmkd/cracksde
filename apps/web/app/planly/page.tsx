@@ -209,41 +209,41 @@ export default function PlanlyPage() {
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           {/* Left: Heading & 4 Feature Benefits */}
           <div className="space-y-3.5 max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
               <span>Study Planner Engine</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
+            <h1 className="text-[24px] font-semibold leading-[1.25] tracking-tight text-zinc-100">
               Know what to study every day and readjust as you go
             </h1>
 
             {/* 4 Benefits in a row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-[13px]">
                 <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
                   <Activity className="h-3.5 w-3.5" />
                 </div>
-                <span className="text-[11px] text-zinc-400 font-medium leading-tight">Goal-based pacing</span>
+                <span className="text-[12px] text-zinc-400 font-normal leading-[1.4]">Goal-based pacing</span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-[13px]">
                 <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
                   <BarChart2 className="h-3.5 w-3.5" />
                 </div>
-                <span className="text-[11px] text-zinc-400 font-medium leading-tight">Dynamic backlog shifts</span>
+                <span className="text-[12px] text-zinc-400 font-normal leading-[1.4]">Dynamic backlog shifts</span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-[13px]">
                 <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
                   <Layers className="h-3.5 w-3.5" />
                 </div>
-                <span className="text-[11px] text-zinc-400 font-medium leading-tight">9 structured sprints</span>
+                <span className="text-[12px] text-zinc-400 font-normal leading-[1.4]">9 structured sprints</span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-[13px]">
                 <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
                   <Target className="h-3.5 w-3.5" />
                 </div>
-                <span className="text-[11px] text-zinc-400 font-medium leading-tight">Revision bookmarking</span>
+                <span className="text-[12px] text-zinc-400 font-normal leading-[1.4]">Revision bookmarking</span>
               </div>
             </div>
           </div>
@@ -253,7 +253,7 @@ export default function PlanlyPage() {
             <Button
               asChild
               size="sm"
-              className="h-9 px-4 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+              className="h-9 px-4 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
             >
               <Link href="/onboarding">
                 Generate custom plan <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
@@ -270,14 +270,14 @@ export default function PlanlyPage() {
         <button
           onClick={() => setActiveTab("active")}
           className={cn(
-            "flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors",
+            "flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium rounded-lg transition-colors",
             activeTab === "active"
               ? "bg-zinc-800 text-zinc-100 shadow-sm"
               : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60"
           )}
         >
           <span>Active Plans</span>
-          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/30 px-1.5 text-[10px] font-bold text-blue-400">
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/30 px-1.5 text-[11px] font-semibold text-blue-400">
             1
           </span>
         </button>
@@ -285,14 +285,14 @@ export default function PlanlyPage() {
         <button
           onClick={() => setActiveTab("completed")}
           className={cn(
-            "flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors",
+            "flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium rounded-lg transition-colors",
             activeTab === "completed"
               ? "bg-zinc-800 text-zinc-100 shadow-sm"
               : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60"
           )}
         >
           <span>Completed</span>
-          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-800 px-1.5 text-[10px] font-bold text-zinc-500">
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-800 px-1.5 text-[11px] font-semibold text-zinc-500">
             0
           </span>
         </button>
@@ -306,12 +306,12 @@ export default function PlanlyPage() {
           {/* Main Active Plan Card */}
           <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle hover:border-zinc-700/80 transition-all duration-200">
             {/* Top Sub-header Bar */}
-            <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-950/60 px-5 py-2.5 text-xs text-blue-400 font-medium">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-950/60 px-5 py-2.5 text-[13px] text-blue-400 font-normal">
               <div className="flex items-center gap-2">
                 <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
                 <span>Starts in 5 days &middot; Ready to begin &middot; 61 days total</span>
               </div>
-              <span className="text-[11px] font-mono text-zinc-500">Scheduled: 1 Oct 2026</span>
+              <span className="text-[12px] text-zinc-500">Scheduled: 1 Oct 2026</span>
             </div>
 
             {/* Plan Card Body */}
@@ -319,18 +319,18 @@ export default function PlanlyPage() {
               {/* Left Plan Meta */}
               <div className="space-y-1">
                 <div className="flex items-center gap-2.5">
-                  <h3 className="text-base sm:text-lg font-bold text-zinc-100 tracking-tight">
+                  <h3 className="text-[16px] font-semibold leading-[1.35] text-zinc-100">
                     {plan?.name || "Crack SDE"}
                   </h3>
-                  <Badge variant="blue" className="text-[10px] font-semibold">
+                  <Badge variant="blue" className="text-[12px] font-medium">
                     <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse mr-1" />
                     Active Plan
                   </Badge>
                 </div>
-                <div className="text-xs text-zinc-400 flex flex-wrap items-center gap-2 font-normal">
-                  <span>Target Role: <strong className="text-zinc-300 font-medium">Software Engineer</strong></span>
+                <div className="text-[13px] text-zinc-400 flex flex-wrap items-center gap-2 font-normal leading-[1.45]">
+                  <span>Target Role: <strong className="text-zinc-300 font-normal">Software Engineer</strong></span>
                   <span>&middot;</span>
-                  <span>Pacing: <strong className="text-zinc-300 font-medium">4 hrs/day</strong></span>
+                  <span>Pacing: <strong className="text-zinc-300 font-normal">4 hrs/day</strong></span>
                   <span>&middot;</span>
                   <span>9 Sprints</span>
                 </div>
@@ -342,7 +342,7 @@ export default function PlanlyPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => setIsPlanDetailOpen((prev) => !prev)}
-                  className="h-8 text-xs font-medium border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800"
+                  className="h-8 text-[13px] font-medium border-zinc-800 bg-zinc-900 text-zinc-200 hover:bg-zinc-800"
                 >
                   {isPlanDetailOpen ? "Collapse schedule" : "View schedule & sprints"}
                 </Button>
@@ -359,7 +359,7 @@ export default function PlanlyPage() {
 
                   {isActionMenuOpen && (
                     <div
-                      className="absolute right-0 top-full mt-1.5 w-48 rounded-xl border border-zinc-800 bg-zinc-950 p-1 text-xs shadow-dialog z-30 divide-y divide-zinc-800/80 animate-in fade-in-0 duration-150"
+                      className="absolute right-0 top-full mt-1.5 w-48 rounded-xl border border-zinc-800 bg-zinc-950 p-1 text-[13px] shadow-dialog z-30 divide-y divide-zinc-800/80 animate-in fade-in-0 duration-150"
                       onClick={() => setIsActionMenuOpen(false)}
                     >
                       <div className="py-1">
@@ -409,37 +409,37 @@ export default function PlanlyPage() {
                 {/* 4 Overview KPI Metric Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
                   <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1 shadow-subtle">
-                    <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
+                    <div className="flex items-center gap-2 text-[13px] font-medium text-zinc-400">
                       <TrendingUp className="h-3.5 w-3.5 text-blue-400" />
                       <span>Overall progress</span>
                     </div>
                     <div className="flex items-baseline gap-2 pt-1">
-                      <span className="text-xl font-bold tracking-tight text-zinc-100">{progressPercent}%</span>
-                      <span className="text-xs text-zinc-500">{completedDaysCount} / 61 days</span>
+                      <span className="text-[18px] font-semibold leading-[1.3] text-zinc-100">{progressPercent}%</span>
+                      <span className="text-[12px] text-zinc-500">{completedDaysCount} / 61 days</span>
                     </div>
                     <Progress value={progressPercent} className="mt-2" />
                   </div>
 
                   <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1 shadow-subtle">
-                    <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
+                    <div className="flex items-center gap-2 text-[13px] font-medium text-zinc-400">
                       <Clock className="h-3.5 w-3.5 text-amber-400" />
                       <span>Time spent</span>
                     </div>
                     <div className="flex items-baseline gap-2 pt-1">
-                      <span className="text-xl font-bold tracking-tight text-zinc-100">0m</span>
-                      <span className="text-xs text-zinc-500">of {totalHours}h {remainingMinutes}m</span>
+                      <span className="text-[18px] font-semibold leading-[1.3] text-zinc-100">0m</span>
+                      <span className="text-[12px] text-zinc-500">of {totalHours}h {remainingMinutes}m</span>
                     </div>
                     <Progress value={0} className="mt-2" />
                   </div>
 
                   <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1 shadow-subtle">
-                    <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
+                    <div className="flex items-center gap-2 text-[13px] font-medium text-zinc-400">
                       <Layers className="h-3.5 w-3.5 text-purple-400" />
                       <span>Sprints completed</span>
                     </div>
                     <div className="flex items-baseline gap-2 pt-1">
-                      <span className="text-xl font-bold tracking-tight text-zinc-100">{completedSprintsCount}</span>
-                      <span className="text-xs text-zinc-500">of {totalSprintsCount} sprints</span>
+                      <span className="text-[18px] font-semibold leading-[1.3] text-zinc-100">{completedSprintsCount}</span>
+                      <span className="text-[12px] text-zinc-500">of {totalSprintsCount} sprints</span>
                     </div>
                     <Progress
                       value={(completedSprintsCount / totalSprintsCount) * 100}
@@ -448,15 +448,15 @@ export default function PlanlyPage() {
                   </div>
 
                   <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-1 shadow-subtle">
-                    <div className="flex items-center gap-2 text-xs font-medium text-zinc-400">
+                    <div className="flex items-center gap-2 text-[13px] font-medium text-zinc-400">
                       <CalendarIcon className="h-3.5 w-3.5 text-emerald-400" />
                       <span>Est. completion</span>
                     </div>
                     <div className="flex items-baseline gap-2 pt-1">
-                      <span className="text-xl font-bold tracking-tight text-zinc-100">30 Nov</span>
-                      <span className="text-xs text-zinc-500">2026</span>
+                      <span className="text-[18px] font-semibold leading-[1.3] text-zinc-100">30 Nov</span>
+                      <span className="text-[12px] text-zinc-500">2026</span>
                     </div>
-                    <div className="text-[11px] text-emerald-400 font-medium pt-1 flex items-center gap-1">
+                    <div className="text-[12px] text-emerald-400 font-normal pt-1 flex items-center gap-1">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> On schedule
                     </div>
                   </div>
@@ -500,16 +500,16 @@ export default function PlanlyPage() {
                             className="flex items-center justify-between p-3.5 sm:p-4 cursor-pointer select-none hover:bg-zinc-900/60 transition-colors"
                           >
                             <div className="flex items-center gap-2.5">
-                              <Badge variant="blue" className="text-xs font-semibold">
+                              <Badge variant="blue" className="text-[12px] font-medium">
                                 Sprint {sprint.sprintNo}
                               </Badge>
-                              <span className="text-xs text-zinc-300 font-medium hidden sm:inline">
+                              <span className="text-[13px] text-zinc-300 font-normal hidden sm:inline">
                                 • {sprintSubjects}
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-3 text-xs text-zinc-400">
-                              <span className="text-[11px] font-mono text-zinc-400">
+                            <div className="flex items-center gap-3 text-[12px] text-zinc-400">
+                              <span className="text-[12px] text-zinc-400">
                                 Est. {sprintTotalHours}h {sprintRemainingMinutes}m
                               </span>
                               <ChevronDown
@@ -542,7 +542,7 @@ export default function PlanlyPage() {
                                       }
                                       className="flex items-center justify-between p-3 cursor-pointer hover:bg-zinc-900/80 transition-colors"
                                     >
-                                      <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
+                                      <div className="flex items-center gap-2 text-[13px] font-medium text-zinc-200">
                                         <ChevronDown
                                           className={cn(
                                             "h-3.5 w-3.5 text-blue-400 transition-transform duration-200",
@@ -550,13 +550,13 @@ export default function PlanlyPage() {
                                           )}
                                         />
                                         <span>Day {day.sprintDayNo}</span>
-                                        <span className="text-[10px] text-zinc-500 font-normal">
+                                        <span className="text-[12px] text-zinc-500 font-normal">
                                           ({day.tasksCompleted} / {day.tasksTotal} completed)
                                         </span>
                                       </div>
 
-                                      <div className="flex items-center gap-2 text-xs text-zinc-400">
-                                        <span className="font-mono text-[11px]">
+                                      <div className="flex items-center gap-2 text-[12px] text-zinc-400">
+                                        <span>
                                           Est. {dayHours > 0 ? `${dayHours}h ` : ""}{dayMinutes}m
                                         </span>
                                         <ChevronRight className="h-3.5 w-3.5 text-blue-400" />
@@ -575,7 +575,7 @@ export default function PlanlyPage() {
                                             <div
                                               key={task.taskId}
                                               className={cn(
-                                                "flex items-center justify-between px-3.5 py-2.5 text-xs transition-colors hover:bg-zinc-900/60 group",
+                                                "flex items-center justify-between px-3.5 py-2.5 text-[13px] transition-colors hover:bg-zinc-900/60 group",
                                                 isCompleted && "bg-zinc-900/20 opacity-70"
                                               )}
                                             >
@@ -596,14 +596,14 @@ export default function PlanlyPage() {
 
                                                 <div className="flex items-center gap-1.5 shrink-0">
                                                   {getSubjectBadge(task.item?.subjectSlug, subjectName)}
-                                                  <span className="text-[10px] text-zinc-500 font-medium hidden sm:inline">
+                                                  <span className="text-[12px] text-zinc-500 font-normal hidden sm:inline">
                                                     {topicName} &middot;
                                                   </span>
                                                 </div>
 
                                                 <span
                                                   className={cn(
-                                                    "font-medium text-zinc-200 truncate cursor-pointer hover:text-blue-400 transition-colors",
+                                                    "font-normal text-zinc-200 truncate cursor-pointer hover:text-blue-400 transition-colors text-[13px] leading-[1.45]",
                                                     isCompleted && "line-through text-zinc-500"
                                                   )}
                                                   onClick={() => handleToggleTaskStatus(task)}
@@ -629,7 +629,7 @@ export default function PlanlyPage() {
                                                   />
                                                 </button>
 
-                                                <span className="font-mono text-[10px] text-zinc-500 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
+                                                <span className="text-[12px] text-zinc-500 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">
                                                   {task.estimatedMinutes}m
                                                 </span>
                                               </div>
@@ -653,18 +653,18 @@ export default function PlanlyPage() {
                     {/* Revision list preview */}
                     <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3 shadow-subtle">
                       <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                        <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
+                        <div className="flex items-center gap-2 text-[14px] font-semibold text-zinc-200">
                           <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                           <span>Revision List</span>
                           {revisionListData && revisionListData.length > 0 && (
-                            <Badge variant="blue" className="text-[10px] py-0 px-1.5 font-mono">
+                            <Badge variant="blue" className="text-[12px] py-0.5 px-2 font-medium">
                               {revisionListData.length}
                             </Badge>
                           )}
                         </div>
                         <button
                           onClick={() => setIsRevisionModalOpen(true)}
-                          className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                          className="text-[13px] font-medium text-blue-400 hover:text-blue-300 transition-colors"
                         >
                           View all
                         </button>
@@ -672,10 +672,10 @@ export default function PlanlyPage() {
 
                       {/* Day 1 Schedule Preview */}
                       <div className="space-y-2 pt-1">
-                        <div className="text-xs font-semibold text-zinc-300">
+                        <div className="text-[13px] font-medium text-zinc-300">
                           Day 1 Schedule Preview
                         </div>
-                        <div className="flex items-center gap-3 text-[11px] text-zinc-400 bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/80">
+                        <div className="flex items-center gap-3 text-[12px] text-zinc-400 bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/80">
                           <span>{day1Tasks.length || 20} topics</span>
                           <span>&middot;</span>
                           <span>3h 53m planned</span>
@@ -685,10 +685,10 @@ export default function PlanlyPage() {
                           {day1Tasks.slice(0, 8).map((t, idx) => (
                             <div
                               key={t.taskId || idx}
-                              className="flex items-center justify-between py-1 px-1.5 rounded text-[11px] text-zinc-300 hover:bg-zinc-800/40 transition-colors"
+                              className="flex items-center justify-between py-1 px-1.5 rounded text-[12px] text-zinc-300 hover:bg-zinc-800/40 transition-colors"
                             >
                               <span className="truncate pr-2">{t.item?.title || `Task #${idx + 1}`}</span>
-                              <span className="text-zinc-500 font-mono text-[10px] shrink-0">
+                              <span className="text-zinc-500 text-[11px] shrink-0">
                                 {t.estimatedMinutes}m
                               </span>
                             </div>

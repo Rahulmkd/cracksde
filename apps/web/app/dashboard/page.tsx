@@ -98,18 +98,18 @@ export default function DashboardPage() {
       {/* ========================================================================= */}
       {/* 1. TOP ANNOUNCEMENT BANNER */}
       {/* ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-2.5 text-xs text-zinc-300 shadow-subtle">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-2.5 text-[13px] text-zinc-300 shadow-subtle">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 text-blue-400 font-bold text-[11px] shrink-0">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 text-blue-400 font-semibold text-[11px] shrink-0">
             ✦
           </span>
-          <p className="truncate text-zinc-300 text-xs font-normal">
-            <strong className="text-blue-400 font-semibold">Zenkai Curriculum Active</strong> &middot; Your problem sheets have been structured with day-wise sprint goals.
+          <p className="truncate text-zinc-300 text-[13px] font-normal leading-[1.45]">
+            <strong className="text-blue-400 font-medium">Zenkai Curriculum Active</strong> &middot; Your problem sheets have been structured with day-wise sprint goals.
           </p>
         </div>
         <Link
           href="/prep-hub"
-          className="shrink-0 text-xs font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors self-start sm:self-auto"
+          className="shrink-0 text-[13px] font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors self-start sm:self-auto"
         >
           Explore Curriculum <ArrowRight className="h-3 w-3" />
         </Link>
@@ -119,11 +119,11 @@ export default function DashboardPage() {
       {/* 2. GREETING SECTION */}
       {/* ========================================================================= */}
       <div className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
+        <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100 flex items-center gap-2">
           <span>Good afternoon, Rahul</span>
           <span className="inline-block">👋</span>
         </h1>
-        <p className="text-xs sm:text-sm text-zinc-400">
+        <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
           The day gets heavy around now. Good to see you still going. Keep up the momentum!
         </p>
       </div>
@@ -149,15 +149,15 @@ export default function DashboardPage() {
 
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
               <div className="space-y-3 max-w-xl">
-                <span className="inline-block rounded-md border border-zinc-800 bg-zinc-950/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+                <span className="inline-block rounded-md border border-zinc-800 bg-zinc-950/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
                   PLANLY &middot; Personal Study Planner
                 </span>
 
-                <h2 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-100 leading-snug">
+                <h2 className="text-[24px] font-semibold leading-[1.25] tracking-tight text-zinc-100">
                   Know what to study every day and readjust as you go
                 </h2>
 
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-[13px] font-normal text-zinc-400 leading-[1.45]">
                   Personalized day-by-day study roadmap adapted to your schedule, weak areas, and interview targets.
                 </p>
 
@@ -165,7 +165,7 @@ export default function DashboardPage() {
                   <Button
                     asChild
                     size="sm"
-                    className="h-8 px-4 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                    className="h-8 px-4 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                   >
                     <Link href="/onboarding">
                       Build my plan <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
@@ -176,7 +176,7 @@ export default function DashboardPage() {
                     asChild
                     size="sm"
                     variant="outline"
-                    className="h-8 px-4 text-xs"
+                    className="h-8 px-4 text-[13px] font-medium"
                   >
                     <Link href="/planly">View Plan Schedule</Link>
                   </Button>
@@ -184,12 +184,12 @@ export default function DashboardPage() {
               </div>
 
               {/* Right Tagline */}
-              <div className="hidden md:flex flex-col items-end justify-center text-right text-xs text-zinc-400 pr-2 space-y-1">
-                <span className="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">Timeline</span>
-                <p className="font-medium text-zinc-300">
+              <div className="hidden md:flex flex-col items-end justify-center text-right text-[13px] text-zinc-400 pr-2 space-y-1">
+                <span className="text-[12px] uppercase tracking-wider text-zinc-500 font-medium">Timeline</span>
+                <p className="font-normal text-zinc-300">
                   Target: <strong className="text-blue-400 font-semibold">61 Days</strong>
                 </p>
-                <span className="text-[11px] text-zinc-500">9 structured sprints</span>
+                <span className="text-[12px] text-zinc-500 font-normal">9 structured sprints</span>
               </div>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function DashboardPage() {
           {/* YOUR PROGRESS SECTION (2 COMPACT CARDS) */}
           {/* ===================================================================== */}
           <div className="space-y-3">
-            <h2 className="text-base font-semibold tracking-tight text-zinc-100">
+            <h2 className="text-[18px] font-semibold leading-[1.3] tracking-tight text-zinc-100">
               Your Progress
             </h2>
 
@@ -206,7 +206,7 @@ export default function DashboardPage() {
               {/* CARD 1: DSA PROGRESS (CENTERED DONUT RADIAL METER) */}
               <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-4 hover:border-zinc-700/80 transition-all duration-200 shadow-subtle flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-zinc-200">DSA Progress</span>
+                  <span className="text-[16px] font-semibold leading-[1.35] text-zinc-100">DSA Progress</span>
                   <div className="text-zinc-500 hover:text-zinc-300 cursor-pointer" title="DSA problem solving progress">
                     <Info className="h-3.5 w-3.5" />
                   </div>
@@ -241,44 +241,44 @@ export default function DashboardPage() {
 
                     {/* Center stats count */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none">
-                      <span className="text-2xl font-bold text-zinc-100 tracking-tight leading-none">
+                      <span className="text-[20px] font-semibold text-zinc-100 tracking-tight leading-none">
                         {completedTasks}
                       </span>
-                      <span className="text-[10px] font-mono text-zinc-500 mt-1">
+                      <span className="text-[12px] text-zinc-500 mt-1">
                         / 1369
                       </span>
                     </div>
                   </div>
 
                   {/* Level Breakdown Legend */}
-                  <div className="space-y-2 text-xs">
+                  <div className="space-y-2 text-[13px]">
                     <div className="flex items-center justify-between gap-5">
                       <div className="flex items-center gap-2">
                         <span className="h-2 w-2 rounded-sm bg-emerald-500" />
-                        <span className="text-zinc-300 font-medium text-xs">Basic</span>
+                        <span className="text-zinc-300 font-normal text-[13px]">Basic</span>
                       </div>
-                      <span className="font-mono text-[11px] text-zinc-400">0 / 214</span>
+                      <span className="text-[12px] text-zinc-400">0 / 214</span>
                     </div>
 
                     <div className="flex items-center justify-between gap-5">
                       <div className="flex items-center gap-2">
                         <span className="h-2 w-2 rounded-sm bg-amber-400" />
-                        <span className="text-zinc-300 font-medium text-xs">Core</span>
+                        <span className="text-zinc-300 font-normal text-[13px]">Core</span>
                       </div>
-                      <span className="font-mono text-[11px] text-zinc-400">0 / 843</span>
+                      <span className="text-[12px] text-zinc-400">0 / 843</span>
                     </div>
 
                     <div className="flex items-center justify-between gap-5">
                       <div className="flex items-center gap-2">
                         <span className="h-2 w-2 rounded-sm bg-rose-500" />
-                        <span className="text-zinc-300 font-medium text-xs">Pro</span>
+                        <span className="text-zinc-300 font-normal text-[13px]">Pro</span>
                       </div>
-                      <span className="font-mono text-[11px] text-zinc-400">0 / 312</span>
+                      <span className="text-[12px] text-zinc-400">0 / 312</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-500">
+                <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[12px] text-zinc-500">
                   <span>Accuracy: --</span>
                   <Link href="/practice" className="text-blue-400 hover:text-blue-300 font-medium">
                     View full problem list &rarr;
@@ -288,7 +288,7 @@ export default function DashboardPage() {
 
               {/* CARD 2: CATEGORY-WISE PROGRESS */}
               <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-3 hover:border-zinc-700/80 transition-all duration-200 shadow-subtle flex flex-col justify-between">
-                <span className="text-xs font-semibold text-zinc-200">Category-wise Progress</span>
+                <span className="text-[16px] font-semibold leading-[1.35] text-zinc-100">Category-wise Progress</span>
 
                 <div className="space-y-2 pt-1">
                   {categories.map((cat) => {
@@ -303,12 +303,12 @@ export default function DashboardPage() {
                             <Icon className="h-3.5 w-3.5" />
                           </div>
                           <div className="truncate">
-                            <div className="text-xs font-semibold text-zinc-200 truncate">{cat.name}</div>
-                            <div className="text-[10px] font-mono text-zinc-500">{cat.count}</div>
+                            <div className="text-[13px] font-medium text-zinc-200 truncate">{cat.name}</div>
+                            <div className="text-[12px] text-zinc-500">{cat.count}</div>
                           </div>
                         </div>
 
-                        <div className="text-xs font-mono font-semibold text-zinc-400 shrink-0">
+                        <div className="text-[13px] font-medium text-zinc-400 shrink-0">
                           {cat.percent}%
                         </div>
                       </div>
@@ -316,7 +316,7 @@ export default function DashboardPage() {
                   })}
                 </div>
 
-                <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-500">
+                <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[12px] text-zinc-500">
                   <span>4 core subject areas</span>
                   <Link href="/prep-hub" className="text-blue-400 hover:text-blue-300 font-medium">
                     Explore modules &rarr;
@@ -331,11 +331,11 @@ export default function DashboardPage() {
           {/* ===================================================================== */}
           <div className="space-y-3.5 pt-1">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-base font-semibold tracking-tight text-zinc-100">
+              <div className="flex items-center gap-1.5 text-[18px] font-semibold leading-[1.3] tracking-tight text-zinc-100">
                 <span className="text-blue-400 text-xs">✦</span>
                 <h2>Explore Popular Topics</h2>
               </div>
-              <Link href="/practice" className="text-xs font-medium text-blue-400 hover:text-blue-300">
+              <Link href="/practice" className="text-[13px] font-medium text-blue-400 hover:text-blue-300">
                 View all topics &rarr;
               </Link>
             </div>
@@ -348,28 +348,28 @@ export default function DashboardPage() {
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded border border-zinc-800 bg-zinc-950 text-zinc-400">
+                      <span className="text-[12px] font-medium px-2 py-0.5 rounded border border-zinc-800 bg-zinc-950 text-zinc-400">
                         {topic.category}
                       </span>
-                      <span className="text-[10px] text-zinc-500 font-mono">
+                      <span className="text-[12px] text-zinc-500">
                         {topic.problems} items
                       </span>
                     </div>
 
-                    <h3 className="text-sm font-semibold text-zinc-200 group-hover:text-blue-400 transition-colors">
+                    <h3 className="text-[16px] font-semibold leading-[1.35] text-zinc-200 group-hover:text-blue-400 transition-colors">
                       {topic.title}
                     </h3>
 
-                    <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                    <p className="text-[13px] font-normal text-zinc-400 leading-[1.45] line-clamp-2">
                       {topic.desc}
                     </p>
                   </div>
 
-                  <div className="pt-2.5 border-t border-zinc-800/60 flex items-center justify-between text-xs">
-                    <span className="text-[10px] text-zinc-500 font-medium">{topic.badge}</span>
+                  <div className="pt-2.5 border-t border-zinc-800/60 flex items-center justify-between text-[12px]">
+                    <span className="text-[12px] text-zinc-500 font-normal">{topic.badge}</span>
                     <Link
                       href={topic.link}
-                      className="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 text-xs"
+                      className="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 text-[13px]"
                     >
                       Practice <ChevronRight className="h-3 w-3" />
                     </Link>

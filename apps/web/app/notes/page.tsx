@@ -148,14 +148,14 @@ export default function NotesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
             <FileText className="h-3.5 w-3.5 text-blue-400" />
             <span>NoteSpace</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+          <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
             Interview Notes &amp; Cheatsheets
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400">
+          <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
             Write, review, and organize custom technical notes, algorithmic patterns, and system design summaries.
           </p>
         </div>
@@ -163,7 +163,7 @@ export default function NotesPage() {
         <Button
           size="sm"
           onClick={handleOpenCreate}
-          className="h-8 px-3.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+          className="h-8 px-3.5 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
         >
           <Plus className="h-3.5 w-3.5 mr-1" /> New Note
         </Button>
@@ -178,21 +178,21 @@ export default function NotesPage() {
             placeholder="Search notes by title or tags..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-2 text-[13px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-          <span className="text-zinc-500 text-[11px] font-medium mr-1">Subject:</span>
+        <div className="flex flex-wrap items-center gap-2 pt-1 text-[13px]">
+          <span className="text-zinc-500 text-[12px] font-medium mr-1">Subject:</span>
           {["all", "DSA", "DBMS", "Operating Systems", "Computer Networks", "System Design"].map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => setSelectedSubject(s)}
               className={cn(
-                "rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors select-none",
+                "rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors select-none",
                 selectedSubject === s
-                  ? "bg-blue-600/15 text-blue-400 border border-blue-500/30 font-semibold"
+                  ? "bg-blue-600/15 text-blue-400 border border-blue-500/30"
                   : "border border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
               )}
             >
@@ -213,30 +213,30 @@ export default function NotesPage() {
             >
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <Badge variant="blue" className="text-[10px]">
+                  <Badge variant="blue" className="text-[12px] font-medium">
                     {note.subject}
                   </Badge>
-                  <span className="text-[10px] text-zinc-500 font-mono flex items-center gap-1">
+                  <span className="text-[12px] text-zinc-500 flex items-center gap-1">
                     <Clock className="h-3 w-3" /> {note.updatedAt}
                   </span>
                 </div>
 
-                <h3 className="text-sm font-semibold text-zinc-100 group-hover:text-blue-400 transition-colors line-clamp-2">
+                <h3 className="text-[16px] font-semibold leading-[1.35] text-zinc-100 group-hover:text-blue-400 transition-colors line-clamp-2">
                   {note.title}
                 </h3>
 
                 <div
-                  className="text-xs text-zinc-400 line-clamp-3 leading-relaxed"
+                  className="text-[13px] font-normal text-zinc-400 line-clamp-3 leading-[1.45]"
                   dangerouslySetInnerHTML={{ __html: note.content }}
                 />
               </div>
 
-              <div className="pt-3 border-t border-zinc-800/60 flex items-center justify-between text-xs">
+              <div className="pt-3 border-t border-zinc-800/60 flex items-center justify-between text-[12px]">
                 <div className="flex flex-wrap gap-1 overflow-hidden">
                   {note.tags.slice(0, 2).map((t, idx) => (
                     <span
                       key={idx}
-                      className="text-[10px] font-mono text-zinc-500 bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-800"
+                      className="text-[12px] text-zinc-500 bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-800"
                     >
                       #{t}
                     </span>

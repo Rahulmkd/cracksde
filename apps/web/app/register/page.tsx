@@ -84,13 +84,13 @@ export default function RegisterPage() {
       <div className="w-full max-w-md space-y-5 animate-in fade-in-50 duration-200">
         <Card className="border border-zinc-800/80 bg-zinc-900/40 p-6 sm:p-8 shadow-card">
           <CardHeader className="text-center space-y-2 p-0 pb-6">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-sm shadow-blue-600/20 text-white font-bold text-sm">
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-sm shadow-blue-600/20 text-white font-semibold text-[14px]">
               ⚡
             </div>
-            <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
+            <CardTitle className="text-[20px] font-semibold leading-[1.25] tracking-tight text-zinc-100">
               Create an account
             </CardTitle>
-            <CardDescription className="text-xs text-zinc-400">
+            <CardDescription className="text-[13px] font-normal leading-[1.45] text-zinc-400">
               Get started with your personalized SDE preparation sprint
             </CardDescription>
           </CardHeader>
@@ -98,13 +98,13 @@ export default function RegisterPage() {
           <CardContent className="p-0 space-y-4">
             <form onSubmit={handleSubmit} className="space-y-3.5">
               {error && (
-                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-xs text-red-400 font-medium">
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-[13px] text-red-400 font-normal">
                   {error}
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-xs font-semibold text-zinc-200">Full Name</Label>
+                <Label htmlFor="name" className="text-[13px] font-medium text-zinc-200">Full Name</Label>
                 <Input
                   id="name"
                   type="text"
@@ -117,7 +117,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-xs font-semibold text-zinc-200">Email Address</Label>
+                <Label htmlFor="email" className="text-[13px] font-medium text-zinc-200">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
@@ -130,7 +130,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="password" className="text-xs font-semibold text-zinc-200">Password</Label>
+                <Label htmlFor="password" className="text-[13px] font-medium text-zinc-200">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -143,7 +143,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="confirmPassword" className="text-xs font-semibold text-zinc-200">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="text-[13px] font-medium text-zinc-200">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -158,7 +158,7 @@ export default function RegisterPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-10 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-2"
+                className="w-full h-10 text-[14px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-2"
               >
                 {loading ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -170,7 +170,7 @@ export default function RegisterPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-zinc-400">
+        <p className="text-center text-[13px] text-zinc-400">
           Already have an account?{" "}
           <Link
             href="/login"

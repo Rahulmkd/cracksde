@@ -67,9 +67,9 @@ export function TabsTrigger({
       type="button"
       onClick={() => context?.onValueChange(value)}
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-xs font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-[13px] font-medium leading-[1.4] transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50",
         isActive
-          ? "bg-zinc-800 text-zinc-100 shadow-sm font-semibold"
+          ? "bg-zinc-800 text-zinc-100 shadow-sm font-medium"
           : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50",
         className
       )}

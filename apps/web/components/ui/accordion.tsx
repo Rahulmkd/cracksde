@@ -88,7 +88,7 @@ export function AccordionTrigger({
         onClick?.();
       }}
       className={cn(
-        "flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-800/40",
+        "flex w-full items-center justify-between px-4 py-3 text-[14px] font-medium leading-[1.4] text-zinc-200 transition-colors hover:bg-zinc-800/40",
         className
       )}
     >
@@ -120,7 +120,7 @@ export function AccordionContent({
   return (
     <div
       className={cn(
-        "border-t border-zinc-800/60 bg-zinc-950/60 px-4 py-3 text-xs text-zinc-300 animate-in fade-in-0 duration-150",
+        "border-t border-zinc-800/60 bg-zinc-950/60 px-4 py-3 text-[13px] font-normal leading-[1.45] text-zinc-300 animate-in fade-in-0 duration-150",
         className
       )}
     >

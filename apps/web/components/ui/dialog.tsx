@@ -101,7 +101,7 @@ export function DialogTitle({
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h2
-      className={cn("text-base sm:text-lg font-bold tracking-tight text-zinc-100", className)}
+      className={cn("text-[18px] font-semibold leading-[1.3] text-zinc-100", className)}
       {...props}
     />
   );
@@ -113,7 +113,7 @@ export function DialogDescription({
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
-      className={cn("text-xs text-zinc-400 leading-relaxed", className)}
+      className={cn("text-[13px] font-normal text-zinc-400 leading-[1.45]", className)}
       {...props}
     />
   );

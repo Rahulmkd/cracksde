@@ -56,38 +56,38 @@ export function Header() {
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="flex h-8 items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/60 px-2.5 text-xs text-zinc-400 transition-colors hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-200"
+              className="flex h-8 items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/60 px-2.5 text-[13px] font-normal text-zinc-400 transition-colors hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-200"
             >
               <Search className="h-3.5 w-3.5 text-zinc-500" />
               <span className="hidden sm:inline">Search problems, subjects...</span>
               <span className="sm:hidden">Search</span>
-              <kbd className="hidden rounded bg-zinc-800 border border-zinc-700/60 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400 sm:inline">
+              <kbd className="hidden rounded bg-zinc-800 border border-zinc-700/60 px-1.5 py-0.5 font-mono text-[11px] text-zinc-400 sm:inline">
                 ⌘K
               </kbd>
             </button>
 
             {/* Coin / Points Counter */}
             <div
-              className="flex h-8 items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-2.5 text-xs font-semibold text-amber-300 select-none"
+              className="flex h-8 items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-2.5 text-[13px] font-semibold text-amber-300 select-none"
               title="2 CrackSDE Points"
             >
-              <span className="text-xs">🟡</span>
-              <span className="font-mono text-xs">2</span>
+              <span className="text-[12px]">🟡</span>
+              <span className="text-[13px] font-medium">2</span>
             </div>
 
             {/* Streak Counter */}
             <div
-              className="flex h-8 items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-2.5 text-xs font-semibold text-orange-400 select-none"
+              className="flex h-8 items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-2.5 text-[13px] font-semibold text-orange-400 select-none"
               title="Current Daily Streak: 0 days"
             >
               <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-500" />
-              <span className="font-mono text-xs">0</span>
+              <span className="text-[13px] font-medium">0</span>
             </div>
 
             {/* Profile Avatar Button */}
             <button
               onClick={() => router.push("/dashboard")}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-800 bg-blue-600/20 text-xs font-semibold text-blue-400 transition-colors hover:border-blue-500/50 hover:bg-blue-600/30"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-800 bg-blue-600/20 text-[12px] font-semibold text-blue-400 transition-colors hover:border-blue-500/50 hover:bg-blue-600/30"
               aria-label="User Profile"
               title="Rahul Mahakud"
             >
@@ -108,7 +108,7 @@ export function Header() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus
-              className="flex-1 bg-transparent text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
+              className="flex-1 bg-transparent text-[13px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
             />
             {searchQuery && (
               <button
@@ -126,22 +126,22 @@ export function Header() {
                 <div
                   key={idx}
                   onClick={() => handleSelectSearch(item.href)}
-                  className="flex items-center justify-between rounded-lg px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white cursor-pointer transition-colors"
+                  className="flex items-center justify-between rounded-lg px-3 py-2 text-[13px] font-normal text-zinc-300 hover:bg-zinc-900 hover:text-white cursor-pointer transition-colors"
                 >
-                  <span className="font-medium">{item.title}</span>
-                  <span className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500">
+                  <span className="font-medium text-[13px]">{item.title}</span>
+                  <span className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[11px] text-zinc-500">
                     {item.category}
                   </span>
                 </div>
               ))
             ) : (
-              <div className="py-8 text-center text-xs text-zinc-500">
+              <div className="py-8 text-center text-[13px] text-zinc-500">
                 No matching results found for &ldquo;{searchQuery}&rdquo;
               </div>
             )}
           </div>
 
-          <div className="border-t border-zinc-800/80 bg-zinc-950/80 px-4 py-2 text-[11px] text-zinc-500 flex items-center justify-between">
+          <div className="border-t border-zinc-800/80 bg-zinc-950/80 px-4 py-2 text-[12px] text-zinc-500 flex items-center justify-between">
             <span>Navigate with click</span>
             <span>ESC to close</span>
           </div>

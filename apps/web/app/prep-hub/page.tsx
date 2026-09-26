@@ -116,39 +116,39 @@ export default function PrepHubPage() {
               {/* Left Title & Stats */}
               <div className="space-y-4 max-w-xl">
                 <div className="space-y-1.5">
-                  <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+                  <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
                     <span>Curriculum Hub</span>
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+                  <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
                     Prep Hub
                   </h1>
-                  <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                  <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
                     Your complete knowledge base and practice roadmap across all core SDE interview subjects.
                   </p>
                 </div>
 
                 {/* Statistics Row */}
-                <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-1 text-xs text-zinc-400">
-                  <div className="flex items-center gap-1.5 font-medium">
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-1 text-[13px] text-zinc-400">
+                  <div className="flex items-center gap-1.5 font-normal">
                     <Activity className="h-3.5 w-3.5 text-blue-400 shrink-0" />
-                    <span className="text-zinc-200 font-semibold">26.9K</span>
-                    <span className="text-zinc-500 text-[11px]">Active this month</span>
+                    <span className="text-zinc-200 font-semibold text-[14px]">26.9K</span>
+                    <span className="text-zinc-500 text-[12px]">Active this month</span>
                   </div>
 
                   <span className="text-zinc-700 hidden sm:inline">&middot;</span>
 
-                  <div className="flex items-center gap-1.5 font-medium">
+                  <div className="flex items-center gap-1.5 font-normal">
                     <Users className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                    <span className="text-zinc-200 font-semibold">1.8M</span>
-                    <span className="text-zinc-500 text-[11px]">Total Candidates</span>
+                    <span className="text-zinc-200 font-semibold text-[14px]">1.8M</span>
+                    <span className="text-zinc-500 text-[12px]">Total Candidates</span>
                   </div>
 
                   <span className="text-zinc-700 hidden sm:inline">&middot;</span>
 
-                  <div className="flex items-center gap-1.5 font-medium">
+                  <div className="flex items-center gap-1.5 font-normal">
                     <BookOpen className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-                    <span className="text-zinc-200 font-semibold">16</span>
-                    <span className="text-zinc-500 text-[11px]">Curated Subjects</span>
+                    <span className="text-zinc-200 font-semibold text-[14px]">16</span>
+                    <span className="text-zinc-500 text-[12px]">Curated Subjects</span>
                   </div>
                 </div>
               </div>
@@ -157,10 +157,10 @@ export default function PrepHubPage() {
               <div className="hidden md:flex items-center justify-center shrink-0 pr-2">
                 <div className="relative flex flex-col items-center p-3 rounded-xl border border-zinc-800 bg-zinc-950/80 shadow-card">
                   <div className="h-16 w-28 rounded-lg border border-zinc-800 bg-zinc-900/90 flex flex-col items-center justify-center text-center p-2">
-                    <span className="text-blue-400 font-bold text-sm">⚡ 847</span>
-                    <span className="text-[10px] text-zinc-500 font-mono">Curated Qs</span>
+                    <span className="text-blue-400 font-semibold text-[16px]">⚡ 847</span>
+                    <span className="text-[12px] text-zinc-500">Curated Qs</span>
                   </div>
-                  <div className="mt-2 text-[10px] text-zinc-500 font-medium">
+                  <div className="mt-2 text-[12px] text-zinc-500 font-normal">
                     Full Coverage
                   </div>
                 </div>
@@ -173,10 +173,10 @@ export default function PrepHubPage() {
           {/* ===================================================================== */}
           <div className="space-y-3.5">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold tracking-tight text-zinc-100">
+              <h2 className="text-[18px] font-semibold leading-[1.3] tracking-tight text-zinc-100">
                 Explore Subjects
               </h2>
-              <span className="text-xs text-zinc-500">4 Core Tracks</span>
+              <span className="text-[12px] text-zinc-500">4 Core Tracks</span>
             </div>
 
             <div className="grid gap-3.5">
@@ -200,14 +200,14 @@ export default function PrepHubPage() {
                         {/* Subject Text Details */}
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <h3 className="text-sm sm:text-base font-semibold text-zinc-100 group-hover:text-blue-400 transition-colors">
+                            <h3 className="text-[16px] font-semibold leading-[1.35] text-zinc-100 group-hover:text-blue-400 transition-colors">
                               {sub.name}
                             </h3>
-                            <span className="text-[10px] font-mono text-zinc-500 hidden sm:inline">
+                            <span className="text-[12px] text-zinc-500 hidden sm:inline">
                               • {sub.hours}
                             </span>
                           </div>
-                          <p className="text-xs text-zinc-400 leading-relaxed line-clamp-1 sm:line-clamp-2">
+                          <p className="text-[13px] font-normal leading-[1.45] text-zinc-400 line-clamp-1 sm:line-clamp-2">
                             {sub.description}
                           </p>
                         </div>
@@ -215,9 +215,9 @@ export default function PrepHubPage() {
 
                       {/* Right: Sheets Count + Chevron */}
                       <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-800/60 pl-2">
-                        <div className="flex items-center gap-3 text-xs text-zinc-300">
-                          <span className="text-[11px] text-zinc-500">{sub.modules} Modules</span>
-                          <span className="font-semibold text-zinc-200 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded text-[11px]">
+                        <div className="flex items-center gap-3 text-[13px] text-zinc-300">
+                          <span className="text-[12px] text-zinc-500">{sub.modules} Modules</span>
+                          <span className="font-medium text-zinc-200 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded text-[12px]">
                             {sub.sheets} Sheets
                           </span>
                         </div>

@@ -132,14 +132,14 @@ export default function CommunityPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
             <Users className="h-3.5 w-3.5 text-blue-400" />
             <span>Community Discussions</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+          <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
             Candidate Network &amp; Experiences
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400">
+          <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
             Connect with peers, share recent interview experiences, and discuss tricky technical problems.
           </p>
         </div>
@@ -147,7 +147,7 @@ export default function CommunityPage() {
         <Button
           size="sm"
           onClick={() => setIsNewPostModalOpen(true)}
-          className="h-8 px-3.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+          className="h-8 px-3.5 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
         >
           <Plus className="h-3.5 w-3.5 mr-1" /> Share Experience
         </Button>
@@ -162,7 +162,7 @@ export default function CommunityPage() {
             placeholder="Search interview experiences by company, title, or keywords (e.g. Google, Amazon, LLD)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-2 text-[13px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal"
           />
         </div>
       </div>
@@ -176,12 +176,12 @@ export default function CommunityPage() {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/30 text-xs font-semibold text-blue-400">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/30 text-[12px] font-semibold text-blue-400">
                   {post.avatar}
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-zinc-200">{post.author}</div>
-                  <div className="text-[10px] text-zinc-500 flex items-center gap-1.5">
+                  <div className="text-[13px] font-medium text-zinc-200">{post.author}</div>
+                  <div className="text-[12px] text-zinc-500 flex items-center gap-1.5 font-normal">
                     <span>{post.role}</span>
                     <span>&middot;</span>
                     <span className="flex items-center gap-1">
@@ -191,25 +191,25 @@ export default function CommunityPage() {
                 </div>
               </div>
 
-              <Badge variant="blue" className="text-[10px] font-semibold">
+              <Badge variant="blue" className="text-[12px] font-medium">
                 <Building2 className="h-3 w-3 mr-1" /> {post.company}
               </Badge>
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-semibold text-zinc-100">
+              <h3 className="text-[16px] font-semibold leading-[1.35] text-zinc-100">
                 {post.title}
               </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">{post.content}</p>
+              <p className="text-[13px] font-normal text-zinc-400 leading-[1.45]">{post.content}</p>
             </div>
 
-            <div className="flex items-center gap-4 pt-2 border-t border-zinc-800/60 text-xs text-zinc-400">
+            <div className="flex items-center gap-4 pt-2 border-t border-zinc-800/60 text-[13px] text-zinc-400">
               <button
                 type="button"
                 onClick={() => handleUpvote(post.id)}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors ${
+                className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors text-[13px] font-medium ${
                   post.hasUpvoted
-                    ? "text-blue-400 bg-blue-500/10 font-semibold"
+                    ? "text-blue-400 bg-blue-500/10"
                     : "hover:text-zinc-200 hover:bg-zinc-800/50"
                 }`}
               >
@@ -220,7 +220,7 @@ export default function CommunityPage() {
               <button
                 type="button"
                 onClick={() => toast.info("Opening comments section")}
-                className="flex items-center gap-1.5 px-2 py-1 rounded hover:text-zinc-200 hover:bg-zinc-800/50 transition-colors"
+                className="flex items-center gap-1.5 px-2 py-1 rounded hover:text-zinc-200 hover:bg-zinc-800/50 transition-colors text-[13px] font-medium"
               >
                 <MessageSquare className="h-3.5 w-3.5" />
                 <span>{post.comments} Comments</span>

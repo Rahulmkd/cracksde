@@ -120,14 +120,14 @@ export default function BuganizerPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
             <CalendarCheck2 className="h-3.5 w-3.5 text-blue-400" />
             <span>Buganizer</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+          <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
             Interview Edge-Case &amp; Bug Tracker
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400">
+          <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
             Record recurring coding mistakes, off-by-one errors, and tricky interviewer corner cases to never repeat them.
           </p>
         </div>
@@ -135,7 +135,7 @@ export default function BuganizerPage() {
         <Button
           size="sm"
           onClick={() => setIsAddModalOpen(true)}
-          className="h-8 px-3.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+          className="h-8 px-3.5 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
         >
           <Plus className="h-3.5 w-3.5 mr-1" /> Track New Bug
         </Button>
@@ -150,7 +150,7 @@ export default function BuganizerPage() {
             placeholder="Search edge cases and bug descriptions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-2 text-[13px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal"
           />
         </div>
       </div>
@@ -164,13 +164,13 @@ export default function BuganizerPage() {
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2.5">
-                <Badge variant={bug.category === "DSA" ? "blue" : "success"}>
+                <Badge variant={bug.category === "DSA" ? "blue" : "success"} className="text-[12px] font-medium">
                   {bug.category}
                 </Badge>
-                <Badge variant={bug.severity === "High" ? "destructive" : "warning"}>
+                <Badge variant={bug.severity === "High" ? "destructive" : "warning"} className="text-[12px] font-medium">
                   {bug.severity} Severity
                 </Badge>
-                <Badge variant={bug.status === "Resolved" ? "success" : "secondary"}>
+                <Badge variant={bug.status === "Resolved" ? "success" : "secondary"} className="text-[12px] font-medium">
                   {bug.status}
                 </Badge>
               </div>
@@ -180,7 +180,7 @@ export default function BuganizerPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => toggleBugStatus(bug.id)}
-                  className="h-7 text-[11px]"
+                  className="h-7 text-[12px] font-medium"
                 >
                   <CheckCircle2 className="h-3 w-3 mr-1" />
                   {bug.status === "Resolved" ? "Mark Open" : "Mark Resolved"}
@@ -196,15 +196,15 @@ export default function BuganizerPage() {
             </div>
 
             <div>
-              <h3 className="text-sm sm:text-base font-semibold text-zinc-100">
+              <h3 className="text-[16px] font-semibold leading-[1.35] text-zinc-100">
                 {bug.title}
               </h3>
-              <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{bug.notes}</p>
+              <p className="text-[13px] font-normal text-zinc-400 mt-1 leading-[1.45]">{bug.notes}</p>
             </div>
 
             {bug.solution && (
-              <div className="rounded-lg border border-emerald-500/20 bg-emerald-950/20 p-3 text-xs text-emerald-300 space-y-1">
-                <span className="font-semibold text-emerald-200 flex items-center gap-1">
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-950/20 p-3 text-[13px] text-emerald-300 space-y-1 font-normal leading-[1.45]">
+                <span className="font-semibold text-emerald-200 flex items-center gap-1 text-[13px]">
                   💡 Fix / Preventive Rule:
                 </span>
                 <p>{bug.solution}</p>

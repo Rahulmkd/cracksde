@@ -93,14 +93,14 @@ export default function ListsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
             <ListTodo className="h-3.5 w-3.5 text-blue-400" />
             <span>Curated Lists</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+          <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
             All Problem Sheets
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400">
+          <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
             Structured problem sheets and checklists designed by top engineers to help you crack technical rounds.
           </p>
         </div>
@@ -121,31 +121,31 @@ export default function ListsPage() {
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Badge variant="blue" className="text-[10px]">
+                  <Badge variant="blue" className="text-[12px] font-medium">
                     {sheet.category}
                   </Badge>
-                  <span className="text-[10px] font-mono text-zinc-500">
+                  <span className="text-[12px] text-zinc-500">
                     {sheet.topics} Topics
                   </span>
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-base font-semibold text-zinc-100 group-hover:text-blue-400 transition-colors">
+                  <h3 className="text-[16px] font-semibold leading-[1.35] text-zinc-100 group-hover:text-blue-400 transition-colors">
                     {sheet.title}
                   </h3>
-                  <div className="text-[11px] text-zinc-500 font-medium">By {sheet.author}</div>
+                  <div className="text-[12px] text-zinc-500 font-normal">By {sheet.author}</div>
                 </div>
 
-                <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                <p className="text-[13px] font-normal text-zinc-400 leading-[1.45] line-clamp-2">
                   {sheet.description}
                 </p>
               </div>
 
               <div className="space-y-3 pt-3 border-t border-zinc-800/60">
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-400 text-[11px]">Progress:</span>
-                    <span className="font-mono text-[11px] text-zinc-300 font-semibold">
+                  <div className="flex items-center justify-between text-[12px]">
+                    <span className="text-zinc-400 font-normal">Progress:</span>
+                    <span className="text-zinc-300 font-medium">
                       {sheet.completedProblems} / {sheet.totalProblems}
                     </span>
                   </div>
@@ -156,7 +156,7 @@ export default function ListsPage() {
                   asChild
                   size="sm"
                   variant="outline"
-                  className="w-full h-8 text-xs font-medium border-zinc-800 bg-zinc-900 group-hover:border-blue-500/40 group-hover:text-blue-400"
+                  className="w-full h-8 text-[13px] font-medium border-zinc-800 bg-zinc-900 group-hover:border-blue-500/40 group-hover:text-blue-400"
                 >
                   <Link href="/practice">
                     <span>Open Sheet</span>

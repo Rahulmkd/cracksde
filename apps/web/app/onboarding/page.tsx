@@ -95,17 +95,17 @@ export default function OnboardingPage() {
       {/* Top Navigation */}
       <header className="flex h-14 items-center justify-between border-b border-zinc-800/80 px-4 sm:px-8 bg-zinc-950/85 backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-sm tracking-tight text-zinc-100">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-xs shadow-sm shadow-blue-600/20">
+          <Link href="/dashboard" className="flex items-center gap-2 text-[14px] font-semibold tracking-tight text-zinc-100">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold text-[12px] shadow-sm shadow-blue-600/20">
               ⚡
             </span>
             <span>
-              Planly <span className="text-zinc-500 font-normal text-xs">by</span> <span className="text-zinc-100 font-semibold">Crack SDE</span>
+              Planly <span className="text-zinc-500 font-normal text-[12px]">by</span> <span className="text-zinc-100 font-semibold">Crack SDE</span>
             </span>
           </Link>
         </div>
 
-        <div className="flex items-center gap-4 text-xs text-zinc-400">
+        <div className="flex items-center gap-4 text-[13px] text-zinc-400">
           <button
             onClick={() => {
               store.resetOnboarding();
@@ -117,7 +117,7 @@ export default function OnboardingPage() {
           </button>
           <button
             onClick={() => router.push("/dashboard")}
-            className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+            className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors text-[12px] font-medium"
           >
             Close
           </button>
@@ -132,13 +132,13 @@ export default function OnboardingPage() {
         {store.currentStep === 1 && (
           <div className="space-y-7 animate-in fade-in-50 duration-200">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[11px] font-medium text-zinc-300 uppercase tracking-wider">
                 <span>Step 1 of 6</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+              <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
                 About You
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-400">
+              <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
                 Let&apos;s personalize your preparation roadmap to match your target role and timeline.
               </p>
             </div>
@@ -146,7 +146,7 @@ export default function OnboardingPage() {
             <div className="grid gap-6">
               {/* Question 1: Role */}
               <div className="space-y-2.5">
-                <label className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                <label className="text-[13px] font-medium text-zinc-200 flex items-center gap-1.5">
                   1. Which role are you preparing for?<span className="text-red-400">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2.5">
@@ -158,9 +158,9 @@ export default function OnboardingPage() {
                         type="button"
                         onClick={() => store.setTargetRole(r)}
                         className={cn(
-                          "rounded-lg px-3.5 py-2 text-xs font-medium border transition-all duration-150 select-none",
+                          "rounded-lg px-3.5 py-2 text-[13px] font-medium border transition-all duration-150 select-none",
                           isSelected
-                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm font-semibold"
+                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm"
                             : "border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
                         )}
                       >
@@ -173,7 +173,7 @@ export default function OnboardingPage() {
 
               {/* Question 2: Experience */}
               <div className="space-y-2.5">
-                <label className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                <label className="text-[13px] font-medium text-zinc-200 flex items-center gap-1.5">
                   2. How much engineering experience do you have?<span className="text-red-400">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2.5">
@@ -185,9 +185,9 @@ export default function OnboardingPage() {
                         type="button"
                         onClick={() => store.setExperience(exp)}
                         className={cn(
-                          "rounded-lg px-3.5 py-2 text-xs font-medium border transition-all duration-150 select-none",
+                          "rounded-lg px-3.5 py-2 text-[13px] font-medium border transition-all duration-150 select-none",
                           isSelected
-                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm font-semibold"
+                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm"
                             : "border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
                         )}
                       >
@@ -200,7 +200,7 @@ export default function OnboardingPage() {
 
               {/* Question 3: Target Companies */}
               <div className="space-y-2.5">
-                <label className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                <label className="text-[13px] font-medium text-zinc-200 flex items-center gap-1.5">
                   3. What kind of companies are you mainly targeting?<span className="text-red-400">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2.5">
@@ -212,9 +212,9 @@ export default function OnboardingPage() {
                         type="button"
                         onClick={() => store.setTargetCompany(comp)}
                         className={cn(
-                          "rounded-lg px-3.5 py-2 text-xs font-medium border transition-all duration-150 select-none",
+                          "rounded-lg px-3.5 py-2 text-[13px] font-medium border transition-all duration-150 select-none",
                           isSelected
-                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm font-semibold"
+                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm"
                             : "border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
                         )}
                       >
@@ -227,7 +227,7 @@ export default function OnboardingPage() {
 
               {/* Question 4: Target Region */}
               <div className="space-y-2.5">
-                <label className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                <label className="text-[13px] font-medium text-zinc-200 flex items-center gap-1.5">
                   4. Which region are you preparing for?<span className="text-red-400">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2.5">
@@ -239,9 +239,9 @@ export default function OnboardingPage() {
                         type="button"
                         onClick={() => store.setTargetRegion(reg)}
                         className={cn(
-                          "rounded-lg px-3.5 py-2 text-xs font-medium border transition-all duration-150 select-none",
+                          "rounded-lg px-3.5 py-2 text-[13px] font-medium border transition-all duration-150 select-none",
                           isSelected
-                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm font-semibold"
+                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm"
                             : "border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
                         )}
                       >
@@ -261,20 +261,20 @@ export default function OnboardingPage() {
         {store.currentStep === 2 && (
           <div className="space-y-7 animate-in fade-in-50 duration-200">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[11px] font-medium text-zinc-300 uppercase tracking-wider">
                 <span>Step 2 of 6</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+              <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
                 Recommended Subjects
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-400">
+              <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
                 We selected the key subjects that matter most for your target. You can customize them however you like.
               </p>
             </div>
 
             {/* Core Selected Subjects */}
             <div className="space-y-3">
-              <div className="text-xs font-semibold text-zinc-300">
+              <div className="text-[13px] font-medium text-zinc-300">
                 Core Recommended Track:
               </div>
               <div className="space-y-2.5">
@@ -302,10 +302,10 @@ export default function OnboardingPage() {
                         >
                           {isChecked && <Check className="h-3 w-3 stroke-[3]" />}
                         </div>
-                        <span className="text-xs font-semibold text-zinc-200">{sub.name}</span>
+                        <span className="text-[14px] font-medium text-zinc-200">{sub.name}</span>
                       </div>
                       {sub.recommended && (
-                        <Badge variant="blue" className="text-[10px] py-0 px-2 font-medium">
+                        <Badge variant="blue" className="text-[11px] py-0 px-2 font-medium">
                           Recommended
                         </Badge>
                       )}
@@ -317,7 +317,7 @@ export default function OnboardingPage() {
 
             {/* Other Additional Subjects */}
             <div className="space-y-3 pt-4 border-t border-zinc-800/80">
-              <div className="text-xs font-semibold text-zinc-300">Additional Optional Tracks:</div>
+              <div className="text-[13px] font-medium text-zinc-300">Additional Optional Tracks:</div>
               <div className="flex flex-wrap gap-2.5">
                 {additionalSubjects.map((sub) => {
                   const isChecked = store.selectedSubjects.includes(sub.slug);
@@ -327,15 +327,15 @@ export default function OnboardingPage() {
                       type="button"
                       onClick={() => store.toggleSubject(sub.slug)}
                       className={cn(
-                        "flex items-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-medium transition-all select-none",
+                        "flex items-center gap-2 rounded-lg border px-3.5 py-2 text-[13px] font-medium transition-all select-none",
                         isChecked
-                          ? "border-blue-500 bg-blue-600/15 text-blue-400 font-semibold"
+                          ? "border-blue-500 bg-blue-600/15 text-blue-400"
                           : "border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
                       )}
                     >
                       <span>{sub.name}</span>
                       {sub.recommended && (
-                        <span className="rounded bg-blue-500/20 px-1.5 py-0.2 text-[10px] text-blue-300">
+                        <span className="rounded bg-blue-500/20 px-1.5 py-0.5 text-[11px] font-medium text-blue-300">
                           Recommended
                         </span>
                       )}
@@ -354,13 +354,13 @@ export default function OnboardingPage() {
         {store.currentStep === 3 && (
           <div className="space-y-7 animate-in fade-in-50 duration-200">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[11px] font-medium text-zinc-300 uppercase tracking-wider">
                 <span>Step 3 of 6</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+              <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
                 Select Your Starting Level
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-400">
+              <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
                 Choose the preparation depth and baseline for each selected subject.
               </p>
             </div>
@@ -369,7 +369,7 @@ export default function OnboardingPage() {
               {/* DSA Levels */}
               {store.selectedSubjects.includes("dsa") && (
                 <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Data Structures &amp; Algorithms</h3>
+                  <h3 className="text-[12px] font-medium uppercase tracking-wider text-zinc-400">Data Structures &amp; Algorithms</h3>
                   <div className="grid sm:grid-cols-2 gap-3">
                     {[
                       {
@@ -410,8 +410,8 @@ export default function OnboardingPage() {
                             {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
                           </div>
                           <div>
-                            <div className="text-xs font-bold text-zinc-200">{opt.level}</div>
-                            <div className="text-[11px] text-zinc-400 mt-1 leading-snug">{opt.desc}</div>
+                            <div className="text-[13px] font-medium text-zinc-200">{opt.level}</div>
+                            <div className="text-[12px] text-zinc-400 mt-1 leading-[1.4]">{opt.desc}</div>
                           </div>
                         </div>
                       );
@@ -423,7 +423,7 @@ export default function OnboardingPage() {
               {/* DBMS Levels */}
               {store.selectedSubjects.includes("dbms") && (
                 <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Database Management Systems</h3>
+                  <h3 className="text-[12px] font-medium uppercase tracking-wider text-zinc-400">Database Management Systems</h3>
                   <div className="grid sm:grid-cols-2 gap-3">
                     {[
                       {
@@ -456,8 +456,8 @@ export default function OnboardingPage() {
                             {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
                           </div>
                           <div>
-                            <div className="text-xs font-bold text-zinc-200">{opt.level}</div>
-                            <div className="text-[11px] text-zinc-400 mt-1 leading-snug">{opt.desc}</div>
+                            <div className="text-[13px] font-medium text-zinc-200">{opt.level}</div>
+                            <div className="text-[12px] text-zinc-400 mt-1 leading-[1.4]">{opt.desc}</div>
                           </div>
                         </div>
                       );
@@ -476,23 +476,23 @@ export default function OnboardingPage() {
           <div className="space-y-6 animate-in fade-in-50 duration-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+                <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[11px] font-medium text-zinc-300 uppercase tracking-wider">
                   <span>Step 4 of 6</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+                <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
                   Review Your Personalized Roadmap
                 </h1>
-                <p className="text-xs sm:text-sm text-zinc-400">
+                <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
                   Inspect the curriculum structure and estimated topic hours tailored for your sprint.
                 </p>
               </div>
             </div>
 
             {/* Planned Hours Banner */}
-            <div className="flex items-center gap-2.5 rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-3 text-xs text-blue-300 shadow-subtle">
+            <div className="flex items-center gap-2.5 rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-3 text-[13px] text-blue-300 shadow-subtle">
               <Zap className="h-4 w-4 text-blue-400 shrink-0" />
               <span>
-                We&apos;ve organized <strong className="text-blue-200 font-bold">220.1 hours</strong> of structured learning across your selected tracks.
+                We&apos;ve organized <strong className="text-blue-200 font-semibold">220.1 hours</strong> of structured learning across your selected tracks.
               </span>
             </div>
 
@@ -505,7 +505,7 @@ export default function OnboardingPage() {
                   }
                   className="flex items-center justify-between p-4 cursor-pointer hover:bg-zinc-900 transition-colors select-none"
                 >
-                  <div className="flex items-center gap-3 font-semibold text-xs text-zinc-200">
+                  <div className="flex items-center gap-3 text-[14px] font-medium text-zinc-200">
                     <ChevronDown
                       className={cn(
                         "h-4 w-4 text-zinc-400 transition-transform duration-200",
@@ -514,7 +514,7 @@ export default function OnboardingPage() {
                     />
                     <span>Data Structures &amp; Algorithms</span>
                   </div>
-                  <span className="text-xs text-zinc-400 font-mono">Est. 66h</span>
+                  <span className="text-[12px] text-zinc-400 font-mono">Est. 66h</span>
                 </div>
 
                 {expandedReviewSubject === "dsa" && (
@@ -526,7 +526,7 @@ export default function OnboardingPage() {
                         }
                         className="flex items-center justify-between p-3 cursor-pointer hover:bg-zinc-900/80 transition-colors select-none"
                       >
-                        <div className="flex items-center gap-2.5 text-xs font-medium text-zinc-300">
+                        <div className="flex items-center gap-2.5 text-[13px] font-medium text-zinc-300">
                           <ChevronDown
                             className={cn(
                               "h-3.5 w-3.5 text-zinc-400 transition-transform duration-200",
@@ -539,7 +539,7 @@ export default function OnboardingPage() {
                       </div>
 
                       {expandedReviewTopic === "Arrays" && (
-                        <div className="border-t border-zinc-800/60 bg-zinc-950 p-3 space-y-2 text-xs">
+                        <div className="border-t border-zinc-800/60 bg-zinc-950 p-3 space-y-2 text-[12px]">
                           <div className="pl-3 space-y-1.5 border-l border-zinc-800">
                             {[
                               "Majority Element (Boyer-Moore)",
@@ -549,10 +549,10 @@ export default function OnboardingPage() {
                             ].map((item, idx) => (
                               <div
                                 key={idx}
-                                className="flex items-center justify-between py-1 text-zinc-300 text-[11px]"
+                                className="flex items-center justify-between py-1 text-zinc-300 text-[12px]"
                               >
                                 <span>{item}</span>
-                                <Badge variant="blue" className="text-[9px] py-0">Core</Badge>
+                                <Badge variant="blue" className="text-[10px] py-0 px-1.5 font-medium">Core</Badge>
                               </div>
                             ))}
                           </div>
@@ -572,26 +572,26 @@ export default function OnboardingPage() {
         {store.currentStep === 5 && (
           <div className="space-y-7 animate-in fade-in-50 duration-200">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[11px] font-medium text-zinc-300 uppercase tracking-wider">
                 <span>Step 5 of 6</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+              <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
                 Weekly Study Availability
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-400">
+              <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
                 Set how many hours you can comfortably commit on each day of the week.
               </p>
             </div>
 
             {/* Availability Banner */}
-            <div className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-3 text-xs text-blue-300 shadow-subtle">
+            <div className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-950/20 px-4 py-3 text-[13px] text-blue-300 shadow-subtle">
               <div className="flex items-center gap-2">
                 <Zap className="h-4 w-4 text-blue-400 shrink-0" />
                 <span>Adjust hours freely — sprint deadlines will calculate automatically.</span>
               </div>
               <div className="flex items-center gap-1.5 font-semibold text-blue-200">
                 <CalendarIcon className="h-3.5 w-3.5" />
-                <span>Est. days: <strong className="text-white text-sm">{estimatedDays}</strong></span>
+                <span>Est. days: <strong className="text-white text-[14px] font-semibold">{estimatedDays}</strong></span>
               </div>
             </div>
 
@@ -611,7 +611,7 @@ export default function OnboardingPage() {
                 const hours = store.availability[d.key];
                 return (
                   <div key={d.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 w-28 text-xs font-semibold text-zinc-200">
+                    <div className="flex items-center gap-2.5 w-28 text-[13px] font-medium text-zinc-200">
                       <CalendarIcon className="h-3.5 w-3.5 text-zinc-500" />
                       <span>{d.label}</span>
                     </div>
@@ -625,7 +625,7 @@ export default function OnboardingPage() {
                       />
                     </div>
 
-                    <div className="w-16 text-right text-xs font-semibold text-zinc-300 font-mono">
+                    <div className="w-16 text-right text-[13px] font-semibold text-zinc-300 font-mono">
                       {hours} {hours === 1 ? "hr" : "hrs"}
                     </div>
                   </div>
@@ -633,8 +633,8 @@ export default function OnboardingPage() {
               })}
             </div>
 
-            <div className="text-xs text-zinc-400">
-              Allocated weekly total: <strong className="text-zinc-200 font-bold">{totalWeeklyHours} hours</strong>
+            <div className="text-[13px] font-normal text-zinc-400">
+              Allocated weekly total: <strong className="text-zinc-200 font-semibold">{totalWeeklyHours} hours</strong>
             </div>
           </div>
         )}
@@ -649,17 +649,17 @@ export default function OnboardingPage() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+                    <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[11px] font-medium text-zinc-300 uppercase tracking-wider">
                       <span>Step 6 of 6 &middot; Preview</span>
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+                    <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
                       Finalise Your Plan
                     </h1>
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-[13px] font-normal text-zinc-400">
                       Here is your 9-sprint roadmap preview.
                     </p>
                   </div>
-                  <span className="text-xs font-mono text-zinc-500">9 Sprints Total</span>
+                  <span className="text-[12px] font-mono text-zinc-500">9 Sprints Total</span>
                 </div>
 
                 <div className="space-y-3">
@@ -692,12 +692,12 @@ export default function OnboardingPage() {
                           className="flex items-center justify-between p-3.5 cursor-pointer select-none"
                         >
                           <div className="flex items-center gap-2.5">
-                            <Badge variant="blue" className="font-semibold text-xs">
+                            <Badge variant="blue" className="font-medium text-[12px]">
                               {s.sprint}
                             </Badge>
-                            <span className="text-xs text-zinc-300 font-medium">• {s.tags}</span>
+                            <span className="text-[13px] text-zinc-300 font-normal">• {s.tags}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-zinc-400">
+                          <div className="flex items-center gap-2 text-[12px] text-zinc-400">
                             <span className="font-mono text-[11px]">{s.time}</span>
                             <ChevronDown
                               className={cn(
@@ -718,51 +718,51 @@ export default function OnboardingPage() {
             {step6Phase === "details" && (
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+                  <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[11px] font-medium text-zinc-300 uppercase tracking-wider">
                     <span>Step 6 of 6 &middot; Details</span>
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+                  <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
                     Plan Details &amp; Target Start Date
                   </h1>
                 </div>
 
                 {/* Metrics Bar */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-xs shadow-subtle">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-[12px] shadow-subtle">
                   <div>
-                    <div className="text-zinc-500 flex items-center gap-1">
+                    <div className="text-zinc-500 flex items-center gap-1 text-[12px] font-medium">
                       <Layers className="h-3.5 w-3.5" /> Sprints
                     </div>
-                    <div className="text-base font-bold text-zinc-100 mt-1 font-mono">9</div>
+                    <div className="text-[18px] font-semibold text-zinc-100 mt-1 font-mono">9</div>
                   </div>
                   <div>
-                    <div className="text-zinc-500 flex items-center gap-1">
+                    <div className="text-zinc-500 flex items-center gap-1 text-[12px] font-medium">
                       <BookOpen className="h-3.5 w-3.5" /> Subjects
                     </div>
-                    <div className="text-base font-bold text-zinc-100 mt-1 font-mono">6</div>
+                    <div className="text-[18px] font-semibold text-zinc-100 mt-1 font-mono">6</div>
                   </div>
                   <div>
-                    <div className="text-zinc-500 flex items-center gap-1">
+                    <div className="text-zinc-500 flex items-center gap-1 text-[12px] font-medium">
                       <Clock className="h-3.5 w-3.5" /> Study hours
                     </div>
-                    <div className="text-base font-bold text-zinc-100 mt-1 font-mono">270h 53m</div>
+                    <div className="text-[18px] font-semibold text-zinc-100 mt-1 font-mono">270h 53m</div>
                   </div>
                   <div>
-                    <div className="text-zinc-500 flex items-center gap-1">
+                    <div className="text-zinc-500 flex items-center gap-1 text-[12px] font-medium">
                       <Target className="h-3.5 w-3.5" /> Duration
                     </div>
-                    <div className="text-base font-bold text-zinc-100 mt-1 font-mono">61 days</div>
+                    <div className="text-[18px] font-semibold text-zinc-100 mt-1 font-mono">61 days</div>
                   </div>
                   <div className="col-span-2 sm:col-span-1">
-                    <div className="text-zinc-500 flex items-center gap-1">
+                    <div className="text-zinc-500 flex items-center gap-1 text-[12px] font-medium">
                       <CalendarIcon className="h-3.5 w-3.5" /> Completion
                     </div>
-                    <div className="text-base font-bold text-zinc-100 mt-1 font-mono">30 Nov 2026</div>
+                    <div className="text-[18px] font-semibold text-zinc-100 mt-1 font-mono">30 Nov 2026</div>
                   </div>
                 </div>
 
                 {/* Plan Name Input */}
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-semibold text-zinc-200">
+                  <div className="flex items-center justify-between text-[13px] font-medium text-zinc-200">
                     <span>Plan Name<span className="text-red-400">*</span></span>
                     <span className="text-[11px] text-zinc-500 font-mono">
                       {store.planName.length}/60
@@ -773,13 +773,13 @@ export default function OnboardingPage() {
                     maxLength={60}
                     value={store.planName}
                     onChange={(e) => store.setPlanName(e.target.value)}
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-900/70 px-3.5 py-2 text-xs text-zinc-100 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-900/70 px-3.5 py-2 text-[14px] leading-[1.5] text-zinc-100 focus:border-blue-500 focus:outline-none font-normal"
                   />
                 </div>
 
                 {/* When do you want to start? */}
                 <div className="space-y-2.5">
-                  <label className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                  <label className="text-[13px] font-medium text-zinc-200 flex items-center gap-1.5">
                     When do you want to start?<span className="text-red-400">*</span>
                   </label>
                   <div className="flex gap-2.5">
@@ -793,9 +793,9 @@ export default function OnboardingPage() {
                         type="button"
                         onClick={() => store.setStartDateOption(opt.key as "today" | "tomorrow" | "custom")}
                         className={cn(
-                          "rounded-lg px-3.5 py-2 text-xs font-medium border transition-all select-none",
+                          "rounded-lg px-3.5 py-2 text-[13px] font-medium border transition-all select-none",
                           store.startDateOption === opt.key
-                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm font-semibold"
+                            ? "border-blue-500 bg-blue-600/15 text-blue-400 ring-1 ring-blue-500/40 shadow-sm"
                             : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700"
                         )}
                       >
@@ -815,10 +815,10 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+                  <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
                     Your Personal Roadmap Is Ready
                   </h1>
-                  <p className="text-xs sm:text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
+                  <p className="text-[13px] font-normal leading-[1.45] text-zinc-400 max-w-md mx-auto">
                     We&apos;ve structured a day-wise sprint plan matching your target role and weekly commitments.
                   </p>
                 </div>
@@ -826,45 +826,45 @@ export default function OnboardingPage() {
                 {/* Plan Card */}
                 <div className="max-w-xl mx-auto rounded-xl border border-zinc-800 bg-zinc-900/70 p-6 text-left shadow-card space-y-5">
                   <div className="flex items-center gap-3.5">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-lg shadow-sm">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white font-semibold text-[16px] shadow-sm">
                       🎯
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-zinc-100">{store.planName}</h3>
-                      <p className="text-xs text-zinc-400">Target: Software Engineer &middot; 61 Days</p>
+                      <h3 className="text-[16px] font-semibold leading-[1.35] text-zinc-100">{store.planName}</h3>
+                      <p className="text-[13px] font-normal text-zinc-400">Target: Software Engineer &middot; 61 Days</p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-zinc-800/80 text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-zinc-800/80 text-[12px]">
                     <div>
-                      <div className="text-zinc-500 flex items-center gap-1">
+                      <div className="text-zinc-500 flex items-center gap-1 font-medium text-[12px]">
                         <CalendarIcon className="h-3.5 w-3.5" /> Start date
                       </div>
-                      <div className="text-xs font-bold text-zinc-200 mt-1 font-mono">1 Oct 2026</div>
+                      <div className="text-[13px] font-semibold text-zinc-200 mt-1 font-mono">1 Oct 2026</div>
                     </div>
                     <div>
-                      <div className="text-zinc-500 flex items-center gap-1">
+                      <div className="text-zinc-500 flex items-center gap-1 font-medium text-[12px]">
                         <CalendarIcon className="h-3.5 w-3.5" /> End date
                       </div>
-                      <div className="text-xs font-bold text-zinc-200 mt-1 font-mono">30 Nov 2026</div>
+                      <div className="text-[13px] font-semibold text-zinc-200 mt-1 font-mono">30 Nov 2026</div>
                     </div>
                     <div>
-                      <div className="text-zinc-500 flex items-center gap-1">
+                      <div className="text-zinc-500 flex items-center gap-1 font-medium text-[12px]">
                         <Layers className="h-3.5 w-3.5" /> Sprints
                       </div>
-                      <div className="text-xs font-bold text-zinc-200 mt-1 font-mono">9 Sprints</div>
+                      <div className="text-[13px] font-semibold text-zinc-200 mt-1 font-mono">9 Sprints</div>
                     </div>
                     <div>
-                      <div className="text-zinc-500 flex items-center gap-1">
+                      <div className="text-zinc-500 flex items-center gap-1 font-medium text-[12px]">
                         <Clock className="h-3.5 w-3.5" /> Duration
                       </div>
-                      <div className="text-xs font-bold text-zinc-200 mt-1 font-mono">271h</div>
+                      <div className="text-[13px] font-semibold text-zinc-200 mt-1 font-mono">271h</div>
                     </div>
                   </div>
 
                   <Button
                     onClick={() => router.push("/dashboard")}
-                    className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm"
+                    className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-white font-medium text-[14px] shadow-sm"
                   >
                     Go to Study Dashboard <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
@@ -884,7 +884,7 @@ export default function OnboardingPage() {
               <div className="w-24 sm:w-32">
                 <Progress value={(store.currentStep / 6) * 100} className="h-1.5" />
               </div>
-              <span className="text-[11px] text-zinc-500 font-medium">
+              <span className="text-[12px] text-zinc-400 font-normal">
                 Step {store.currentStep} of 6 &middot; Draft saved
               </span>
             </div>
@@ -896,7 +896,7 @@ export default function OnboardingPage() {
                   variant="outline"
                   size="sm"
                   onClick={handlePrev}
-                  className="h-8 px-3 text-xs"
+                  className="h-8 px-3 text-[13px] font-medium"
                 >
                   <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Back
                 </Button>
@@ -905,7 +905,7 @@ export default function OnboardingPage() {
               <Button
                 size="sm"
                 onClick={handleNext}
-                className="h-8 px-4 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                className="h-8 px-4 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
               >
                 {store.currentStep === 1 && (
                   <>Next <ChevronRight className="h-3.5 w-3.5 ml-1" /></>

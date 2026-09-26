@@ -291,22 +291,22 @@ export default function PracticePage() {
       {/* ========================================================================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[10px] font-semibold text-zinc-300 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
             <Code2 className="h-3.5 w-3.5 text-blue-400" />
             <span>Problem Workspace</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+          <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
             Practice Problems
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400">
+          <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
             Master pattern-based problems, system design questions, and core subjects for SDE interviews.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-3.5 py-2 text-xs flex items-center gap-2 shadow-subtle">
-            <span className="text-zinc-400">Solved:</span>
-            <strong className="text-zinc-100 font-bold font-mono">
+          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-3.5 py-2 text-[13px] flex items-center gap-2 shadow-subtle">
+            <span className="text-zinc-400 font-normal">Solved:</span>
+            <strong className="text-zinc-100 font-semibold">
               {localProblems.filter((p) => p.solved).length} / {localProblems.length}
             </strong>
           </div>
@@ -325,15 +325,15 @@ export default function PracticePage() {
             placeholder="Search by problem title, topic (e.g. Arrays, Trees, B+ Tree, TCP)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-2 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-2 text-[13px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal"
           />
         </div>
 
         {/* Filter Chips Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-1 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1 text-[13px]">
           {/* Subject Filter */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-zinc-500 text-[11px] font-medium mr-1 flex items-center gap-1">
+            <span className="text-zinc-500 text-[12px] font-medium mr-1 flex items-center gap-1">
               <Filter className="h-3 w-3" /> Track:
             </span>
             {[
@@ -349,9 +349,9 @@ export default function PracticePage() {
                 type="button"
                 onClick={() => setSelectedSubject(f.val)}
                 className={cn(
-                  "rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors select-none",
+                  "rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors select-none",
                   selectedSubject === f.val
-                    ? "bg-blue-600/15 text-blue-400 border border-blue-500/30 font-semibold"
+                    ? "bg-blue-600/15 text-blue-400 border border-blue-500/30"
                     : "border border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
                 )}
               >
@@ -364,11 +364,11 @@ export default function PracticePage() {
           <div className="flex flex-wrap items-center gap-3">
             {/* Difficulty Selector */}
             <div className="flex items-center gap-1.5">
-              <span className="text-zinc-500 text-[11px]">Difficulty:</span>
+              <span className="text-zinc-500 text-[12px]">Difficulty:</span>
               <select
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500"
+                className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 text-[12px] text-zinc-300 focus:outline-none focus:border-blue-500"
               >
                 <option value="all">All Levels</option>
                 <option value="basic">Basic / Easy</option>
@@ -379,11 +379,11 @@ export default function PracticePage() {
 
             {/* Status Selector */}
             <div className="flex items-center gap-1.5">
-              <span className="text-zinc-500 text-[11px]">Status:</span>
+              <span className="text-zinc-500 text-[12px]">Status:</span>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value as "all" | "solved" | "unsolved" | "bookmarked")}
-                className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500"
+                className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 text-[12px] text-zinc-300 focus:outline-none focus:border-blue-500"
               >
                 <option value="all">All Status</option>
                 <option value="unsolved">To Solve</option>
@@ -400,7 +400,7 @@ export default function PracticePage() {
       {/* ========================================================================= */}
       <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle">
         {/* Table Header Bar */}
-        <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/60 px-4 py-2.5 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+        <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/60 px-4 py-2.5 text-[12px] font-medium text-zinc-500 uppercase tracking-wider">
           <div className="col-span-1 flex items-center justify-center">Status</div>
           <div className="col-span-5 sm:col-span-5">Problem Title</div>
           <div className="col-span-2 hidden sm:block">Subject &middot; Topic</div>
@@ -416,7 +416,7 @@ export default function PracticePage() {
                 key={problem.id}
                 onClick={() => handleOpenProblem(problem)}
                 className={cn(
-                  "grid grid-cols-12 gap-3 items-center px-4 py-3 text-xs transition-colors hover:bg-zinc-900/80 cursor-pointer group",
+                  "grid grid-cols-12 gap-3 items-center px-4 py-3 text-[13px] transition-colors hover:bg-zinc-900/80 cursor-pointer group",
                   problem.solved && "bg-zinc-950/20 opacity-75"
                 )}
               >
@@ -456,13 +456,13 @@ export default function PracticePage() {
                   <div className="truncate">
                     <span
                       className={cn(
-                        "font-medium text-zinc-100 group-hover:text-blue-400 transition-colors",
+                        "font-normal text-zinc-100 text-[14px] leading-[1.45] group-hover:text-blue-400 transition-colors",
                         problem.solved && "line-through text-zinc-500"
                       )}
                     >
                       {problem.title}
                     </span>
-                    <div className="text-[10px] text-zinc-500 sm:hidden flex items-center gap-1.5 mt-0.5">
+                    <div className="text-[12px] text-zinc-500 sm:hidden flex items-center gap-1.5 mt-0.5 font-normal">
                       <span>{problem.subject}</span>
                       <span>&middot;</span>
                       <span>{problem.estimatedMinutes}m</span>
@@ -473,7 +473,7 @@ export default function PracticePage() {
                 {/* 3. Subject & Topic */}
                 <div className="col-span-2 hidden sm:flex items-center gap-2 overflow-hidden">
                   {getSubjectBadge(problem.subject)}
-                  <span className="text-[11px] text-zinc-400 truncate">{problem.topic}</span>
+                  <span className="text-[12px] text-zinc-400 truncate font-normal">{problem.topic}</span>
                 </div>
 
                 {/* 4. Difficulty */}
@@ -483,7 +483,7 @@ export default function PracticePage() {
 
                 {/* 5. Action / Time */}
                 <div className="col-span-4 sm:col-span-2 flex items-center justify-end gap-2 pr-1">
-                  <span className="font-mono text-[10px] text-zinc-500 hidden sm:inline">
+                  <span className="text-[12px] text-zinc-500 hidden sm:inline">
                     {problem.estimatedMinutes}m
                   </span>
                   <Button
@@ -493,7 +493,7 @@ export default function PracticePage() {
                       e.stopPropagation();
                       handleOpenProblem(problem);
                     }}
-                    className="h-7 px-2.5 text-[11px] border-zinc-800 bg-zinc-900 group-hover:border-blue-500/40 group-hover:text-blue-400"
+                    className="h-7 px-2.5 text-[12px] font-medium border-zinc-800 bg-zinc-900 group-hover:border-blue-500/40 group-hover:text-blue-400"
                   >
                     <span>Solve</span>
                     <ChevronRight className="h-3 w-3 ml-0.5" />
@@ -506,8 +506,8 @@ export default function PracticePage() {
               <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500">
                 <Code2 className="h-5 w-5" />
               </div>
-              <p className="text-xs font-semibold text-zinc-300">No matching problems found</p>
-              <p className="text-[11px] text-zinc-500">
+              <p className="text-[13px] font-medium text-zinc-300">No matching problems found</p>
+              <p className="text-[12px] text-zinc-500">
                 Try adjusting your search query or removing active filters.
               </p>
             </div>
