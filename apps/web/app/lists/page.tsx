@@ -93,14 +93,14 @@ export default function ListsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
-            <ListTodo className="h-3.5 w-3.5 text-blue-400" />
+          <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
+            <ListTodo className="h-3 w-3 text-blue-400" />
             <span>Curated Lists</span>
           </div>
-          <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
+          <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
             All Problem Sheets
           </h1>
-          <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
+          <p className="text-[12px] font-normal leading-normal text-zinc-400">
             Structured problem sheets and checklists designed by top engineers to help you crack technical rounds.
           </p>
         </div>
@@ -117,35 +117,35 @@ export default function ListsPage() {
           return (
             <div
               key={sheet.id}
-              className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-4 hover:border-zinc-700/80 hover:bg-zinc-900/60 transition-all duration-200 group flex flex-col justify-between shadow-subtle"
+              className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3 hover:border-zinc-700/80 hover:bg-zinc-900/60 transition-all duration-200 group flex flex-col justify-between shadow-subtle"
             >
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <Badge variant="blue" className="text-[12px] font-medium">
+                  <Badge variant="blue" className="text-[11px] font-medium py-0 px-2">
                     {sheet.category}
                   </Badge>
-                  <span className="text-[12px] text-zinc-500">
+                  <span className="text-[11px] text-zinc-500 font-mono">
                     {sheet.topics} Topics
                   </span>
                 </div>
 
-                <div className="space-y-1">
-                  <h3 className="text-[16px] font-semibold leading-[1.35] text-zinc-100 group-hover:text-blue-400 transition-colors">
+                <div className="space-y-0.5">
+                  <h3 className="text-[14px] font-semibold leading-snug text-zinc-100 group-hover:text-blue-400 transition-colors">
                     {sheet.title}
                   </h3>
-                  <div className="text-[12px] text-zinc-500 font-normal">By {sheet.author}</div>
+                  <div className="text-[11px] text-zinc-500 font-normal">By {sheet.author}</div>
                 </div>
 
-                <p className="text-[13px] font-normal text-zinc-400 leading-[1.45] line-clamp-2">
+                <p className="text-[12px] font-normal text-zinc-400 leading-normal line-clamp-2">
                   {sheet.description}
                 </p>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-zinc-800/60">
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[12px]">
-                    <span className="text-zinc-400 font-normal">Progress:</span>
-                    <span className="text-zinc-300 font-medium">
+              <div className="space-y-2.5 pt-2.5 border-t border-zinc-800/60">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-zinc-400 font-normal">Progress</span>
+                    <span className="text-zinc-300 font-mono font-medium">
                       {sheet.completedProblems} / {sheet.totalProblems}
                     </span>
                   </div>
@@ -156,11 +156,11 @@ export default function ListsPage() {
                   asChild
                   size="sm"
                   variant="outline"
-                  className="w-full h-8 text-[13px] font-medium border-zinc-800 bg-zinc-900 group-hover:border-blue-500/40 group-hover:text-blue-400"
+                  className="w-full h-7 text-[12px] font-medium border-zinc-800 bg-zinc-900/80 group-hover:border-blue-500/40 group-hover:text-blue-400"
                 >
                   <Link href="/practice">
                     <span>Open Sheet</span>
-                    <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                    <ArrowRight className="h-3 w-3 ml-1" />
                   </Link>
                 </Button>
               </div>

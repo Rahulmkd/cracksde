@@ -120,14 +120,14 @@ export default function BuganizerPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
-            <CalendarCheck2 className="h-3.5 w-3.5 text-blue-400" />
+          <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
+            <CalendarCheck2 className="h-3 w-3 text-blue-400" />
             <span>Buganizer</span>
           </div>
-          <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
+          <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
             Interview Edge-Case &amp; Bug Tracker
           </h1>
-          <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
+          <p className="text-[12px] font-normal leading-normal text-zinc-400">
             Record recurring coding mistakes, off-by-one errors, and tricky interviewer corner cases to never repeat them.
           </p>
         </div>
@@ -135,14 +135,14 @@ export default function BuganizerPage() {
         <Button
           size="sm"
           onClick={() => setIsAddModalOpen(true)}
-          className="h-8 px-3.5 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+          className="h-7 px-3 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
         >
           <Plus className="h-3.5 w-3.5 mr-1" /> Track New Bug
         </Button>
       </div>
 
       {/* Search Bar */}
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-subtle">
+      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 shadow-subtle">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
           <input
@@ -150,27 +150,27 @@ export default function BuganizerPage() {
             placeholder="Search edge cases and bug descriptions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-2 text-[13px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal"
           />
         </div>
       </div>
 
       {/* Bug Items List */}
-      <div className="space-y-3.5">
+      <div className="space-y-3">
         {filteredBugs.map((bug) => (
           <div
             key={bug.id}
-            className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-3 hover:border-zinc-700/80 transition-all duration-200 shadow-subtle"
+            className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-2.5 hover:border-zinc-700/80 transition-all duration-200 shadow-subtle"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5">
-                <Badge variant={bug.category === "DSA" ? "blue" : "success"} className="text-[12px] font-medium">
+              <div className="flex items-center gap-2">
+                <Badge variant={bug.category === "DSA" ? "blue" : "success"} className="text-[11px] font-medium py-0 px-2">
                   {bug.category}
                 </Badge>
-                <Badge variant={bug.severity === "High" ? "destructive" : "warning"} className="text-[12px] font-medium">
+                <Badge variant={bug.severity === "High" ? "destructive" : "warning"} className="text-[11px] font-medium py-0 px-2">
                   {bug.severity} Severity
                 </Badge>
-                <Badge variant={bug.status === "Resolved" ? "success" : "secondary"} className="text-[12px] font-medium">
+                <Badge variant={bug.status === "Resolved" ? "success" : "secondary"} className="text-[11px] font-medium py-0 px-2">
                   {bug.status}
                 </Badge>
               </div>
@@ -180,7 +180,7 @@ export default function BuganizerPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => toggleBugStatus(bug.id)}
-                  className="h-7 text-[12px] font-medium"
+                  className="h-6 text-[11px] font-medium"
                 >
                   <CheckCircle2 className="h-3 w-3 mr-1" />
                   {bug.status === "Resolved" ? "Mark Open" : "Mark Resolved"}
@@ -196,15 +196,15 @@ export default function BuganizerPage() {
             </div>
 
             <div>
-              <h3 className="text-[16px] font-semibold leading-[1.35] text-zinc-100">
+              <h3 className="text-[14px] font-semibold leading-snug text-zinc-100">
                 {bug.title}
               </h3>
-              <p className="text-[13px] font-normal text-zinc-400 mt-1 leading-[1.45]">{bug.notes}</p>
+              <p className="text-[12px] font-normal text-zinc-400 mt-1 leading-normal">{bug.notes}</p>
             </div>
 
             {bug.solution && (
-              <div className="rounded-lg border border-emerald-500/20 bg-emerald-950/20 p-3 text-[13px] text-emerald-300 space-y-1 font-normal leading-[1.45]">
-                <span className="font-semibold text-emerald-200 flex items-center gap-1 text-[13px]">
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-950/20 p-2.5 text-[12px] text-emerald-300 space-y-0.5 font-normal leading-normal">
+                <span className="font-semibold text-emerald-200 flex items-center gap-1 text-[12px]">
                   💡 Fix / Preventive Rule:
                 </span>
                 <p>{bug.solution}</p>
@@ -217,32 +217,32 @@ export default function BuganizerPage() {
       {/* Add Bug Modal */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
         <DialogContent className="max-w-lg bg-zinc-950">
-          <DialogHeader>
-            <DialogTitle className="text-[18px] font-semibold leading-[1.3]">Track Interview Edge Case</DialogTitle>
-            <DialogDescription className="text-[13px] text-zinc-400 leading-[1.45]">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-[15px] font-semibold leading-snug">Track Interview Edge Case</DialogTitle>
+            <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
               Record tricky bugs or interview traps you encountered so you remember the fix.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3.5 py-2">
-            <div className="space-y-1.5">
-              <label className="text-[13px] font-medium text-zinc-200">Bug / Issue Title</label>
+          <div className="space-y-3 py-1">
+            <div className="space-y-1">
+              <label className="text-[12px] font-medium text-zinc-200">Bug / Issue Title</label>
               <input
                 type="text"
                 placeholder="e.g. Memory leak in cyclical shared_ptr references"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-zinc-200">Category</label>
+              <div className="space-y-1">
+                <label className="text-[12px] font-medium text-zinc-200">Category</label>
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
                 >
                   <option value="DSA">DSA</option>
                   <option value="DBMS">DBMS</option>
@@ -252,12 +252,12 @@ export default function BuganizerPage() {
                 </select>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-zinc-200">Severity</label>
+              <div className="space-y-1">
+                <label className="text-[12px] font-medium text-zinc-200">Severity</label>
                 <select
                   value={newSeverity}
                   onChange={(e) => setNewSeverity(e.target.value as "High" | "Medium" | "Low")}
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
                 >
                   <option value="High">High Severity</option>
                   <option value="Medium">Medium Severity</option>
@@ -266,42 +266,42 @@ export default function BuganizerPage() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-[13px] font-medium text-zinc-200">Problem / Symptom</label>
+            <div className="space-y-1">
+              <label className="text-[12px] font-medium text-zinc-200">Problem / Symptom</label>
               <textarea
                 placeholder="Describe why the mistake occurred during testing..."
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-[13px] font-medium text-zinc-200">Permanent Fix / Best Practice</label>
+            <div className="space-y-1">
+              <label className="text-[12px] font-medium text-zinc-200">Permanent Fix / Best Practice</label>
               <textarea
                 placeholder="Rule of thumb or pattern to prevent this in the future..."
                 value={newSolution}
                 onChange={(e) => setNewSolution(e.target.value)}
                 rows={3}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
               />
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="pt-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsAddModalOpen(false)}
-              className="text-[13px] font-medium h-8"
+              className="text-[12px] font-medium h-7"
             >
               Cancel
             </Button>
             <Button
               size="sm"
               onClick={handleCreateBug}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium h-8"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium h-7"
             >
               Save Bug Entry
             </Button>

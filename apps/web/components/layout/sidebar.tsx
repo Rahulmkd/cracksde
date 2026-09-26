@@ -185,17 +185,17 @@ export function Sidebar() {
     onToggle: () => void
   ) => {
     return (
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {sidebarOpen ? (
           <button
             type="button"
             onClick={onToggle}
-            className="flex w-full items-center justify-between px-2.5 py-1 text-[12px] font-medium text-zinc-500 hover:text-zinc-300 uppercase tracking-wider transition-colors select-none group"
+            className="flex w-full items-center justify-between px-2.5 py-1 text-[11px] font-medium text-zinc-400 hover:text-zinc-200 transition-colors select-none group"
           >
             <span>{title}</span>
             <ChevronDown
               className={cn(
-                "h-3.5 w-3.5 text-zinc-500 group-hover:text-zinc-300 transition-transform duration-200",
+                "h-3 w-3 text-zinc-500 group-hover:text-zinc-300 transition-transform duration-200",
                 isOpen ? "rotate-0" : "-rotate-90"
               )}
             />
@@ -231,17 +231,17 @@ export function Sidebar() {
                   }}
                   onClick={() => handleItemClick(item.href)}
                   className={cn(
-                    "relative z-10 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] leading-[1.4] transition-colors duration-150 group select-none",
+                    "relative z-10 flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] leading-snug transition-colors duration-150 group select-none",
                     isActive
                       ? "text-blue-400 font-medium"
                       : "text-zinc-400 font-normal hover:bg-zinc-900/60 hover:text-zinc-100",
-                    !sidebarOpen && "justify-center px-0 py-2"
+                    !sidebarOpen && "justify-center px-0 py-1.5"
                   )}
                   title={!sidebarOpen ? item.name : undefined}
                 >
                   <Icon
                     className={cn(
-                      "h-4 w-4 shrink-0 transition-colors",
+                      "h-3.5 w-3.5 shrink-0 transition-colors",
                       isActive
                         ? "text-blue-400"
                         : "text-zinc-400 group-hover:text-zinc-200"
@@ -276,17 +276,17 @@ export function Sidebar() {
         )}
       >
         {/* Brand Header */}
-        <div className="flex h-14 items-center justify-between px-3.5 border-b border-zinc-800/80 bg-zinc-950">
+        <div className="flex h-13 items-center justify-between px-3.5 border-b border-zinc-800/80 bg-zinc-950">
           <Link
             href="/dashboard"
             onClick={() => handleItemClick("/dashboard")}
-            className="flex items-center gap-2.5 overflow-hidden group focus-visible:outline-none"
+            className="flex items-center gap-2 overflow-hidden group focus-visible:outline-none"
           >
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold text-[13px] shadow-sm shadow-blue-600/20 group-hover:bg-blue-500 transition-colors">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white font-semibold text-[12px] shadow-sm shadow-blue-600/20 group-hover:bg-blue-500 transition-colors">
               ⚡
             </div>
             {sidebarOpen && (
-              <span className="font-semibold text-[15px] tracking-tight text-zinc-100 flex items-center">
+              <span className="font-semibold text-[14px] tracking-tight text-zinc-100 flex items-center">
                 Crack<span className="text-blue-400 font-semibold ml-0.5">SDE</span>
               </span>
             )}
@@ -308,7 +308,7 @@ export function Sidebar() {
         {/* Scrollable Nav Sections without visible scrollbar */}
         <div
           ref={containerRef}
-          className="relative flex-1 overflow-y-auto px-2.5 py-3 space-y-4 text-[13px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="relative flex-1 overflow-y-auto px-2.5 py-3 space-y-3.5 text-[13px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
           {/* Sliding Active Navigation Highlight & Indicator */}
           {activeNavRect && activeNavRect.opacity > 0 && (
@@ -335,40 +335,40 @@ export function Sidebar() {
         </div>
 
         {/* Bottom Notification & User Profile */}
-        <div className="p-2.5 border-t border-zinc-800/80 bg-zinc-950/80 space-y-2">
+        <div className="p-2 border-t border-zinc-800/80 bg-zinc-950/80 space-y-1.5">
           {sidebarOpen ? (
             <>
               {/* Notification Badge */}
-              <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-2.5 space-y-1.5 transition-colors hover:border-zinc-700/80">
+              <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-2 space-y-1 transition-colors hover:border-zinc-700/80">
                 <div className="flex items-center justify-between text-zinc-400">
-                  <span className="text-[12px] text-zinc-400 font-medium flex items-center gap-1.5">
+                  <span className="text-[11px] text-zinc-400 font-medium flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
                     4 updates
                   </span>
-                  <span className="text-[12px] text-zinc-500">1d ago</span>
+                  <span className="text-[11px] text-zinc-500">1d ago</span>
                 </div>
-                <p className="text-zinc-300 line-clamp-2 text-[12px] leading-[1.4] font-normal">
+                <p className="text-zinc-300 line-clamp-2 text-[11px] leading-normal font-normal">
                   Your Crack SDE study roadmap is active. Sprints are organized for your target role.
                 </p>
               </div>
 
               {/* Profile Drawer */}
-              <div className="flex items-center justify-between rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-2">
-                <div className="flex items-center gap-2.5 overflow-hidden">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-[12px] font-semibold text-blue-400 border border-blue-500/30">
+              <div className="flex items-center justify-between rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-1.5">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30">
                     RA
                   </div>
                   <div className="truncate">
-                    <div className="text-[13px] font-medium text-zinc-100 truncate">Rahul</div>
-                    <div className="text-[12px] text-zinc-400 font-normal">Free Plan</div>
+                    <div className="text-[12px] font-medium text-zinc-100 truncate">Rahul</div>
+                    <div className="text-[11px] text-zinc-500 font-normal leading-none">Free Plan</div>
                   </div>
                 </div>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-6 px-2 text-[12px] font-medium border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
+                  className="h-5 px-1.5 text-[10px] font-medium border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
                 >
-                  <Sparkles className="h-3 w-3 mr-1 text-amber-400" />
+                  <Sparkles className="h-2.5 w-2.5 mr-1 text-amber-400" />
                   Upgrade
                 </Button>
               </div>
@@ -376,7 +376,7 @@ export function Sidebar() {
           ) : (
             <div className="flex flex-col items-center gap-2 py-1">
               <div
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600/20 text-xs font-semibold text-blue-400 border border-blue-500/30 cursor-pointer"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 cursor-pointer"
                 title="Rahul (Free Plan)"
               >
                 RA

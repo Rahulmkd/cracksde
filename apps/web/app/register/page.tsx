@@ -81,30 +81,30 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md space-y-5 animate-in fade-in-50 duration-200">
-        <Card className="border border-zinc-800/80 bg-zinc-900/40 p-6 sm:p-8 shadow-card">
-          <CardHeader className="text-center space-y-2 p-0 pb-6">
-            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-sm shadow-blue-600/20 text-white font-semibold text-[14px]">
+      <div className="w-full max-w-md space-y-4 animate-in fade-in-50 duration-200">
+        <Card className="border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 shadow-card">
+          <CardHeader className="text-center space-y-1.5 p-0 pb-5">
+            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 shadow-sm shadow-blue-600/20 text-white font-semibold text-[13px]">
               ⚡
             </div>
-            <CardTitle className="text-[20px] font-semibold leading-[1.25] tracking-tight text-zinc-100">
+            <CardTitle className="text-[18px] font-semibold leading-tight tracking-tight text-zinc-100">
               Create an account
             </CardTitle>
-            <CardDescription className="text-[13px] font-normal leading-[1.45] text-zinc-400">
+            <CardDescription className="text-[12px] font-normal leading-normal text-zinc-400">
               Get started with your personalized SDE preparation sprint
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="p-0 space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-3.5">
+          <CardContent className="p-0 space-y-3.5">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {error && (
-                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-[13px] text-red-400 font-normal">
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12px] text-red-400 font-normal">
                   {error}
                 </div>
               )}
 
-              <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-[13px] font-medium text-zinc-200">Full Name</Label>
+              <div className="space-y-1">
+                <Label htmlFor="name" className="text-[12px] font-medium text-zinc-200">Full Name</Label>
                 <Input
                   id="name"
                   type="text"
@@ -113,11 +113,12 @@ export default function RegisterPage() {
                   placeholder="Rahul"
                   required
                   autoComplete="name"
+                  className="text-[12px] h-8"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-[13px] font-medium text-zinc-200">Email Address</Label>
+              <div className="space-y-1">
+                <Label htmlFor="email" className="text-[12px] font-medium text-zinc-200">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
@@ -126,11 +127,12 @@ export default function RegisterPage() {
                   placeholder="you@example.com"
                   required
                   autoComplete="email"
+                  className="text-[12px] h-8"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="password" className="text-[13px] font-medium text-zinc-200">Password</Label>
+              <div className="space-y-1">
+                <Label htmlFor="password" className="text-[12px] font-medium text-zinc-200">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -139,11 +141,12 @@ export default function RegisterPage() {
                   placeholder="At least 6 characters"
                   required
                   autoComplete="new-password"
+                  className="text-[12px] h-8"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="confirmPassword" className="text-[13px] font-medium text-zinc-200">Confirm Password</Label>
+              <div className="space-y-1">
+                <Label htmlFor="confirmPassword" className="text-[12px] font-medium text-zinc-200">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -152,16 +155,17 @@ export default function RegisterPage() {
                   placeholder="Confirm your password"
                   required
                   autoComplete="new-password"
+                  className="text-[12px] h-8"
                 />
               </div>
 
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-10 text-[14px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-2"
+                className="w-full h-8 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-2"
               >
                 {loading ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
                   "Create Account"
                 )}
@@ -170,7 +174,7 @@ export default function RegisterPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-[13px] text-zinc-400">
+        <p className="text-center text-[12px] text-zinc-400">
           Already have an account?{" "}
           <Link
             href="/login"

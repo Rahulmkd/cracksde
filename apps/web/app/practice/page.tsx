@@ -287,26 +287,23 @@ export default function PracticePage() {
   return (
     <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200">
       {/* ========================================================================= */}
+      {/* ========================================================================= */}
       {/* 1. HEADER SECTION */}
       {/* ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[12px] font-medium text-zinc-300 uppercase tracking-wider">
-            <Code2 className="h-3.5 w-3.5 text-blue-400" />
-            <span>Problem Workspace</span>
-          </div>
-          <h1 className="text-[28px] font-semibold leading-[1.2] tracking-tight text-zinc-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
             Practice Problems
           </h1>
-          <p className="text-[13px] font-normal leading-[1.45] text-zinc-400">
+          <p className="text-[12px] font-normal text-zinc-400 leading-normal">
             Master pattern-based problems, system design questions, and core subjects for SDE interviews.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-3.5 py-2 text-[13px] flex items-center gap-2 shadow-subtle">
+        <div className="flex items-center gap-2.5">
+          <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-3 py-1.5 text-[12px] flex items-center gap-1.5 shadow-subtle">
             <span className="text-zinc-400 font-normal">Solved:</span>
-            <strong className="text-zinc-100 font-semibold">
+            <strong className="text-zinc-100 font-semibold font-mono text-[12px]">
               {localProblems.filter((p) => p.solved).length} / {localProblems.length}
             </strong>
           </div>
@@ -316,7 +313,7 @@ export default function PracticePage() {
       {/* ========================================================================= */}
       {/* 2. SEARCH & FILTER CONTROLS */}
       {/* ========================================================================= */}
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 shadow-subtle">
+      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-2.5 shadow-subtle">
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
@@ -325,15 +322,15 @@ export default function PracticePage() {
             placeholder="Search by problem title, topic (e.g. Arrays, Trees, B+ Tree, TCP)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-2 text-[13px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-3.5 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal"
           />
         </div>
 
         {/* Filter Chips Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-1 text-[13px]">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-0.5 text-[12px]">
           {/* Subject Filter */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-zinc-500 text-[12px] font-medium mr-1 flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="text-zinc-500 text-[11px] font-medium mr-1 flex items-center gap-1">
               <Filter className="h-3 w-3" /> Track:
             </span>
             {[
@@ -349,7 +346,7 @@ export default function PracticePage() {
                 type="button"
                 onClick={() => setSelectedSubject(f.val)}
                 className={cn(
-                  "rounded-md px-2.5 py-1 text-[12px] font-medium transition-colors select-none",
+                  "rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors select-none",
                   selectedSubject === f.val
                     ? "bg-blue-600/15 text-blue-400 border border-blue-500/30"
                     : "border border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
@@ -361,14 +358,14 @@ export default function PracticePage() {
           </div>
 
           {/* Difficulty & Status Filters */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             {/* Difficulty Selector */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-zinc-500 text-[12px]">Difficulty:</span>
+            <div className="flex items-center gap-1">
+              <span className="text-zinc-500 text-[11px]">Difficulty:</span>
               <select
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 text-[12px] text-zinc-300 focus:outline-none focus:border-blue-500"
+                className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500"
               >
                 <option value="all">All Levels</option>
                 <option value="basic">Basic / Easy</option>
@@ -378,12 +375,12 @@ export default function PracticePage() {
             </div>
 
             {/* Status Selector */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-zinc-500 text-[12px]">Status:</span>
+            <div className="flex items-center gap-1">
+              <span className="text-zinc-500 text-[11px]">Status:</span>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value as "all" | "solved" | "unsolved" | "bookmarked")}
-                className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 text-[12px] text-zinc-300 focus:outline-none focus:border-blue-500"
+                className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500"
               >
                 <option value="all">All Status</option>
                 <option value="unsolved">To Solve</option>
@@ -400,7 +397,7 @@ export default function PracticePage() {
       {/* ========================================================================= */}
       <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle">
         {/* Table Header Bar */}
-        <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/60 px-4 py-2.5 text-[12px] font-medium text-zinc-500 uppercase tracking-wider">
+        <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/60 px-3.5 py-2 text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
           <div className="col-span-1 flex items-center justify-center">Status</div>
           <div className="col-span-5 sm:col-span-5">Problem Title</div>
           <div className="col-span-2 hidden sm:block">Subject &middot; Topic</div>
@@ -456,13 +453,13 @@ export default function PracticePage() {
                   <div className="truncate">
                     <span
                       className={cn(
-                        "font-normal text-zinc-100 text-[14px] leading-[1.45] group-hover:text-blue-400 transition-colors",
+                        "font-normal text-zinc-100 text-[13px] leading-snug group-hover:text-blue-400 transition-colors",
                         problem.solved && "line-through text-zinc-500"
                       )}
                     >
                       {problem.title}
                     </span>
-                    <div className="text-[12px] text-zinc-500 sm:hidden flex items-center gap-1.5 mt-0.5 font-normal">
+                    <div className="text-[11px] text-zinc-500 sm:hidden flex items-center gap-1.5 mt-0.5 font-normal">
                       <span>{problem.subject}</span>
                       <span>&middot;</span>
                       <span>{problem.estimatedMinutes}m</span>
@@ -473,7 +470,7 @@ export default function PracticePage() {
                 {/* 3. Subject & Topic */}
                 <div className="col-span-2 hidden sm:flex items-center gap-2 overflow-hidden">
                   {getSubjectBadge(problem.subject)}
-                  <span className="text-[12px] text-zinc-400 truncate font-normal">{problem.topic}</span>
+                  <span className="text-[11px] text-zinc-400 truncate font-normal">{problem.topic}</span>
                 </div>
 
                 {/* 4. Difficulty */}
@@ -483,7 +480,7 @@ export default function PracticePage() {
 
                 {/* 5. Action / Time */}
                 <div className="col-span-4 sm:col-span-2 flex items-center justify-end gap-2 pr-1">
-                  <span className="text-[12px] text-zinc-500 hidden sm:inline">
+                  <span className="text-[11px] text-zinc-500 hidden sm:inline font-mono">
                     {problem.estimatedMinutes}m
                   </span>
                   <Button
@@ -493,7 +490,7 @@ export default function PracticePage() {
                       e.stopPropagation();
                       handleOpenProblem(problem);
                     }}
-                    className="h-7 px-2.5 text-[12px] font-medium border-zinc-800 bg-zinc-900 group-hover:border-blue-500/40 group-hover:text-blue-400"
+                    className="h-6 px-2 text-[11px] font-medium border-zinc-800 bg-zinc-900 group-hover:border-blue-500/40 group-hover:text-blue-400"
                   >
                     <span>Solve</span>
                     <ChevronRight className="h-3 w-3 ml-0.5" />
@@ -502,12 +499,12 @@ export default function PracticePage() {
               </div>
             ))
           ) : (
-            <div className="py-12 text-center space-y-2">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500">
-                <Code2 className="h-5 w-5" />
+            <div className="py-10 text-center space-y-1.5">
+              <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500">
+                <Code2 className="h-4 w-4" />
               </div>
-              <p className="text-[13px] font-medium text-zinc-300">No matching problems found</p>
-              <p className="text-[12px] text-zinc-500">
+              <p className="text-[12px] font-medium text-zinc-300">No matching problems found</p>
+              <p className="text-[11px] text-zinc-500">
                 Try adjusting your search query or removing active filters.
               </p>
             </div>
@@ -522,9 +519,9 @@ export default function PracticePage() {
         <Dialog open={!!activeProblem} onOpenChange={() => setActiveProblem(null)}>
           <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col p-0 overflow-hidden bg-zinc-950">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3.5 bg-zinc-900/50">
-              <div className="flex items-center gap-3">
-                <h2 className="text-[18px] font-semibold leading-[1.3] text-zinc-100">{activeProblem.title}</h2>
+            <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3 bg-zinc-900/50">
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-[15px] font-semibold leading-tight text-zinc-100">{activeProblem.title}</h2>
                 {getDifficultyBadge(activeProblem.difficulty)}
                 {getSubjectBadge(activeProblem.subject)}
               </div>
@@ -535,7 +532,7 @@ export default function PracticePage() {
                   variant="outline"
                   onClick={() => toggleBookmark(activeProblem.id)}
                   className={cn(
-                    "h-7 px-2.5 text-[12px] font-medium",
+                    "h-6 px-2 text-[11px] font-medium",
                     activeProblem.bookmarked && "text-amber-400 border-amber-500/30"
                   )}
                 >
@@ -546,11 +543,11 @@ export default function PracticePage() {
             </div>
 
             {/* Modal Tabs */}
-            <div className="flex items-center border-b border-zinc-800 bg-zinc-950 px-5 gap-4 text-[13px] font-medium">
+            <div className="flex items-center border-b border-zinc-800 bg-zinc-950 px-4 gap-4 text-[12px] font-medium">
               <button
                 onClick={() => setActiveTab("description")}
                 className={cn(
-                  "py-2.5 border-b-2 transition-colors",
+                  "py-2 border-b-2 transition-colors",
                   activeTab === "description"
                     ? "border-blue-500 text-blue-400 font-medium"
                     : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -561,7 +558,7 @@ export default function PracticePage() {
               <button
                 onClick={() => setActiveTab("solution")}
                 className={cn(
-                  "py-2.5 border-b-2 transition-colors",
+                  "py-2 border-b-2 transition-colors",
                   activeTab === "solution"
                     ? "border-blue-500 text-blue-400 font-medium"
                     : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -572,7 +569,7 @@ export default function PracticePage() {
               <button
                 onClick={() => setActiveTab("notes")}
                 className={cn(
-                  "py-2.5 border-b-2 transition-colors",
+                  "py-2 border-b-2 transition-colors",
                   activeTab === "notes"
                     ? "border-blue-500 text-blue-400 font-medium"
                     : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -583,17 +580,17 @@ export default function PracticePage() {
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
               {activeTab === "description" && (
-                <div className="space-y-4 text-[13px] leading-[1.5] text-zinc-300">
-                  <div className="p-3.5 rounded-lg border border-zinc-800/80 bg-zinc-900/30">
+                <div className="space-y-3 text-[12px] leading-relaxed text-zinc-300">
+                  <div className="p-3 rounded-lg border border-zinc-800/80 bg-zinc-900/30">
                     <p>{activeProblem.description}</p>
                   </div>
 
                   {activeProblem.examples.map((ex, idx) => (
-                    <div key={idx} className="space-y-1.5">
-                      <span className="text-[13px] font-medium text-zinc-200">Example {idx + 1}:</span>
-                      <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 font-mono text-[12px] space-y-1 leading-relaxed">
+                    <div key={idx} className="space-y-1">
+                      <span className="text-[12px] font-medium text-zinc-200">Example {idx + 1}:</span>
+                      <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-2.5 font-mono text-[11px] space-y-1 leading-relaxed">
                         <div>
                           <span className="text-zinc-500">Input: </span>
                           <span className="text-zinc-200">{ex.input}</span>
@@ -615,14 +612,14 @@ export default function PracticePage() {
               )}
 
               {activeTab === "solution" && (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-medium text-zinc-400">Language:</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[12px] font-medium text-zinc-400">Language:</span>
                       <select
                         value={activeLanguage}
                         onChange={(e) => setActiveLanguage(e.target.value as "cpp" | "java" | "python" | "javascript")}
-                        className="rounded border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[13px] text-zinc-200 focus:outline-none"
+                        className="rounded border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[12px] text-zinc-200 focus:outline-none"
                       >
                         <option value="cpp">C++ 20</option>
                         <option value="java">Java 21</option>
@@ -635,7 +632,7 @@ export default function PracticePage() {
                       size="sm"
                       variant="outline"
                       onClick={() => setUserCode(activeProblem.codeSnippet)}
-                      className="h-7 text-[12px] font-medium"
+                      className="h-6 text-[11px] font-medium px-2"
                     >
                       <RotateCcw className="h-3 w-3 mr-1" /> Reset Code
                     </Button>
@@ -645,26 +642,26 @@ export default function PracticePage() {
                     value={userCode}
                     onChange={(e) => setUserCode(e.target.value)}
                     rows={12}
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3.5 font-mono text-[13px] text-zinc-100 focus:outline-none focus:border-blue-500"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3 font-mono text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               )}
 
               {activeTab === "notes" && (
-                <div className="space-y-3 text-[13px]">
+                <div className="space-y-2.5 text-[12px]">
                   <p className="text-zinc-400">Add personal interview tips, edge cases, and time complexity thoughts:</p>
                   <textarea
                     placeholder="e.g., Handle empty array edge cases. Time complexity O(N), Space O(1)..."
                     rows={6}
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-[13px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between border-t border-zinc-800 bg-zinc-950 px-5 py-3">
-              <div className="text-[12px] text-zinc-500">
+            <div className="flex items-center justify-between border-t border-zinc-800 bg-zinc-950 px-4 py-2.5">
+              <div className="text-[11px] text-zinc-500">
                 Estimated time: <span className="font-mono text-zinc-400">{activeProblem.estimatedMinutes} mins</span>
               </div>
 
@@ -676,7 +673,7 @@ export default function PracticePage() {
                     toggleSolveProblem(activeProblem.id);
                     setActiveProblem((prev) => prev ? { ...prev, solved: !prev.solved } : null);
                   }}
-                  className="text-[13px] font-medium h-8"
+                  className="text-[12px] font-medium h-7 px-2.5"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
                   {activeProblem.solved ? "Mark Incomplete" : "Mark Solved"}
@@ -689,7 +686,7 @@ export default function PracticePage() {
                     toast.success("Solution submitted & test cases passed! +20 pts");
                     setActiveProblem(null);
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium h-8"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium h-7 px-3"
                 >
                   <Play className="h-3 w-3 mr-1 fill-white" />
                   Run &amp; Submit
