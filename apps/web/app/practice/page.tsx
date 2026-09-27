@@ -373,11 +373,18 @@ export default function PracticePage() {
   };
 
   const formatLastSolved = (dateStr?: string | null) => {
-    if (!dateStr) return null;
+    if (!dateStr) return "—";
     const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return null;
+    if (isNaN(d.getTime())) return "—";
     return d.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
   };
+
+  const isFilterActive =
+    selectedSubject !== "all" ||
+    selectedDifficulty !== "all" ||
+    selectedPattern !== "all" ||
+    selectedStatus !== "all" ||
+    Boolean(searchQuery);
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200 select-none">
@@ -421,22 +428,23 @@ export default function PracticePage() {
       {/* 2. SEARCH & ADVANCED FILTER BAR */}
       {/* ========================================================================= */}
       <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-3 shadow-subtle">
-        {/* Search Bar */}
+        {/* Search Bar - Compact */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
           <input
             type="text"
             placeholder="Search by problem title, topic (Arrays, Two Pointers, Indexing, Sockets)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-950/80 pl-9 pr-8 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal"
+            className="w-full h-8 rounded-lg border border-zinc-800 bg-zinc-950/80 pl-8 pr-7 text-[12px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/40 font-normal transition-colors"
           />
           {searchQuery && (
             <button
+              type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-0.5"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-0.5"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-3 w-3" />
             </button>
           )}
         </div>
@@ -476,7 +484,7 @@ export default function PracticePage() {
             ))}
           </div>
 
-          {/* Selectors: Pattern, Level, Status */}
+          {/* Selectors: Pattern, Level, Status & Reset */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Pattern Selector */}
             <div className="flex items-center gap-1">
@@ -534,14 +542,18 @@ export default function PracticePage() {
               </select>
             </div>
 
-            {/* Reset Filters button if active */}
-            {(selectedSubject !== "all" || selectedDifficulty !== "all" || selectedPattern !== "all" || selectedStatus !== "all" || searchQuery) && (
-              <button
+            {/* Reset Button (only shown when filters/search are active) */}
+            {isFilterActive && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
                 onClick={handleClearFilters}
-                className="text-[11px] text-blue-400 hover:text-blue-300 underline underline-offset-2 ml-1"
+                className="h-6 px-2 text-[11px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition-colors flex items-center gap-1 ml-0.5"
               >
-                Reset
-              </button>
+                <RotateCcw className="h-3 w-3 text-zinc-400" />
+                <span>Reset</span>
+              </Button>
             )}
           </div>
         </div>
@@ -553,12 +565,13 @@ export default function PracticePage() {
       <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle">
         {/* Table Header */}
         <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/60 px-3.5 py-2 text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
-          <div className="col-span-1 flex items-center justify-center">Status</div>
-          <div className="col-span-5 sm:col-span-4">Problem Title</div>
-          <div className="col-span-2 hidden sm:block">Subject &middot; Pattern</div>
-          <div className="col-span-2 text-center">Difficulty</div>
-          <div className="col-span-2 hidden sm:block text-center">Revision Status</div>
-          <div className="col-span-4 sm:col-span-1 text-right pr-2">Action</div>
+          <div className="col-span-1 flex items-center justify-center" aria-label="Status" />
+          <div className="col-span-6 sm:col-span-4 md:col-span-4 lg:col-span-4">Problem Title</div>
+          <div className="col-span-2 hidden sm:flex items-center">Subject &middot; Pattern</div>
+          <div className="col-span-2 sm:col-span-2 md:col-span-1 flex justify-center">Difficulty</div>
+          <div className="col-span-2 hidden md:flex justify-center items-center">Last Solved</div>
+          <div className="col-span-2 sm:col-span-2 md:col-span-1 hidden sm:flex justify-center items-center">Revision</div>
+          <div className="col-span-3 sm:col-span-1 md:col-span-1 flex justify-end pr-2">Action</div>
         </div>
 
         {/* Loading State */}
@@ -595,53 +608,34 @@ export default function PracticePage() {
           /* Problem Rows */
           <div className="divide-y divide-zinc-800/40">
             {problems.map((problem) => {
-              const lastSolvedText = formatLastSolved(problem.lastSolvedAt);
+              const lastSolvedFormatted = formatLastSolved(problem.lastSolvedAt);
 
               return (
                 <div
                   key={problem.id}
                   onClick={() => handleOpenProblem(problem)}
-                  className={cn(
-                    "grid grid-cols-12 gap-3 items-center px-4 py-3 text-[13px] transition-colors hover:bg-zinc-900/80 cursor-pointer group",
-                    problem.solved && "bg-zinc-950/20 opacity-75"
-                  )}
+                  className="grid grid-cols-12 gap-3 items-center px-4 py-3 text-[13px] transition-colors hover:bg-zinc-900/80 cursor-pointer group"
                 >
-                  {/* 1. Status Checkbox */}
+                  {/* 1. Solved Checkmark (LeetCode style) */}
                   <div className="col-span-1 flex items-center justify-center">
-                    <button
-                      type="button"
-                      onClick={(e) => handleToggleSolve(problem, e)}
-                      className={cn(
-                        "flex h-4 w-4 items-center justify-center rounded border transition-colors",
-                        problem.solved
-                          ? "border-emerald-500 bg-emerald-500 text-white"
-                          : "border-zinc-700 bg-zinc-900 hover:border-blue-500"
-                      )}
-                      aria-label="Toggle completed"
-                    >
-                      {problem.solved && <Check className="h-3 w-3 stroke-[3]" />}
-                    </button>
+                    {problem.solved && (
+                      <Check className="h-4 w-4 text-emerald-400 stroke-[2.5]" />
+                    )}
                   </div>
 
-                  {/* 2. Title + Last Solved Date */}
-                  <div className="col-span-5 sm:col-span-4 flex items-center gap-2 overflow-hidden">
+                  {/* 2. Problem Title */}
+                  <div className="col-span-6 sm:col-span-4 md:col-span-4 lg:col-span-4 flex items-center gap-2 overflow-hidden">
                     <div className="truncate">
-                      <span
-                        className={cn(
-                          "font-medium text-zinc-100 text-[13px] leading-snug group-hover:text-blue-400 transition-colors",
-                          problem.solved && "line-through text-zinc-500 font-normal"
-                        )}
-                      >
+                      <span className="font-medium text-zinc-100 text-[13px] leading-snug group-hover:text-blue-400 transition-colors">
                         {problem.title}
                       </span>
                       <div className="text-[11px] text-zinc-500 flex items-center gap-1.5 mt-0.5 font-normal truncate font-mono">
-                        {lastSolvedText ? (
-                          <span className="text-zinc-400">{lastSolvedText}</span>
-                        ) : (
-                          <span className="text-zinc-600">Not solved yet</span>
+                        <span>Est. {problem.estimatedMinutes}m</span>
+                        {problem.lastSolvedAt && (
+                          <span className="md:hidden">
+                            &middot; <span className="text-zinc-400">{lastSolvedFormatted}</span>
+                          </span>
                         )}
-                        <span>&middot;</span>
-                        <span>{problem.estimatedMinutes}m</span>
                       </div>
                     </div>
                   </div>
@@ -655,17 +649,22 @@ export default function PracticePage() {
                   </div>
 
                   {/* 4. Difficulty */}
-                  <div className="col-span-2 flex justify-center">
+                  <div className="col-span-2 sm:col-span-2 md:col-span-1 flex justify-center">
                     {getDifficultyBadge(problem.difficulty)}
                   </div>
 
-                  {/* 5. Revision Status Badge */}
-                  <div className="col-span-2 hidden sm:flex justify-center">
+                  {/* 5. Last Solved */}
+                  <div className="col-span-2 hidden md:flex justify-center items-center font-mono text-[11px] text-zinc-400">
+                    {lastSolvedFormatted}
+                  </div>
+
+                  {/* 6. Revision Status Badge */}
+                  <div className="col-span-2 sm:col-span-2 md:col-span-1 hidden sm:flex justify-center">
                     {getStatusBadge(problem)}
                   </div>
 
-                  {/* 6. Action */}
-                  <div className="col-span-4 sm:col-span-1 flex items-center justify-end gap-2 pr-1">
+                  {/* 7. Action */}
+                  <div className="col-span-3 sm:col-span-1 md:col-span-1 flex items-center justify-end gap-2 pr-1">
                     <Button
                       size="sm"
                       variant="outline"
