@@ -186,7 +186,7 @@ export function RevisionStatus({
                 : "text-zinc-400 hover:text-zinc-200",
             )}
           >
-            <span>Due Now</span>
+            <span>Due</span>
             {dueCount > 0 && (
               <span className="font-mono text-[10px] px-1 rounded bg-amber-500/20 text-amber-300">
                 {dueCount}

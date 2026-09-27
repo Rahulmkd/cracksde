@@ -83,13 +83,25 @@ export default function PracticePage() {
   const { data: roadmapSubjects } = useRoadmapSubjects();
 
   // Active Problem Note Modal State
-  const [activeProblem, setActiveProblem] = useState<PracticeProblemDto | null>(null);
+  const [activeProblem, setActiveProblem] = useState<PracticeProblemDto | null>(
+    null,
+  );
   const [userNotes, setUserNotes] = useState<string>("");
 
   // Solved & Total Counts
   const problems = practiceData?.problems || [];
-  const pagination = practiceData?.pagination || { page: 1, limit: pageSize, total: 0, totalPages: 1, hasMore: false };
-  const stats = practiceData?.stats || { totalProblems: 847, totalSolved: 0, totalDue: 0 };
+  const pagination = practiceData?.pagination || {
+    page: 1,
+    limit: pageSize,
+    total: 0,
+    totalPages: 1,
+    hasMore: false,
+  };
+  const stats = practiceData?.stats || {
+    totalProblems: 847,
+    totalSolved: 0,
+    totalDue: 0,
+  };
 
   // Generate dynamic pattern options from roadmap topics
   const availablePatterns = useMemo(() => {
@@ -98,17 +110,55 @@ export default function PracticePage() {
       roadmapSubjects.forEach((sub) => {
         if (selectedSubject === "all" || sub.slug === selectedSubject) {
           if (sub.slug === "dsa") {
-            ["Arrays", "Two Pointers", "Sliding Window", "Binary Search", "Linked List", "Recursion", "Trees", "Graphs", "Dynamic Programming"].forEach((p) => patterns.add(p));
+            [
+              "Arrays",
+              "Two Pointers",
+              "Sliding Window",
+              "Binary Search",
+              "Linked List",
+              "Recursion",
+              "Trees",
+              "Graphs",
+              "Dynamic Programming",
+            ].forEach((p) => patterns.add(p));
           } else if (sub.slug === "dbms") {
-            ["SQL Queries", "Indexing & B+ Trees", "Transactions & ACID", "Normalization", "Concurrency Control"].forEach((p) => patterns.add(p));
+            [
+              "SQL Queries",
+              "Indexing & B+ Trees",
+              "Transactions & ACID",
+              "Normalization",
+              "Concurrency Control",
+            ].forEach((p) => patterns.add(p));
           } else if (sub.slug === "operating-systems") {
-            ["Process Synchronization", "Deadlocks & Semaphores", "Virtual Memory & Paging", "CPU Scheduling", "System Calls"].forEach((p) => patterns.add(p));
+            [
+              "Process Synchronization",
+              "Deadlocks & Semaphores",
+              "Virtual Memory & Paging",
+              "CPU Scheduling",
+              "System Calls",
+            ].forEach((p) => patterns.add(p));
           } else if (sub.slug === "computer-networks") {
-            ["TCP/IP & OSI Model", "HTTP & WebSocket", "Routing Protocols", "DNS & Sockets"].forEach((p) => patterns.add(p));
+            [
+              "TCP/IP & OSI Model",
+              "HTTP & WebSocket",
+              "Routing Protocols",
+              "DNS & Sockets",
+            ].forEach((p) => patterns.add(p));
           } else if (sub.slug === "oops") {
-            ["Encapsulation & Inheritance", "Polymorphism", "Abstraction & Interfaces", "Design Principles"].forEach((p) => patterns.add(p));
+            [
+              "Encapsulation & Inheritance",
+              "Polymorphism",
+              "Abstraction & Interfaces",
+              "Design Principles",
+            ].forEach((p) => patterns.add(p));
           } else if (sub.slug === "lld") {
-            ["Creational Patterns", "Structural Patterns", "Behavioral Patterns", "SOLID Principles", "System Design"].forEach((p) => patterns.add(p));
+            [
+              "Creational Patterns",
+              "Structural Patterns",
+              "Behavioral Patterns",
+              "SOLID Principles",
+              "System Design",
+            ].forEach((p) => patterns.add(p));
           }
         }
       });
@@ -195,12 +245,50 @@ export default function PracticePage() {
 
   const getSubjectBadge = (slug?: string, name?: string) => {
     const s = (slug || "").toLowerCase();
-    if (s === "dsa") return <Badge variant="blue" className="font-medium text-[11px] py-0 px-1.5">DSA</Badge>;
-    if (s === "dbms") return <Badge variant="success" className="font-medium text-[11px] py-0 px-1.5">DBMS</Badge>;
-    if (s === "operating-systems" || s === "os") return <Badge variant="purple" className="font-medium text-[11px] py-0 px-1.5">OS</Badge>;
-    if (s === "computer-networks" || s === "cn") return <Badge variant="warning" className="font-medium text-[11px] py-0 px-1.5">CN</Badge>;
-    if (s === "oops") return <Badge variant="success" className="font-medium text-[11px] py-0 px-1.5">OOPs</Badge>;
-    return <Badge variant="cyan" className="font-medium text-[11px] py-0 px-1.5">{name || "LLD"}</Badge>;
+    if (s === "dsa")
+      return (
+        <Badge variant="blue" className="font-medium text-[11px] py-0 px-1.5">
+          DSA
+        </Badge>
+      );
+    if (s === "dbms")
+      return (
+        <Badge
+          variant="success"
+          className="font-medium text-[11px] py-0 px-1.5"
+        >
+          DBMS
+        </Badge>
+      );
+    if (s === "operating-systems" || s === "os")
+      return (
+        <Badge variant="purple" className="font-medium text-[11px] py-0 px-1.5">
+          OS
+        </Badge>
+      );
+    if (s === "computer-networks" || s === "cn")
+      return (
+        <Badge
+          variant="warning"
+          className="font-medium text-[11px] py-0 px-1.5"
+        >
+          CN
+        </Badge>
+      );
+    if (s === "oops")
+      return (
+        <Badge
+          variant="success"
+          className="font-medium text-[11px] py-0 px-1.5"
+        >
+          OOPs
+        </Badge>
+      );
+    return (
+      <Badge variant="cyan" className="font-medium text-[11px] py-0 px-1.5">
+        {name || "LLD"}
+      </Badge>
+    );
   };
 
   // Difficulty Badge: Only Easy, Medium, Hard
@@ -215,7 +303,10 @@ export default function PracticePage() {
     }
     if (d.includes("pro") || d.includes("hard")) {
       return (
-        <Badge variant="destructive" className="font-medium text-[11px] py-0 px-2">
+        <Badge
+          variant="destructive"
+          className="font-medium text-[11px] py-0 px-2"
+        >
           Hard
         </Badge>
       );
@@ -260,8 +351,14 @@ export default function PracticePage() {
 
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const targetDay = new Date(revDate.getFullYear(), revDate.getMonth(), revDate.getDate());
-    const diffDays = Math.round((targetDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const targetDay = new Date(
+      revDate.getFullYear(),
+      revDate.getMonth(),
+      revDate.getDate(),
+    );
+    const diffDays = Math.round(
+      (targetDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     if (diffDays <= 0) {
       return (
@@ -279,7 +376,10 @@ export default function PracticePage() {
       );
     }
 
-    const formattedDate = revDate.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+    const formattedDate = revDate.toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
+    });
     return (
       <span className="inline-flex items-center rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-400 font-mono">
         {formattedDate}
@@ -303,12 +403,16 @@ export default function PracticePage() {
         <div className="space-y-0.5">
           <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100 flex items-center gap-2">
             <span>Practice Problems</span>
-            <Badge variant="blue" className="text-[10px] font-medium py-0 px-1.5 font-mono">
+            <Badge
+              variant="blue"
+              className="text-[10px] font-medium py-0 px-1.5 font-mono"
+            >
               {stats.totalProblems} Curated Qs
             </Badge>
           </h1>
           <p className="text-[12px] font-normal text-zinc-400 leading-normal">
-            Master pattern-based algorithms, system design questions, and core subject problems from the real curriculum.
+            Master pattern-based algorithms, system design questions, and core
+            subject problems from the real curriculum.
           </p>
         </div>
 
@@ -384,7 +488,7 @@ export default function PracticePage() {
                   "rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors select-none",
                   selectedSubject === f.val
                     ? "bg-blue-600/15 text-blue-400 border border-blue-500/30"
-                    : "border border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                    : "border border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900",
                 )}
               >
                 {f.label}
@@ -407,7 +511,9 @@ export default function PracticePage() {
               >
                 <option value="all">All Patterns</option>
                 {availablePatterns.map((p) => (
-                  <option key={p} value={p.toLowerCase()}>{p}</option>
+                  <option key={p} value={p.toLowerCase()}>
+                    {p}
+                  </option>
                 ))}
               </select>
             </div>
@@ -473,23 +579,24 @@ export default function PracticePage() {
       <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle">
         {/* Table Header */}
         <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/60 px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wider items-center">
-          <div className="col-span-7 sm:col-span-5 md:col-span-4">Problem</div>
-          <div className="col-span-3 md:col-span-2 hidden sm:block">Subject &middot; Topic</div>
-          <div className="col-span-2 md:col-span-2 text-center">Difficulty</div>
-          <div className="col-span-2 hidden md:block text-center">Last Solved</div>
+          <div className="col-span-7 sm:col-span-5">Problem</div>
+          <div className="col-span-3 hidden sm:block">Subject</div>
+          <div className="col-span-2 text-center">Difficulty</div>
           <div className="col-span-1 hidden sm:block text-center">Revision</div>
-          <div className="col-span-3 sm:col-span-1 md:col-span-1 text-right pr-2">Action</div>
+          <div className="col-span-3 sm:col-span-1 text-right pr-2">Action</div>
         </div>
 
         {/* Loading State */}
         {isLoading ? (
           <div className="divide-y divide-zinc-800/40 p-2 space-y-2">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="flex items-center justify-between py-3 px-3">
-                <Skeleton className="h-4 w-60 bg-zinc-800 rounded" />
-                <Skeleton className="h-4 w-28 bg-zinc-800 rounded hidden sm:block" />
+              <div
+                key={i}
+                className="flex items-center justify-between py-3 px-3"
+              >
+                <Skeleton className="h-4 w-64 bg-zinc-800 rounded" />
+                <Skeleton className="h-4 w-32 bg-zinc-800 rounded hidden sm:block" />
                 <Skeleton className="h-4 w-16 bg-zinc-800 rounded" />
-                <Skeleton className="h-4 w-20 bg-zinc-800 rounded hidden md:block" />
                 <Skeleton className="h-4 w-16 bg-zinc-800 rounded hidden sm:block" />
                 <Skeleton className="h-6 w-14 bg-zinc-800 rounded" />
               </div>
@@ -499,9 +606,13 @@ export default function PracticePage() {
           /* Error State */
           <div className="py-12 text-center space-y-2">
             <AlertTriangle className="h-8 w-8 text-rose-400 mx-auto" />
-            <p className="text-[13px] font-medium text-zinc-200">Failed to load problems</p>
+            <p className="text-[13px] font-medium text-zinc-200">
+              Failed to load problems
+            </p>
             <p className="text-[11px] text-zinc-500">
-              {error instanceof Error ? error.message : "Error connecting to the database."}
+              {error instanceof Error
+                ? error.message
+                : "Error connecting to the database."}
             </p>
             <Button
               size="sm"
@@ -514,76 +625,64 @@ export default function PracticePage() {
         ) : problems.length > 0 ? (
           /* Problem Rows */
           <div className="divide-y divide-zinc-800/40">
-            {problems.map((problem) => {
-              const lastSolvedFormatted = formatLastSolved(problem.lastSolvedAt);
-
-              return (
-                <div
-                  key={problem.id}
-                  onClick={() => handleOpenProblem(problem)}
-                  className="grid grid-cols-12 gap-3 items-center px-4 py-3 text-[13px] transition-colors hover:bg-zinc-900/80 cursor-pointer group"
-                >
-                  {/* 1. Problem Column with checkmark directly beside title */}
-                  <div className="col-span-7 sm:col-span-5 md:col-span-4 flex items-center gap-2 overflow-hidden pr-2">
-                    {problem.solved ? (
-                      <Check className="h-4 w-4 text-emerald-400 stroke-[2.5] shrink-0" />
-                    ) : (
-                      <div className="h-4 w-4 shrink-0" />
-                    )}
-                    <span className="font-medium text-zinc-100 text-[13px] leading-snug group-hover:text-blue-400 transition-colors truncate">
-                      {problem.title}
-                    </span>
-                  </div>
-
-                  {/* 2. Subject · Topic Column */}
-                  <div className="col-span-3 md:col-span-2 hidden sm:flex flex-col justify-center min-w-0">
-                    <span className="text-[12px] font-medium text-zinc-200 leading-tight">
-                      {getSubjectDisplayName(problem.subjectSlug, problem.subject)}
-                    </span>
-                    <span className="text-[11px] text-zinc-500 truncate leading-tight mt-0.5">
-                      {problem.topic || problem.subtopic || "Core"}
-                    </span>
-                  </div>
-
-                  {/* 3. Difficulty Column (Easy / Medium / Hard only) */}
-                  <div className="col-span-2 md:col-span-2 flex justify-center">
-                    {getDifficultyBadge(problem.difficulty)}
-                  </div>
-
-                  {/* 4. Last Solved Column */}
-                  <div className="col-span-2 hidden md:flex justify-center items-center">
-                    {problem.lastSolvedAt ? (
-                      <span className="inline-flex items-center justify-center rounded-md border border-zinc-800/80 bg-zinc-900/60 px-2 py-0.5 text-[11px] font-mono text-zinc-300">
-                        {lastSolvedFormatted}
-                      </span>
-                    ) : (
-                      <span className="text-zinc-600 font-mono text-[11px]">—</span>
-                    )}
-                  </div>
-
-                  {/* 5. Revision Column (Only timing: Tomorrow, 30 Sep, Today, or —) */}
-                  <div className="col-span-1 hidden sm:flex justify-center items-center">
-                    {getRevisionBadge(problem)}
-                  </div>
-
-                  {/* 6. Action Column */}
-                  <div className="col-span-3 sm:col-span-1 md:col-span-1 flex items-center justify-end pr-1">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenProblem(problem);
-                      }}
-                      className="h-6 px-2.5 text-[11px] font-medium border-zinc-800 bg-zinc-900 group-hover:border-blue-500/40 group-hover:text-blue-400"
-                    >
-                      <span>Solve</span>
-                      <ChevronRight className="h-3 w-3 ml-0.5" />
-                    </Button>
-                  </div>
+            {problems.map((problem) => (
+              <div
+                key={problem.id}
+                onClick={() => handleOpenProblem(problem)}
+                className="grid grid-cols-12 gap-3 items-center px-4 py-3 text-[13px] transition-colors hover:bg-zinc-900/80 cursor-pointer group"
+              >
+                {/* 1. Problem Column with checkmark directly beside title */}
+                <div className="col-span-7 sm:col-span-5 flex items-center gap-2 overflow-hidden pr-2">
+                  {problem.solved ? (
+                    <Check className="h-4 w-4 text-emerald-400 stroke-[2.5] shrink-0" />
+                  ) : (
+                    <div className="h-4 w-4 shrink-0" />
+                  )}
+                  <span className="font-medium text-zinc-100 text-[13px] leading-snug group-hover:text-blue-400 transition-colors truncate">
+                    {problem.title}
+                  </span>
                 </div>
-              );
-            })}
+
+                {/* 2. Subject · Topic Column */}
+                <div className="col-span-3 hidden sm:flex flex-col justify-center min-w-0">
+                  <span className="text-[12px] font-medium text-zinc-200 leading-tight">
+                    {getSubjectDisplayName(
+                      problem.subjectSlug,
+                      problem.subject,
+                    )}
+                  </span>
+                  <span className="text-[11px] text-zinc-500 truncate leading-tight mt-0.5">
+                    {problem.topic || problem.subtopic || "Core"}
+                  </span>
+                </div>
+
+                {/* 3. Difficulty Column (Easy / Medium / Hard only) */}
+                <div className="col-span-2 flex justify-center">
+                  {getDifficultyBadge(problem.difficulty)}
+                </div>
+
+                {/* 4. Revision Column (Only timing: Tomorrow, 30 Sep, Today, or —) */}
+                <div className="col-span-1 hidden sm:flex justify-center items-center">
+                  {getRevisionBadge(problem)}
+                </div>
+
+                {/* 5. Action Column */}
+                <div className="col-span-3 sm:col-span-1 flex items-center justify-end pr-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenProblem(problem);
+                    }}
+                    className="h-6 px-2.5 text-[11px] font-medium border-zinc-800 bg-zinc-900 group-hover:border-blue-500/40 group-hover:text-blue-400"
+                  >
+                    <span>Solve</span>
+                    <ChevronRight className="h-3 w-3 ml-0.5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           /* Empty State */
@@ -591,7 +690,9 @@ export default function PracticePage() {
             <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500">
               <FileText className="h-4 w-4" />
             </div>
-            <p className="text-[12px] font-medium text-zinc-300">No matching problems found</p>
+            <p className="text-[12px] font-medium text-zinc-300">
+              No matching problems found
+            </p>
             <p className="text-[11px] text-zinc-500">
               Try clearing active filters or searching a different term.
             </p>
@@ -612,8 +713,13 @@ export default function PracticePage() {
         {!isLoading && pagination.total > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-zinc-800/80 bg-zinc-950/60 px-4 py-3 text-[12px] text-zinc-400 font-mono">
             <div>
-              Showing {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)} –{" "}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} problems
+              Showing{" "}
+              {Math.min(
+                (pagination.page - 1) * pagination.limit + 1,
+                pagination.total,
+              )}{" "}
+              – {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+              of {pagination.total} problems
             </div>
 
             <div className="flex items-center gap-2">
@@ -635,7 +741,9 @@ export default function PracticePage() {
                 size="sm"
                 variant="outline"
                 disabled={currentPage >= pagination.totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))
+                }
                 className="h-7 px-2.5 text-[11px] font-mono border-zinc-800 bg-zinc-900 text-zinc-300 disabled:opacity-40"
               >
                 Next <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
@@ -649,18 +757,27 @@ export default function PracticePage() {
       {/* 4. COMPACT NOTE POPOUT / MODAL */}
       {/* ========================================================================= */}
       {activeProblem && (
-        <Dialog open={!!activeProblem} onOpenChange={(open) => !open && setActiveProblem(null)}>
+        <Dialog
+          open={!!activeProblem}
+          onOpenChange={(open) => !open && setActiveProblem(null)}
+        >
           <DialogContent className="max-w-md border-zinc-800 bg-zinc-950 text-zinc-100 p-5 shadow-2xl">
             <DialogHeader className="space-y-1.5 text-left">
               <div className="flex items-center gap-2">
-                {getSubjectBadge(activeProblem.subjectSlug, activeProblem.subject)}
+                {getSubjectBadge(
+                  activeProblem.subjectSlug,
+                  activeProblem.subject,
+                )}
                 {getDifficultyBadge(activeProblem.difficulty)}
               </div>
               <DialogTitle className="text-[15px] font-semibold text-zinc-100 leading-snug">
                 {activeProblem.title}
               </DialogTitle>
               <DialogDescription className="text-[12px] text-zinc-400">
-                Topic: <strong className="text-zinc-300 font-medium">{activeProblem.topic || "Core"}</strong>
+                Topic:{" "}
+                <strong className="text-zinc-300 font-medium">
+                  {activeProblem.topic || "Core"}
+                </strong>
                 {activeProblem.subtopic ? ` · ${activeProblem.subtopic}` : ""}
               </DialogDescription>
             </DialogHeader>
@@ -675,13 +792,17 @@ export default function PracticePage() {
                       <Check className="h-3 w-3 stroke-[2.5]" /> Solved
                     </span>
                   ) : (
-                    <span className="text-zinc-400 font-normal">Not Solved</span>
+                    <span className="text-zinc-400 font-normal">
+                      Not Solved
+                    </span>
                   )}
                 </div>
                 {activeProblem.lastSolvedAt && (
                   <div className="text-zinc-400 font-mono text-[11px] flex items-center gap-1">
                     <Calendar className="h-3 w-3 text-zinc-500" />
-                    <span>Last: {formatLastSolved(activeProblem.lastSolvedAt)}</span>
+                    <span>
+                      Last: {formatLastSolved(activeProblem.lastSolvedAt)}
+                    </span>
                   </div>
                 )}
               </div>
@@ -744,7 +865,9 @@ export default function PracticePage() {
                     disabled={solveMutation.isPending}
                     className="h-8 px-3 text-[12px] bg-blue-600 hover:bg-blue-700 text-white font-medium"
                   >
-                    {solveMutation.isPending ? "Saving..." : "Mark Solved & Save"}
+                    {solveMutation.isPending
+                      ? "Saving..."
+                      : "Mark Solved & Save"}
                   </Button>
                 )}
               </div>
