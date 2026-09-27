@@ -2,28 +2,19 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import {
-  Code2,
   Search,
   Check,
-  Star,
-  Play,
   RotateCcw,
-  Sparkles,
   ChevronRight,
   ChevronLeft,
-  BookOpen,
   Filter,
-  CheckCircle2,
-  Clock,
-  Layers,
-  Copy,
-  Terminal,
   Shuffle,
-  CheckCircle,
-  XCircle,
   AlertTriangle,
   RefreshCw,
   X,
+  FileText,
+  Clock,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,12 +38,6 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { PracticeProblemDto } from "@starter/shared";
 
-interface TestCase {
-  input: string;
-  expectedOutput: string;
-  explanation?: string;
-}
-
 export default function PracticePage() {
   const { isAuthenticated } = useAuth();
   const { addPoints } = usePlannerStore();
@@ -67,7 +52,7 @@ export default function PracticePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 50;
 
-  // Debounced search query for smoother typing
+  // Debounced search query for smooth typing
   const [debouncedSearch, setDebouncedSearch] = useState("");
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -77,7 +62,7 @@ export default function PracticePage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch Practice Problems from real database
+  // Fetch Practice Problems from database
   const {
     data: practiceData,
     isLoading,
@@ -97,21 +82,9 @@ export default function PracticePage() {
   // Fetch subjects & topic metadata for dynamic filters
   const { data: roadmapSubjects } = useRoadmapSubjects();
 
-  // Selected Problem Modal
+  // Active Problem Note Modal State
   const [activeProblem, setActiveProblem] = useState<PracticeProblemDto | null>(null);
-  const [activeLanguage, setActiveLanguage] = useState<"cpp" | "java" | "python" | "javascript">("cpp");
-  const [userCode, setUserCode] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"editor" | "description" | "notes">("editor");
-
-  // Test Runner State
-  const [selectedTestCaseIndex, setSelectedTestCaseIndex] = useState(0);
-  const [isRunningTests, setIsRunningTests] = useState(false);
-  const [testResults, setTestResults] = useState<{
-    passed: boolean;
-    actualOutput: string;
-    runtime: string;
-    memory: string;
-  } | null>(null);
+  const [userNotes, setUserNotes] = useState<string>("");
 
   // Solved & Total Counts
   const problems = practiceData?.problems || [];
@@ -124,7 +97,6 @@ export default function PracticePage() {
     if (roadmapSubjects) {
       roadmapSubjects.forEach((sub) => {
         if (selectedSubject === "all" || sub.slug === selectedSubject) {
-          // Add default well-known topics for this subject
           if (sub.slug === "dsa") {
             ["Arrays", "Two Pointers", "Sliding Window", "Binary Search", "Linked List", "Recursion", "Trees", "Graphs", "Dynamic Programming"].forEach((p) => patterns.add(p));
           } else if (sub.slug === "dbms") {
@@ -142,7 +114,6 @@ export default function PracticePage() {
       });
     }
 
-    // Also include topics from current problems
     problems.forEach((p) => {
       if (p.topic) patterns.add(p.topic);
       if (p.subtopic) patterns.add(p.subtopic);
@@ -151,119 +122,39 @@ export default function PracticePage() {
     return Array.from(patterns).sort();
   }, [roadmapSubjects, selectedSubject, problems]);
 
-  // Code Snippet Generator for active problem
-  const getCodeTemplate = (problem: PracticeProblemDto, lang: "cpp" | "java" | "python" | "javascript") => {
-    const funcName = problem.slug.replace(/-/g, "_") || "solve";
-    const className = "Solution";
-
-    switch (lang) {
-      case "cpp":
-        return `class ${className} {\npublic:\n    // Problem: ${problem.title}\n    // Topic: ${problem.topic}\n    void ${funcName}() {\n        // Write your optimal solution here\n    }\n};`;
-      case "java":
-        return `class ${className} {\n    // Problem: ${problem.title}\n    // Topic: ${problem.topic}\n    public void ${funcName}() {\n        // Write your optimal solution here\n    }\n}`;
-      case "python":
-        return `class ${className}:\n    # Problem: ${problem.title}\n    # Topic: ${problem.topic}\n    def ${funcName}(self):\n        # Write your optimal solution here\n        pass`;
-      case "javascript":
-        return `/**\n * @param {any}\n * @return {any}\n */\nfunction ${funcName}() {\n    // Problem: ${problem.title}\n    // Write your optimal solution here\n}`;
-    }
-  };
-
-  // Sample Test Cases generator
-  const getProblemExamples = (problem: PracticeProblemDto): TestCase[] => {
-    return [
-      {
-        input: `Sample Input 1 for [${problem.title}]`,
-        expectedOutput: "Optimal result matching constraints",
-        explanation: `Evaluated against ${problem.difficulty} complexity expectations.`,
-      },
-      {
-        input: `Edge Case: Empty or Boundary state`,
-        expectedOutput: "Graceful handle",
-        explanation: "Handles corner conditions properly.",
-      },
-    ];
-  };
-
+  // Open note modal for a problem
   const handleOpenProblem = (problem: PracticeProblemDto) => {
     setActiveProblem(problem);
-    setUserCode(getCodeTemplate(problem, activeLanguage));
-    setSelectedTestCaseIndex(0);
-    setTestResults(null);
-    setActiveTab("editor");
+    setUserNotes(problem.progress?.notes || "");
   };
 
-  const handleLanguageChange = (lang: "cpp" | "java" | "python" | "javascript") => {
-    setActiveLanguage(lang);
-    if (activeProblem) {
-      setUserCode(getCodeTemplate(activeProblem, lang));
-    }
-  };
-
-  // Toggle solve / complete status in database
-  const handleToggleSolve = async (problem: PracticeProblemDto, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  // Save notes & update problem progress
+  const handleSaveProblemNotes = async (markAsSolved: boolean) => {
+    if (!activeProblem) return;
 
     if (!isAuthenticated) {
       toast.error("Please sign in to record question progress.");
       return;
     }
 
-    const nextIsCorrect = !problem.solved;
-
-    try {
-      const result = await solveMutation.mutateAsync({
-        itemId: problem.itemId,
-        isCorrect: nextIsCorrect,
-      });
-
-      if (nextIsCorrect) {
-        addPoints(15);
-        toast.success(`🎉 ${result.message} (+15 pts!)`);
-      } else {
-        toast.info(result.message);
-      }
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update problem status");
-    }
-  };
-
-  // Run Test Cases Simulation
-  const handleRunTests = () => {
-    setIsRunningTests(true);
-    setTestResults(null);
-
-    setTimeout(() => {
-      setIsRunningTests(false);
-      setTestResults({
-        passed: true,
-        actualOutput: "Optimal result matching constraints",
-        runtime: "4 ms",
-        memory: "8.2 MB",
-      });
-      toast.success("All sample test cases passed!");
-    }, 600);
-  };
-
-  // Submit Solution from Modal
-  const handleSubmitSolution = async () => {
-    if (!activeProblem) return;
-
-    if (!isAuthenticated) {
-      toast.error("Please sign in to save your solution.");
-      return;
-    }
-
     try {
       const result = await solveMutation.mutateAsync({
         itemId: activeProblem.itemId,
-        isCorrect: true,
+        isCorrect: markAsSolved,
+        notes: userNotes,
       });
 
-      addPoints(20);
-      toast.success(`🎉 Solution recorded! ${result.message} (+20 pts!)`);
+      if (markAsSolved && !activeProblem.solved) {
+        addPoints(15);
+        toast.success(`🎉 Problem solved! Notes saved (+15 pts!)`);
+      } else if (!markAsSolved && activeProblem.solved) {
+        toast.info("Problem marked as unsolved.");
+      } else {
+        toast.success("Notes saved successfully!");
+      }
       setActiveProblem(null);
     } catch (err: any) {
-      toast.error(err.message || "Failed to record solution");
+      toast.error(err.message || "Failed to save question notes");
     }
   };
 
@@ -290,93 +181,110 @@ export default function PracticePage() {
     setCurrentPage(1);
   };
 
-  // Badges & Formatting Helpers
+  // Subject Display Helpers
+  const getSubjectDisplayName = (slug?: string, name?: string) => {
+    const s = (slug || "").toLowerCase();
+    if (s === "dsa") return "DSA";
+    if (s === "dbms") return "DBMS";
+    if (s === "operating-systems" || s === "os") return "OS";
+    if (s === "computer-networks" || s === "cn") return "CN";
+    if (s === "oops") return "OOPs";
+    if (s === "lld") return "LLD";
+    return name || slug || "DSA";
+  };
+
+  const getSubjectBadge = (slug?: string, name?: string) => {
+    const s = (slug || "").toLowerCase();
+    if (s === "dsa") return <Badge variant="blue" className="font-medium text-[11px] py-0 px-1.5">DSA</Badge>;
+    if (s === "dbms") return <Badge variant="success" className="font-medium text-[11px] py-0 px-1.5">DBMS</Badge>;
+    if (s === "operating-systems" || s === "os") return <Badge variant="purple" className="font-medium text-[11px] py-0 px-1.5">OS</Badge>;
+    if (s === "computer-networks" || s === "cn") return <Badge variant="warning" className="font-medium text-[11px] py-0 px-1.5">CN</Badge>;
+    if (s === "oops") return <Badge variant="success" className="font-medium text-[11px] py-0 px-1.5">OOPs</Badge>;
+    return <Badge variant="cyan" className="font-medium text-[11px] py-0 px-1.5">{name || "LLD"}</Badge>;
+  };
+
+  // Difficulty Badge: Only Easy, Medium, Hard
   const getDifficultyBadge = (diff: string) => {
     const d = (diff || "Medium").toLowerCase();
     if (d.includes("basic") || d.includes("easy")) {
       return (
         <Badge variant="success" className="font-medium text-[11px] py-0 px-2">
-          Basic / Easy
+          Easy
         </Badge>
       );
     }
-    if (d.includes("core") || d.includes("medium")) {
+    if (d.includes("pro") || d.includes("hard")) {
       return (
-        <Badge variant="warning" className="font-medium text-[11px] py-0 px-2">
-          Core / Medium
+        <Badge variant="destructive" className="font-medium text-[11px] py-0 px-2">
+          Hard
         </Badge>
       );
     }
     return (
-      <Badge variant="destructive" className="font-medium text-[11px] py-0 px-2">
-        Pro / Hard
+      <Badge variant="warning" className="font-medium text-[11px] py-0 px-2">
+        Medium
       </Badge>
     );
   };
 
-  const getSubjectBadge = (subjectSlug?: string, subjectName?: string) => {
-    const slug = (subjectSlug || subjectName || "dsa").toLowerCase();
-    if (slug.includes("dsa")) {
-      return <Badge variant="blue" className="font-medium text-[11px] py-0 px-2">DSA</Badge>;
-    }
-    if (slug.includes("dbms") || slug.includes("data")) {
-      return <Badge variant="success" className="font-medium text-[11px] py-0 px-2">DBMS</Badge>;
-    }
-    if (slug.includes("operat") || slug.includes("os")) {
-      return <Badge variant="purple" className="font-medium text-[11px] py-0 px-2">OS</Badge>;
-    }
-    if (slug.includes("netw") || slug.includes("cn")) {
-      return <Badge variant="warning" className="font-medium text-[11px] py-0 px-2">CN</Badge>;
-    }
-    if (slug.includes("oop")) {
-      return <Badge variant="success" className="font-medium text-[11px] py-0 px-2">OOPs</Badge>;
-    }
-    return <Badge variant="cyan" className="font-medium text-[11px] py-0 px-2">LLD</Badge>;
-  };
-
-  const getStatusBadge = (problem: PracticeProblemDto) => {
-    if (problem.userStatus === "due") {
-      return (
-        <Badge
-          variant="destructive"
-          className="font-medium text-[10px] py-0 px-1.5 flex items-center gap-1 animate-pulse"
-        >
-          <AlertTriangle className="h-2.5 w-2.5" />
-          <span>Revision Due</span>
-        </Badge>
-      );
-    }
-    if (problem.userStatus === "upcoming") {
-      return (
-        <Badge
-          variant="outline"
-          className="font-medium text-[10px] py-0 px-1.5 text-blue-400 border-blue-500/20 bg-blue-500/10 flex items-center gap-1 font-mono"
-        >
-          <Clock className="h-2.5 w-2.5" />
-          <span>{problem.revisionStatusText}</span>
-        </Badge>
-      );
-    }
-    if (problem.userStatus === "solved" || problem.solved) {
-      return (
-        <Badge variant="success" className="font-medium text-[10px] py-0 px-1.5 flex items-center gap-1">
-          <Check className="h-2.5 w-2.5" />
-          <span>Solved</span>
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="secondary" className="font-medium text-[10px] py-0 px-1.5 text-zinc-500 bg-zinc-900 border-zinc-800">
-        Not Solved
-      </Badge>
-    );
-  };
-
+  // Last Solved Date Formatter (compact, e.g. "27 Sep")
   const formatLastSolved = (dateStr?: string | null) => {
     if (!dateStr) return "—";
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return "—";
-    return d.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+    return d.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+  };
+
+  // Revision Timing Formatter (Only timing: Tomorrow, 30 Sep, Today, or —)
+  const getRevisionBadge = (problem: PracticeProblemDto) => {
+    if (!problem.solved && !problem.lastSolvedAt) {
+      return <span className="text-zinc-600 font-mono text-[11px]">—</span>;
+    }
+
+    if (problem.userStatus === "due" || problem.isDue) {
+      return (
+        <span className="inline-flex items-center rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-medium text-rose-400 font-mono">
+          Today
+        </span>
+      );
+    }
+
+    if (!problem.nextRevisionAt) {
+      return <span className="text-zinc-600 font-mono text-[11px]">—</span>;
+    }
+
+    const revDate = new Date(problem.nextRevisionAt);
+    if (isNaN(revDate.getTime())) {
+      return <span className="text-zinc-600 font-mono text-[11px]">—</span>;
+    }
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const targetDay = new Date(revDate.getFullYear(), revDate.getMonth(), revDate.getDate());
+    const diffDays = Math.round((targetDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 0) {
+      return (
+        <span className="inline-flex items-center rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-medium text-rose-400 font-mono">
+          Today
+        </span>
+      );
+    }
+
+    if (diffDays === 1) {
+      return (
+        <span className="inline-flex items-center rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-400 font-mono">
+          Tomorrow
+        </span>
+      );
+    }
+
+    const formattedDate = revDate.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+    return (
+      <span className="inline-flex items-center rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-400 font-mono">
+        {formattedDate}
+      </span>
+    );
   };
 
   const isFilterActive =
@@ -516,9 +424,9 @@ export default function PracticePage() {
                 className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500"
               >
                 <option value="all">All Levels</option>
-                <option value="basic">Basic / Easy</option>
-                <option value="core">Core / Medium</option>
-                <option value="pro">Pro / Hard</option>
+                <option value="basic">Easy</option>
+                <option value="core">Medium</option>
+                <option value="pro">Hard</option>
               </select>
             </div>
 
@@ -542,7 +450,7 @@ export default function PracticePage() {
               </select>
             </div>
 
-            {/* Reset Button (only shown when filters/search are active) */}
+            {/* Reset Button */}
             {isFilterActive && (
               <Button
                 type="button"
@@ -564,14 +472,13 @@ export default function PracticePage() {
       {/* ========================================================================= */}
       <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle">
         {/* Table Header */}
-        <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/60 px-3.5 py-2 text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
-          <div className="col-span-1 flex items-center justify-center" aria-label="Status" />
-          <div className="col-span-6 sm:col-span-4 md:col-span-4 lg:col-span-4">Problem Title</div>
-          <div className="col-span-2 hidden sm:flex items-center">Subject &middot; Pattern</div>
-          <div className="col-span-2 sm:col-span-2 md:col-span-1 flex justify-center">Difficulty</div>
-          <div className="col-span-2 hidden md:flex justify-center items-center">Last Solved</div>
-          <div className="col-span-2 sm:col-span-2 md:col-span-1 hidden sm:flex justify-center items-center">Revision</div>
-          <div className="col-span-3 sm:col-span-1 md:col-span-1 flex justify-end pr-2">Action</div>
+        <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/60 px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wider items-center">
+          <div className="col-span-7 sm:col-span-5 md:col-span-4">Problem</div>
+          <div className="col-span-3 md:col-span-2 hidden sm:block">Subject &middot; Topic</div>
+          <div className="col-span-2 md:col-span-2 text-center">Difficulty</div>
+          <div className="col-span-2 hidden md:block text-center">Last Solved</div>
+          <div className="col-span-1 hidden sm:block text-center">Revision</div>
+          <div className="col-span-3 sm:col-span-1 md:col-span-1 text-right pr-2">Action</div>
         </div>
 
         {/* Loading State */}
@@ -579,11 +486,11 @@ export default function PracticePage() {
           <div className="divide-y divide-zinc-800/40 p-2 space-y-2">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div key={i} className="flex items-center justify-between py-3 px-3">
-                <Skeleton className="h-4 w-6 bg-zinc-800 rounded" />
-                <Skeleton className="h-4 w-52 bg-zinc-800 rounded" />
-                <Skeleton className="h-4 w-24 bg-zinc-800 rounded hidden sm:block" />
+                <Skeleton className="h-4 w-60 bg-zinc-800 rounded" />
+                <Skeleton className="h-4 w-28 bg-zinc-800 rounded hidden sm:block" />
                 <Skeleton className="h-4 w-16 bg-zinc-800 rounded" />
-                <Skeleton className="h-4 w-20 bg-zinc-800 rounded hidden sm:block" />
+                <Skeleton className="h-4 w-20 bg-zinc-800 rounded hidden md:block" />
+                <Skeleton className="h-4 w-16 bg-zinc-800 rounded hidden sm:block" />
                 <Skeleton className="h-6 w-14 bg-zinc-800 rounded" />
               </div>
             ))}
@@ -616,55 +523,51 @@ export default function PracticePage() {
                   onClick={() => handleOpenProblem(problem)}
                   className="grid grid-cols-12 gap-3 items-center px-4 py-3 text-[13px] transition-colors hover:bg-zinc-900/80 cursor-pointer group"
                 >
-                  {/* 1. Solved Checkmark (LeetCode style) */}
-                  <div className="col-span-1 flex items-center justify-center">
-                    {problem.solved && (
-                      <Check className="h-4 w-4 text-emerald-400 stroke-[2.5]" />
+                  {/* 1. Problem Column with checkmark directly beside title */}
+                  <div className="col-span-7 sm:col-span-5 md:col-span-4 flex items-center gap-2 overflow-hidden pr-2">
+                    {problem.solved ? (
+                      <Check className="h-4 w-4 text-emerald-400 stroke-[2.5] shrink-0" />
+                    ) : (
+                      <div className="h-4 w-4 shrink-0" />
                     )}
+                    <span className="font-medium text-zinc-100 text-[13px] leading-snug group-hover:text-blue-400 transition-colors truncate">
+                      {problem.title}
+                    </span>
                   </div>
 
-                  {/* 2. Problem Title */}
-                  <div className="col-span-6 sm:col-span-4 md:col-span-4 lg:col-span-4 flex items-center gap-2 overflow-hidden">
-                    <div className="truncate">
-                      <span className="font-medium text-zinc-100 text-[13px] leading-snug group-hover:text-blue-400 transition-colors">
-                        {problem.title}
-                      </span>
-                      <div className="text-[11px] text-zinc-500 flex items-center gap-1.5 mt-0.5 font-normal truncate font-mono">
-                        <span>Est. {problem.estimatedMinutes}m</span>
-                        {problem.lastSolvedAt && (
-                          <span className="md:hidden">
-                            &middot; <span className="text-zinc-400">{lastSolvedFormatted}</span>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 3. Subject & Pattern */}
-                  <div className="col-span-2 hidden sm:flex items-center gap-2 overflow-hidden">
-                    {getSubjectBadge(problem.subjectSlug, problem.subject)}
-                    <span className="text-[11px] text-zinc-400 truncate font-normal">
+                  {/* 2. Subject · Topic Column */}
+                  <div className="col-span-3 md:col-span-2 hidden sm:flex flex-col justify-center min-w-0">
+                    <span className="text-[12px] font-medium text-zinc-200 leading-tight">
+                      {getSubjectDisplayName(problem.subjectSlug, problem.subject)}
+                    </span>
+                    <span className="text-[11px] text-zinc-500 truncate leading-tight mt-0.5">
                       {problem.topic || problem.subtopic || "Core"}
                     </span>
                   </div>
 
-                  {/* 4. Difficulty */}
-                  <div className="col-span-2 sm:col-span-2 md:col-span-1 flex justify-center">
+                  {/* 3. Difficulty Column (Easy / Medium / Hard only) */}
+                  <div className="col-span-2 md:col-span-2 flex justify-center">
                     {getDifficultyBadge(problem.difficulty)}
                   </div>
 
-                  {/* 5. Last Solved */}
-                  <div className="col-span-2 hidden md:flex justify-center items-center font-mono text-[11px] text-zinc-400">
-                    {lastSolvedFormatted}
+                  {/* 4. Last Solved Column */}
+                  <div className="col-span-2 hidden md:flex justify-center items-center">
+                    {problem.lastSolvedAt ? (
+                      <span className="inline-flex items-center justify-center rounded-md border border-zinc-800/80 bg-zinc-900/60 px-2 py-0.5 text-[11px] font-mono text-zinc-300">
+                        {lastSolvedFormatted}
+                      </span>
+                    ) : (
+                      <span className="text-zinc-600 font-mono text-[11px]">—</span>
+                    )}
                   </div>
 
-                  {/* 6. Revision Status Badge */}
-                  <div className="col-span-2 sm:col-span-2 md:col-span-1 hidden sm:flex justify-center">
-                    {getStatusBadge(problem)}
+                  {/* 5. Revision Column (Only timing: Tomorrow, 30 Sep, Today, or —) */}
+                  <div className="col-span-1 hidden sm:flex justify-center items-center">
+                    {getRevisionBadge(problem)}
                   </div>
 
-                  {/* 7. Action */}
-                  <div className="col-span-3 sm:col-span-1 md:col-span-1 flex items-center justify-end gap-2 pr-1">
+                  {/* 6. Action Column */}
+                  <div className="col-span-3 sm:col-span-1 md:col-span-1 flex items-center justify-end pr-1">
                     <Button
                       size="sm"
                       variant="outline"
@@ -686,7 +589,7 @@ export default function PracticePage() {
           /* Empty State */
           <div className="py-12 text-center space-y-2">
             <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500">
-              <Code2 className="h-4 w-4" />
+              <FileText className="h-4 w-4" />
             </div>
             <p className="text-[12px] font-medium text-zinc-300">No matching problems found</p>
             <p className="text-[11px] text-zinc-500">
@@ -743,320 +646,109 @@ export default function PracticePage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 4. INTERACTIVE IDE & CODE SOLVER MODAL */}
+      {/* 4. COMPACT NOTE POPOUT / MODAL */}
       {/* ========================================================================= */}
       {activeProblem && (
-        <Dialog open={!!activeProblem} onOpenChange={() => setActiveProblem(null)}>
-          <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-zinc-950 border-zinc-800 shadow-dialog">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3 bg-zinc-900/70">
-              <div className="flex items-center gap-2.5 overflow-hidden">
-                <h2 className="text-[15px] font-semibold leading-tight text-zinc-100 truncate">
-                  {activeProblem.title}
-                </h2>
-                {getDifficultyBadge(activeProblem.difficulty)}
+        <Dialog open={!!activeProblem} onOpenChange={(open) => !open && setActiveProblem(null)}>
+          <DialogContent className="max-w-md border-zinc-800 bg-zinc-950 text-zinc-100 p-5 shadow-2xl">
+            <DialogHeader className="space-y-1.5 text-left">
+              <div className="flex items-center gap-2">
                 {getSubjectBadge(activeProblem.subjectSlug, activeProblem.subject)}
+                {getDifficultyBadge(activeProblem.difficulty)}
               </div>
+              <DialogTitle className="text-[15px] font-semibold text-zinc-100 leading-snug">
+                {activeProblem.title}
+              </DialogTitle>
+              <DialogDescription className="text-[12px] text-zinc-400">
+                Topic: <strong className="text-zinc-300 font-medium">{activeProblem.topic || "Core"}</strong>
+                {activeProblem.subtopic ? ` · ${activeProblem.subtopic}` : ""}
+              </DialogDescription>
+            </DialogHeader>
 
-              <div className="flex items-center gap-2 shrink-0 pr-6">
-                <span className="text-[11px] text-zinc-400 font-mono">
-                  {formatLastSolved(activeProblem.lastSolvedAt) || "Not solved yet"}
-                </span>
-              </div>
-            </div>
-
-            {/* Modal Navigation Tabs */}
-            <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-950 px-4 text-[12px] font-medium">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setActiveTab("editor")}
-                  className={cn(
-                    "py-2.5 border-b-2 transition-colors flex items-center gap-1.5",
-                    activeTab === "editor"
-                      ? "border-blue-500 text-blue-400 font-semibold"
-                      : "border-transparent text-zinc-400 hover:text-zinc-200"
-                  )}
-                >
-                  <Code2 className="h-3.5 w-3.5" />
-                  <span>Code &amp; Solution</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab("description")}
-                  className={cn(
-                    "py-2.5 border-b-2 transition-colors flex items-center gap-1.5",
-                    activeTab === "description"
-                      ? "border-blue-500 text-blue-400 font-semibold"
-                      : "border-transparent text-zinc-400 hover:text-zinc-200"
-                  )}
-                >
-                  <BookOpen className="h-3.5 w-3.5" />
-                  <span>Problem Description</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab("notes")}
-                  className={cn(
-                    "py-2.5 border-b-2 transition-colors flex items-center gap-1.5",
-                    activeTab === "notes"
-                      ? "border-blue-500 text-blue-400 font-semibold"
-                      : "border-transparent text-zinc-400 hover:text-zinc-200"
-                  )}
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Interview Cheatsheet</span>
-                </button>
-              </div>
-
-              {/* Language Selector */}
-              {activeTab === "editor" && (
-                <div className="flex items-center gap-2 py-1">
-                  <select
-                    value={activeLanguage}
-                    onChange={(e) => handleLanguageChange(e.target.value as "cpp" | "java" | "python" | "javascript")}
-                    className="rounded border border-zinc-800 bg-zinc-900 px-2 py-0.5 text-[11px] text-zinc-200 focus:outline-none font-mono"
-                  >
-                    <option value="cpp">C++ 20</option>
-                    <option value="java">Java 21</option>
-                    <option value="python">Python 3.12</option>
-                    <option value="javascript">JavaScript (ES6)</option>
-                  </select>
-
-                  <button
-                    onClick={() => setUserCode(getCodeTemplate(activeProblem, activeLanguage))}
-                    className="text-zinc-400 hover:text-zinc-200 p-1"
-                    title="Reset Template"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Content Body */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {/* TAB 1: CODE EDITOR & TEST CASE RUNNER */}
-              {activeTab === "editor" && (
-                <div className="space-y-3.5">
-                  {/* Code Editor Window */}
-                  <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-card flex flex-col">
-                    <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-900/60 px-3 py-1.5 text-[11px] font-mono text-zinc-400">
-                      <span>
-                        Solution.{activeLanguage === "cpp" ? "cpp" : activeLanguage === "java" ? "java" : activeLanguage === "python" ? "py" : "js"}
-                      </span>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(userCode);
-                          toast.success("Code copied!");
-                        }}
-                        className="hover:text-zinc-200 flex items-center gap-1 text-[11px]"
-                      >
-                        <Copy className="h-3 w-3" /> Copy
-                      </button>
-                    </div>
-
-                    <textarea
-                      value={userCode}
-                      onChange={(e) => setUserCode(e.target.value)}
-                      rows={12}
-                      spellCheck={false}
-                      className="w-full bg-zinc-950 p-3.5 font-mono text-[12px] text-zinc-100 leading-relaxed focus:outline-none resize-none selection:bg-blue-600/30"
-                    />
-                  </div>
-
-                  {/* Test Cases Panel */}
-                  <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-3 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Terminal className="h-3.5 w-3.5 text-blue-400" />
-                        <span className="text-[12px] font-semibold text-zinc-200">Sample Test Cases</span>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        {getProblemExamples(activeProblem).map((_, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => {
-                              setSelectedTestCaseIndex(idx);
-                              setTestResults(null);
-                            }}
-                            className={cn(
-                              "px-2 py-0.5 rounded text-[11px] font-medium font-mono transition-colors",
-                              selectedTestCaseIndex === idx
-                                ? "bg-blue-600 text-white"
-                                : "bg-zinc-900 text-zinc-400 hover:text-zinc-200"
-                            )}
-                          >
-                            Case {idx + 1}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Active Test Case Detail */}
-                    {getProblemExamples(activeProblem)[selectedTestCaseIndex] && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] font-mono">
-                        <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-2 space-y-1">
-                          <span className="text-zinc-500 font-sans font-medium text-[11px]">Input:</span>
-                          <p className="text-zinc-200">
-                            {getProblemExamples(activeProblem)[selectedTestCaseIndex].input}
-                          </p>
-                        </div>
-
-                        <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-2 space-y-1">
-                          <span className="text-zinc-500 font-sans font-medium text-[11px]">Expected Output:</span>
-                          <p className="text-emerald-400">
-                            {getProblemExamples(activeProblem)[selectedTestCaseIndex].expectedOutput}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Test Results Banner */}
-                    {testResults && (
-                      <div
-                        className={cn(
-                          "rounded-lg p-2.5 text-[12px] flex items-center justify-between font-normal animate-in fade-in-0 duration-150",
-                          testResults.passed
-                            ? "bg-emerald-950/30 border border-emerald-500/30 text-emerald-300"
-                            : "bg-red-950/30 border border-red-500/30 text-red-300"
-                        )}
-                      >
-                        <div className="flex items-center gap-2">
-                          {testResults.passed ? (
-                            <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
-                          ) : (
-                            <XCircle className="h-4 w-4 text-red-400 shrink-0" />
-                          )}
-                          <div>
-                            <div className="font-semibold text-[12px]">
-                              {testResults.passed ? "Test Passed!" : "Execution Failed"}
-                            </div>
-                            <div className="text-[11px] opacity-80 font-mono">
-                              {testResults.runtime} &middot; {testResults.memory}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="text-right font-mono text-[11px]">
-                          Output: {testResults.actualOutput}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 2: PROBLEM DESCRIPTION */}
-              {activeTab === "description" && (
-                <div className="space-y-4 text-[12px] leading-relaxed text-zinc-300">
-                  <div className="p-3.5 rounded-xl border border-zinc-800/80 bg-zinc-900/30 space-y-2">
-                    <p className="leading-normal">
-                      <strong>Problem:</strong> {activeProblem.title}
-                    </p>
-                    <p className="text-zinc-400">
-                      Subject: <strong>{activeProblem.subject}</strong> &middot; Topic: <strong>{activeProblem.topic}</strong>
-                      {activeProblem.subtopic ? ` · Pattern: ${activeProblem.subtopic}` : ""}
-                    </p>
-                  </div>
-
-                  {/* Examples */}
-                  <div className="space-y-3">
-                    {getProblemExamples(activeProblem).map((ex, idx) => (
-                      <div key={idx} className="space-y-1.5">
-                        <span className="text-[12px] font-semibold text-zinc-200">Example {idx + 1}:</span>
-                        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 font-mono text-[11px] space-y-1.5">
-                          <div>
-                            <span className="text-zinc-500">Input: </span>
-                            <span className="text-zinc-200">{ex.input}</span>
-                          </div>
-                          <div>
-                            <span className="text-zinc-500">Output: </span>
-                            <span className="text-emerald-400">{ex.expectedOutput}</span>
-                          </div>
-                          {ex.explanation && (
-                            <div>
-                              <span className="text-zinc-500">Explanation: </span>
-                              <span className="text-zinc-400">{ex.explanation}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Progress & Spaced Repetition details */}
-                  <div className="pt-2 flex flex-wrap items-center gap-3 text-[11px] border-t border-zinc-800">
-                    <span className="text-zinc-500 font-medium">Status:</span>
-                    {getStatusBadge(activeProblem)}
-                    <span className="text-zinc-500">&middot;</span>
-                    <span className="font-mono text-zinc-400">
-                      {formatLastSolved(activeProblem.lastSolvedAt) || "Not solved yet"}
+            <div className="space-y-3 py-2">
+              {/* Quick Status Bar */}
+              <div className="flex items-center justify-between rounded-lg border border-zinc-800/80 bg-zinc-900/50 px-3 py-2 text-[12px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-zinc-400">Status:</span>
+                  {activeProblem.solved ? (
+                    <span className="font-medium text-emerald-400 flex items-center gap-1">
+                      <Check className="h-3 w-3 stroke-[2.5]" /> Solved
                     </span>
-                    <span className="text-zinc-500">&middot;</span>
-                    <span className="font-mono text-zinc-400">
-                      {activeProblem.solveCount}x solved
-                    </span>
-                  </div>
+                  ) : (
+                    <span className="text-zinc-400 font-normal">Not Solved</span>
+                  )}
                 </div>
-              )}
-
-              {/* TAB 3: INTERVIEW CHEATSHEET */}
-              {activeTab === "notes" && (
-                <div className="space-y-3.5 text-[12px]">
-                  <div className="p-3.5 rounded-xl border border-blue-500/20 bg-blue-950/20 space-y-2 text-blue-200">
-                    <div className="font-semibold text-[13px] flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-                      Key Pattern &amp; Time Complexity
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 text-[12px] text-zinc-300 font-normal">
-                      <li><strong>Subject Domain:</strong> {activeProblem.subject} &middot; {activeProblem.topic}</li>
-                      <li><strong>Target Difficulty:</strong> {activeProblem.difficulty}</li>
-                      <li><strong>Spaced Repetition:</strong> Automated review schedules at 1d, 3d, 7d, 14d, 30d upon completion.</li>
-                    </ul>
+                {activeProblem.lastSolvedAt && (
+                  <div className="text-zinc-400 font-mono text-[11px] flex items-center gap-1">
+                    <Calendar className="h-3 w-3 text-zinc-500" />
+                    <span>Last: {formatLastSolved(activeProblem.lastSolvedAt)}</span>
                   </div>
+                )}
+              </div>
 
-                  <div className="space-y-1.5">
-                    <span className="font-medium text-zinc-200">Personal Candidate Notes:</span>
-                    <textarea
-                      placeholder="Add personal interview takeaways or questions to review..."
-                      rows={5}
-                      className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 text-[12px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              )}
+              {/* Simple Notes Area */}
+              <div className="space-y-1.5">
+                <label className="text-[12px] font-medium text-zinc-300 flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5 text-blue-400" />
+                  <span>Problem Notes &amp; Insights</span>
+                </label>
+                <textarea
+                  value={userNotes}
+                  onChange={(e) => setUserNotes(e.target.value)}
+                  placeholder="Add your optimal approach, time/space complexity, or edge cases to remember..."
+                  rows={4}
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900/70 p-2.5 text-[12px] text-zinc-100 placeholder:text-zinc-500 focus:border-blue-500/80 focus:outline-none focus:ring-1 focus:ring-blue-500/40 font-normal resize-none"
+                />
+              </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="flex items-center justify-between border-t border-zinc-800 bg-zinc-950 px-4 py-3">
-              <div className="text-[11px] text-zinc-400">
-                Reward: <span className="font-semibold text-amber-300">+20 Study Pts</span>
-              </div>
+            <DialogFooter className="flex flex-row items-center justify-between sm:justify-between gap-2 pt-1 border-t border-zinc-800/80 mt-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveProblem(null)}
+                className="h-8 px-3 text-[12px] text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              >
+                Cancel
+              </Button>
 
               <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleRunTests}
-                  disabled={isRunningTests}
-                  className="text-[12px] font-medium h-7 px-3 border-zinc-800 bg-zinc-900 text-zinc-200"
-                >
-                  <Play className="h-3 w-3 mr-1 text-emerald-400 fill-emerald-400" />
-                  {isRunningTests ? "Running..." : "Run Test Cases"}
-                </Button>
-
-                <Button
-                  size="sm"
-                  onClick={handleSubmitSolution}
-                  disabled={solveMutation.isPending}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium h-7 px-3"
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                  {solveMutation.isPending ? "Saving..." : "Submit Solution"}
-                </Button>
+                {activeProblem.solved ? (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSaveProblemNotes(false)}
+                      disabled={solveMutation.isPending}
+                      className="h-8 px-2.5 text-[11px] text-zinc-400 border-zinc-800 hover:text-rose-400 hover:border-rose-500/30"
+                    >
+                      Unmark Solved
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleSaveProblemNotes(true)}
+                      disabled={solveMutation.isPending}
+                      className="h-8 px-3 text-[12px] bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                    >
+                      {solveMutation.isPending ? "Saving..." : "Save Notes"}
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => handleSaveProblemNotes(true)}
+                    disabled={solveMutation.isPending}
+                    className="h-8 px-3 text-[12px] bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                  >
+                    {solveMutation.isPending ? "Saving..." : "Mark Solved & Save"}
+                  </Button>
+                )}
               </div>
-            </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
