@@ -1,97 +1,90 @@
-# Full-Stack Starter: Next.js + Express + PostgreSQL + Prisma + Better Auth + Tiptap
+# ⚡ Crack SDE — Full-Stack Production Architecture
 
-A clean, production-ready full-stack monorepo starter designed for rapid SaaS feature development with zero boilerplate friction.
+A high-performance, modular full-stack monorepo designed for tech interview preparation, sprint scheduling, spaced repetition, and computer science curriculum mastery.
 
 ---
 
 ## 🛠 Tech Stack
 
-- **Frontend (`/apps/web`)**: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, shadcn/ui, `next-themes` (Dark/Light mode).
-- **Backend (`/apps/api`)**: Node.js, Express v5, TypeScript, Better Auth, Helmet, CORS.
-- **Database (`/apps/api/prisma`)**: PostgreSQL, Prisma ORM.
-- **State Management**:
-  - **Server State**: TanStack Query (`@tanstack/react-query`)
-  - **Client UI State**: Zustand (`zustand`)
-- **Authentication**: Better Auth with session management, cookies, and protected routing.
-- **Validation**: Zod for type-safe environment and API validation.
-- **Rich Text Editor**: Tiptap (`@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-underline`, `@tiptap/extension-link`).
-- **UI / Visual Design**: Tiptap website aesthetic with violet/purple brand accents (`#7C3AED` / `#958DF1`), glassmorphic navbar, Bento grids, and shadcn/ui components.
+- **Frontend (`/apps/web`)**: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query, Zustand, Lucide Icons, Sonner.
+- **Backend (`/apps/api`)**: Node.js, Express v5, TypeScript, Better Auth, Helmet, CORS, Zod Validation Middleware, Layered Architecture (`Routes -> Controllers -> Services -> Repositories`).
+- **Database (`/apps/api/prisma`)**: PostgreSQL, Prisma ORM, Neon DB.
+- **Shared Contracts (`/packages/shared`)**: DTOs, Enums, Zod Schemas, Domain Constants.
+- **DevOps & Containers**: Multi-stage Dockerfiles, Docker Compose, GitHub Actions CI.
 
 ---
 
-## 📁 Monorepo Structure
+## 📁 Monorepo Folder Structure
 
 ```
 .
 ├── apps/
-│   ├── api/                     # Express + TypeScript backend
-│   │   ├── prisma/              # Prisma schema & seed script
-│   │   │   ├── schema.prisma    # PostgreSQL datasource & Better Auth models
-│   │   │   └── seed.ts          # Demo user seeder
+│   ├── api/                          # Express 5 REST API
+│   │   ├── prisma/                   # Prisma ORM Schema & Seed scripts
+│   │   │   ├── schema.prisma         # Data models & Better Auth
+│   │   │   └── seed.ts               # Curriculum & Demo Seeder
 │   │   └── src/
-│   │       ├── config/          # Zod-validated environment & CORS config
-│   │       ├── controllers/     # Route controllers (Health, Auth, etc.)
-│   │       ├── lib/             # Prisma client & Better Auth instance
-│   │       ├── middleware/      # Error handling & Zod request validation
-│   │       ├── routes/          # Aggregated Express API routes
-│   │       ├── schemas/         # Zod schemas for request validation
-│   │       ├── services/        # Business logic layer
-│   │       └── index.ts         # Express server entry point
+│   │       ├── config/               # Environment & CORS configuration
+│   │       ├── lib/                  # Prisma client & Better Auth instance
+│   │       ├── middleware/           # Zod validation & Central Error Handler
+│   │       ├── modules/              # Domain-Driven Modules
+│   │       │   ├── health/           # Liveness & Readiness checks
+│   │       │   ├── roadmap/          # Subjects, Topics, Knowledge Tree
+│   │       │   ├── study-plan/       # Sprints, Days, Tasks scheduling
+│   │       │   ├── practice/         # Problem querying & multi-facet filtering
+│   │       │   └── repetition/       # Spaced Repetition calculation engine
+│   │       ├── shared/               # AppError classes & standard responses
+│   │       └── index.ts              # Server bootstrap entry point
 │   │
-│   └── web/                     # Next.js App Router frontend
-│       ├── app/
-│       │   ├── globals.css      # Tailwind & Tiptap typography styles
-│       │   ├── layout.tsx       # Root layout with Providers & Navbar
-│       │   ├── page.tsx         # Landing page with Tiptap-inspired UI
-│       │   ├── login/           # Sign in page + Instant Demo Login
-│       │   ├── register/        # Sign up page
-│       │   └── dashboard/       # Protected workspace page with Tiptap editor
+│   └── web/                          # Next.js 15 App Router Frontend
+│       ├── app/                      # Thin App Router page wrappers
+│       │   ├── (auth)/               # Login & Register routes
+│       │   ├── dashboard/            # Overview dashboard & workspace
+│       │   ├── planly/               # Sprint planner & timeline calendar
+│       │   ├── prep-hub/             # Curriculum tracks & topics tree
+│       │   ├── practice/             # Practice problems repository
+│       │   ├── quiz-log/             # Question directory & ingestion
+│       │   ├── onboarding/           # Personalized curriculum wizard
+│       │   └── layout.tsx            # Global providers & App Shell
+│       ├── features/                 # Modular Feature Modules
+│       │   ├── planly/               # Sprint views, day tasks, calendar, modals
+│       │   ├── prep-hub/             # Subject cards, topic accordions, solve modals
+│       │   ├── practice/             # Filter toolbar, problem tables, pagination
+│       │   ├── onboarding/           # 6-step curriculum generation wizard
+│       │   └── quiz-log/             # Question forms & directory table
 │       ├── components/
-│       │   ├── navbar.tsx       # Glassmorphic responsive navigation
-│       │   ├── tiptap-editor.tsx# Reusable Tiptap editor component
-│       │   ├── tiptap-toolbar.tsx # Toolbar (Bold, Italic, Underline, Headings, Lists, Link, Code, Quote, Undo/Redo)
-│       │   └── ui/              # shadcn/ui components (Button, Card, Input, Label, Badge, Skeleton, Separator)
-│       ├── hooks/               # useAuth hook
-│       ├── lib/                 # Better Auth client & typed API client
-│       ├── middleware.ts        # Next.js route protection & auth redirects
-│       ├── providers/           # TanStack Query, Theme & Toaster providers
-│       ├── store/               # Zustand UI store
-│       └── types/               # Frontend TypeScript types
+│       │   ├── layout/               # Header, Sidebar, DailyPlanner, AppShell
+│       │   ├── shared/               # RevisionBadge, StatusChip
+│       │   └── ui/                   # Reusable UI primitives (shadcn)
+│       ├── hooks/                    # TanStack Query & Auth hooks
+│       ├── providers/                # Query, Theme & Toast providers
+│       └── store/                    # Zustand stores (Planner, Onboarding, UI)
 │
-└── packages/
-    └── shared/                  # Shared TypeScript interfaces & types
-        └── src/
-            └── index.ts         # Common user, session, and API contracts
+├── packages/
+│   └── shared/                       # Shared TypeScript types & validation schemas
+│       └── src/
+│           ├── constants/            # Application & Spaced Repetition constants
+│           ├── dtos/                 # Auth, Roadmap, StudyPlan, Practice DTOs
+│           ├── enums/                # Difficulty, ItemType, TaskStatus enums
+│           ├── schemas/              # Zod validation schemas for API & UI
+│           └── index.ts              # Tree-shakable barrel export
+│
+├── .github/workflows/ci.yml          # GitHub Actions Automated CI Pipeline
+├── Dockerfile.api                    # Multi-stage production Dockerfile for API
+├── Dockerfile.web                    # Multi-stage production Dockerfile for Web
+└── docker-compose.yml                # Full local stack with PostgreSQL, API & Web
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start Guide
 
 ### 1. Environment Configuration
 
-Copy `.env.example` to `.env` in the project root:
+Copy `.env.example` to `.env`:
 
 ```bash
 cp .env.example .env
-```
-
-Ensure your PostgreSQL connection string is configured:
-
-```env
-# Database
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/starter_db
-
-# Better Auth
-BETTER_AUTH_SECRET=your-secure-random-secret-key-min-32-chars
-BETTER_AUTH_URL=http://localhost:5001
-
-# API Server
-PORT=5001
-CORS_ORIGIN=http://localhost:3000
-
-# Frontend
-NEXT_PUBLIC_API_URL=http://localhost:5001
 ```
 
 ### 2. Install Dependencies
@@ -102,88 +95,51 @@ npm install
 
 ### 3. Database Migration & Seeding
 
-Ensure your PostgreSQL server is running, then execute:
-
 ```bash
 # Generate Prisma Client
 npm run db:generate
 
-# Apply database migrations
+# Apply migrations
 npm run db:migrate
 
-# Seed the demo user
+# Seed demo account & curriculum data
 npm run db:seed
 ```
 
 ### 4. Start Development Servers
 
-Run both the Next.js frontend (port 3000) and Express API (port 5001) concurrently:
-
 ```bash
+# Concurrently launch API (port 5001) and Web App (port 3000)
 npm run dev
 ```
 
-Or run them in separate terminals:
-
+Or run individually:
 ```bash
-# Terminal 1: Backend API (http://localhost:5001)
+# Backend only
 npm run dev:api
 
-# Terminal 2: Web App (http://localhost:3000)
+# Frontend only
 npm run dev:web
 ```
 
 ---
 
-## 🔑 Demo Account Credentials
-
-The database seeder automatically creates a demo account ready for immediate login:
-
-- **Email**: `demo@example.com`
-- **Password**: `Demo@123`
-
-You can also use the **"Instant Demo Login"** button directly on the `/login` page.
-
----
-
-## 🧭 Application Routes
-
-| Path | Description | Access |
-|---|---|---|
-| `/` | Landing page featuring Tiptap-inspired Bento UI & sandbox | Public |
-| `/login` | User login with email/password & instant demo button | Public (redirects if authenticated) |
-| `/register` | User registration | Public (redirects if authenticated) |
-| `/dashboard` | Protected dashboard with interactive Tiptap editor & live preview | Protected |
-| `http://localhost:5001/api/health` | API health check endpoint | Public |
-| `http://localhost:5001/api/auth/*` | Better Auth endpoints | Public/Protected |
-
----
-
-## 📝 Tiptap Editor Component
-
-The reusable `<TiptapEditor />` component is located at `apps/web/components/tiptap-editor.tsx`.
-
-It comes equipped with:
-- **Bold**, **Italic**, **Underline**, **Inline Code**
-- **Headings (H1, H2, H3)**
-- **Bullet List** (`<ul>`) & **Ordered List** (`<ol>`)
-- **Blockquote** (`<blockquote>`)
-- **Link insertion & deletion**
-- **Undo & Redo** history controls
-- SSR hydration safety (`immediatelyRender: false`)
-- Live two-way HTML binding with Tailwind Typography styling
-
----
-
-## 📦 Build & Typecheck
+## 🧪 Build & Typecheck Commands
 
 ```bash
-# Build all workspaces
+# Run full workspace TypeScript typecheck
+npm run typecheck
+
+# Build all workspaces (Shared -> API -> Web)
 npm run build
+```
 
-# Typecheck backend
-npm run typecheck --workspace=@starter/api
+---
 
-# Typecheck frontend
-npm run typecheck --workspace=@starter/web
+## 🐳 Docker Deployment
+
+To launch the complete production stack (PostgreSQL + Express API + Next.js Web):
+
+```bash
+docker compose up --build -d
 ```

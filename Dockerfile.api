@@ -1,0 +1,55 @@
+# =====================================================================
+# Build Stage: @cracksde/api
+# =====================================================================
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy root workspace configurations
+COPY package*.json tsconfig.base.json ./
+COPY packages/shared/package*.json ./packages/shared/
+COPY apps/api/package*.json ./apps/api/
+COPY apps/web/package*.json ./apps/web/
+
+# Install all workspace dependencies
+RUN npm ci
+
+# Copy source code and Prisma schema
+COPY packages/shared/ ./packages/shared/
+COPY apps/api/ ./apps/api/
+
+# Build shared package first
+RUN npm run build --workspace=@cracksde/shared
+
+# Generate Prisma Client & Build Express API
+RUN npm run db:generate --workspace=@cracksde/api
+RUN npm run build --workspace=@cracksde/api
+
+# =====================================================================
+# Runner Stage
+# =====================================================================
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
+COPY package*.json tsconfig.base.json ./
+COPY packages/shared/package*.json ./packages/shared/
+COPY apps/api/package*.json ./apps/api/
+
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+COPY --from=builder /app/node_modules ./node_modules
+
+EXPOSE 5001
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:5001/api/health || exit 1
+
+CMD ["node", "apps/api/dist/index.js"]

@@ -1,23 +1,14 @@
 import type { Request, Response, NextFunction } from "express";
-
-export class AppError extends Error {
-  constructor(
-    public statusCode: number,
-    public message: string,
-  ) {
-    super(message);
-    this.name = "AppError";
-  }
-}
+import { AppError } from "../shared/errors/app-error.js";
+import { ZodError } from "zod";
 
 export function errorHandler(
-  err: Error,
+  err: unknown,
   _req: Request,
   res: Response,
-  _next: NextFunction,
+  _next: NextFunction
 ): void {
-  console.error("[Error]", err.message);
-
+  // Operational App Error
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
       success: false,
@@ -26,21 +17,30 @@ export function errorHandler(
     return;
   }
 
-  // Zod validation errors
-  if (err.name === "ZodError") {
+  // Zod Validation Error
+  if (err instanceof ZodError) {
+    const message = err.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
     res.status(400).json({
       success: false,
-      error: "Validation failed",
-      details: JSON.parse(err.message),
+      error: `Validation error: ${message}`,
+      details: err.errors,
     });
     return;
   }
 
-  // Default 500
+  // Standard Error
+  if (err instanceof Error) {
+    console.error("Unhandled Error:", err.stack || err.message);
+    res.status(500).json({
+      success: false,
+      error: process.env.NODE_ENV === "production" ? "Internal server error" : err.message,
+    });
+    return;
+  }
+
+  console.error("Unknown Error:", err);
   res.status(500).json({
     success: false,
-    error: process.env.NODE_ENV === "production"
-      ? "Internal server error"
-      : err.message,
+    error: "An unexpected error occurred",
   });
 }

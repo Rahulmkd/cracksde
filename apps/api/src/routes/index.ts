@@ -1,12 +1,14 @@
 import { Router } from "express";
-import healthRouter from "./health.js";
-import roadmapRouter from "./roadmap.js";
-import studyPlanRouter from "./study-plan.js";
+import healthRouter from "../modules/health/health.routes.js";
+import roadmapRouter from "../modules/roadmap/roadmap.routes.js";
+import practiceRouter from "../modules/practice/practice.routes.js";
+import studyPlanRouter from "../modules/study-plan/study-plan.routes.js";
 
 const router = Router();
 
 router.use(healthRouter);
 router.use(roadmapRouter);
+router.use(practiceRouter);
 router.use(studyPlanRouter);
 
 export default router;

@@ -1,5 +1,5 @@
 {
-  "name": "@starter/api",
+  "name": "@cracksde/api",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cracksde/shared": "*",
     "@prisma/client": "^6.0.0",
     "better-auth": "^1.0.0",
     "cors": "^2.8.5",
