@@ -3,7 +3,7 @@
 import React from "react";
 import { AppShell } from "@/components/layout/app-shell";
 
-export default function BuganizerLayout({
+export default function QuizLogLayout({
   children,
 }: {
   children: React.ReactNode;

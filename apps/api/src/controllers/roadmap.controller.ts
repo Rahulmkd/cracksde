@@ -1074,3 +1074,189 @@ export async function getPracticeProblems(req: Request, res: Response): Promise<
   }
 }
 
+/**
+ * Create a new Question / Problem (RoadmapItem) in the curriculum database
+ */
+export async function createRoadmapItem(req: Request, res: Response): Promise<void> {
+  try {
+    const {
+      title,
+      subjectId,
+      topicId,
+      subtopicId,
+      difficulty,
+      estimatedMinutes,
+      type,
+    } = req.body;
+
+    // 1. Validate title
+    if (!title || typeof title !== "string" || !title.trim()) {
+      res.status(400).json({
+        success: false,
+        error: "Question title is required",
+      });
+      return;
+    }
+
+    // 2. Validate Subject
+    const parsedSubjectId = Number(subjectId);
+    if (!parsedSubjectId || isNaN(parsedSubjectId)) {
+      res.status(400).json({
+        success: false,
+        error: "A valid track/subject is required",
+      });
+      return;
+    }
+
+    const subjectExists = await prisma.roadmapSubject.findUnique({
+      where: { id: parsedSubjectId },
+    });
+    if (!subjectExists) {
+      res.status(404).json({
+        success: false,
+        error: `Subject with ID ${parsedSubjectId} does not exist`,
+      });
+      return;
+    }
+
+    // 3. Validate Topic
+    const parsedTopicId = Number(topicId);
+    if (!parsedTopicId || isNaN(parsedTopicId)) {
+      res.status(400).json({
+        success: false,
+        error: "A valid topic/pattern is required",
+      });
+      return;
+    }
+
+    const topicExists = await prisma.roadmapTopic.findUnique({
+      where: { id: parsedTopicId },
+    });
+    if (!topicExists || topicExists.subjectId !== parsedSubjectId) {
+      res.status(400).json({
+        success: false,
+        error: `Topic with ID ${parsedTopicId} does not belong to the selected subject`,
+      });
+      return;
+    }
+
+    // 4. Validate Subtopic if provided
+    let parsedSubtopicId: number | null = null;
+    if (subtopicId !== undefined && subtopicId !== null && subtopicId !== "") {
+      const sId = Number(subtopicId);
+      if (!isNaN(sId) && sId > 0) {
+        const subtopicExists = await prisma.roadmapSubtopic.findUnique({
+          where: { id: sId },
+        });
+        if (!subtopicExists || subtopicExists.topicId !== parsedTopicId) {
+          res.status(400).json({
+            success: false,
+            error: `Subtopic with ID ${sId} does not belong to the selected topic`,
+          });
+          return;
+        }
+        parsedSubtopicId = sId;
+      }
+    }
+
+    // 5. Normalize Difficulty ("Easy" | "Medium" | "Hard")
+    let normalizedDifficulty = "Medium";
+    if (difficulty) {
+      const dLower = String(difficulty).toLowerCase();
+      if (dLower === "easy" || dLower === "basic") normalizedDifficulty = "Easy";
+      else if (dLower === "hard" || dLower === "pro") normalizedDifficulty = "Hard";
+      else normalizedDifficulty = "Medium";
+    }
+
+    // 6. Estimated Minutes
+    const parsedMinutes = Number(estimatedMinutes);
+    const validMinutes = !isNaN(parsedMinutes) && parsedMinutes > 0 ? Math.min(parsedMinutes, 300) : 15;
+
+    // 7. Item Type
+    const validTypes = ["Problem", "Quiz", "Concept", "Code"];
+    const normalizedType = type && validTypes.includes(type) ? type : "Problem";
+
+    // 8. Generate unique itemNo & sortOrder
+    const maxItem = await prisma.roadmapItem.aggregate({
+      _max: { itemNo: true },
+    });
+    const nextItemNo = (maxItem._max.itemNo || 0) + 1;
+
+    const maxSort = await prisma.roadmapItem.aggregate({
+      where: { topicId: parsedTopicId },
+      _max: { sortOrder: true },
+    });
+    const nextSortOrder = (maxSort._max.sortOrder || 0) + 1;
+
+    // 9. Generate unique slug
+    let baseSlug = title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    if (!baseSlug) baseSlug = `question-${nextItemNo}`;
+
+    let uniqueSlug = baseSlug;
+    const existingWithSlug = await prisma.roadmapItem.findFirst({
+      where: { topicId: parsedTopicId, slug: uniqueSlug },
+    });
+    if (existingWithSlug) {
+      uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+    }
+
+    // 10. Create Question in RoadmapItem table
+    const newItem = await prisma.roadmapItem.create({
+      data: {
+        title: title.trim(),
+        slug: uniqueSlug,
+        subjectId: parsedSubjectId,
+        topicId: parsedTopicId,
+        subtopicId: parsedSubtopicId,
+        itemNo: nextItemNo,
+        sortOrder: nextSortOrder,
+        difficulty: normalizedDifficulty,
+        estimatedMinutes: validMinutes,
+        type: normalizedType,
+      },
+      include: {
+        subject: { select: { id: true, slug: true, name: true } },
+        topic: { select: { id: true, slug: true, name: true } },
+        subtopic: { select: { id: true, slug: true, name: true } },
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Question created successfully",
+      data: {
+        item: {
+          id: newItem.id,
+          subjectId: newItem.subjectId,
+          topicId: newItem.topicId,
+          subtopicId: newItem.subtopicId,
+          itemNo: newItem.itemNo,
+          title: newItem.title,
+          slug: newItem.slug,
+          type: newItem.type,
+          difficulty: newItem.difficulty,
+          estimatedMinutes: newItem.estimatedMinutes,
+          sortOrder: newItem.sortOrder,
+          subjectSlug: newItem.subject.slug,
+          subjectName: newItem.subject.name,
+          topicSlug: newItem.topic.slug,
+          topicName: newItem.topic.name,
+          subtopicName: newItem.subtopic?.name ?? null,
+          progress: null,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error creating roadmap question:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to create question in database",
+    });
+  }
+}
+
+

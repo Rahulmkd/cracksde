@@ -12,6 +12,8 @@ import type {
   RecordQuestionSolveResponse,
   PracticeProblemDto,
   PracticeProblemsResponseDto,
+  CreateRoadmapItemRequest,
+  CreateRoadmapItemResponse,
 } from "@starter/shared";
 
 export function useRoadmapSubjects() {
@@ -137,3 +139,29 @@ export function useSolveQuestion() {
     },
   });
 }
+
+export function useCreateRoadmapItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateRoadmapItemRequest) => {
+      const res = await api.post<ApiResponse<CreateRoadmapItemResponse>>(
+        "/api/roadmap/items",
+        data
+      );
+      if (!res.success || !res.data) {
+        throw new Error(res.error || "Failed to create question");
+      }
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["practice-problems"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap-subject"] });
+      queryClient.invalidateQueries({ queryKey: ["topic-questions"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["study-plan"] });
+    },
+  });
+}
+

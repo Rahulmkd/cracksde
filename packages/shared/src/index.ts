@@ -185,6 +185,21 @@ export interface RecordQuestionSolveResponse {
   message: string;
 }
 
+export interface CreateRoadmapItemRequest {
+  title: string;
+  subjectId: number;
+  topicId: number;
+  subtopicId?: number | null;
+  difficulty?: string;
+  estimatedMinutes?: number;
+  type?: string;
+}
+
+export interface CreateRoadmapItemResponse {
+  item: RoadmapItemDto;
+  message: string;
+}
+
 export interface PracticeProblemDto {
   id: string;
   itemId: number;

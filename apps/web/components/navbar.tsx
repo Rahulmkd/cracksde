@@ -19,7 +19,7 @@ export function Navbar() {
     pathname.startsWith("/notes") ||
     pathname.startsWith("/lists") ||
     pathname.startsWith("/codespace") ||
-    pathname.startsWith("/buganizer") ||
+    pathname.startsWith("/quiz-log") ||
     pathname.startsWith("/blogs") ||
     pathname.startsWith("/unlock") ||
     pathname.startsWith("/tools") ||

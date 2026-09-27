@@ -15,7 +15,7 @@ import {
   FileText,
   ListTodo,
   FolderCode,
-  CalendarCheck2,
+  HelpCircle,
   Sparkles,
   ChevronDown,
   PanelLeftClose,
@@ -65,7 +65,7 @@ export function Sidebar() {
     { name: "NoteSpace", href: "/notes", icon: FileText },
     { name: "All Lists", href: "/lists", icon: ListTodo },
     { name: "CodeSpace", href: "/codespace", icon: FolderCode },
-    { name: "Buganizer", href: "/buganizer", icon: CalendarCheck2 },
+    { name: "Quiz Log", href: "/quiz-log", icon: HelpCircle },
   ];
 
   const renderNavGroup = (
