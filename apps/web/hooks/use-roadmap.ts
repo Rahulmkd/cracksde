@@ -10,6 +10,8 @@ import type {
   UserRevisionListDto,
   RecordQuestionSolveRequest,
   RecordQuestionSolveResponse,
+  PracticeProblemDto,
+  PracticeProblemsResponseDto,
 } from "@starter/shared";
 
 export function useRoadmapSubjects() {
@@ -19,6 +21,40 @@ export function useRoadmapSubjects() {
       const res = await api.get<ApiResponse<RoadmapSubjectSummaryDto[]>>("/api/roadmap/subjects");
       if (!res.success || !res.data) {
         throw new Error(res.error || "Failed to fetch roadmap subjects");
+      }
+      return res.data;
+    },
+  });
+}
+
+export function usePracticeProblems(params: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  subject?: string;
+  topic?: string;
+  difficulty?: string;
+  status?: string;
+} = {}) {
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.set("page", params.page.toString());
+  if (params.limit) queryParams.set("limit", params.limit.toString());
+  if (params.search) queryParams.set("search", params.search);
+  if (params.subject && params.subject !== "all") queryParams.set("subject", params.subject);
+  if (params.topic && params.topic !== "all") queryParams.set("topic", params.topic);
+  if (params.difficulty && params.difficulty !== "all") queryParams.set("difficulty", params.difficulty);
+  if (params.status && params.status !== "all") queryParams.set("status", params.status);
+
+  const queryString = queryParams.toString();
+
+  return useQuery({
+    queryKey: ["practice-problems", params],
+    queryFn: async () => {
+      const res = await api.get<ApiResponse<PracticeProblemsResponseDto>>(
+        `/api/roadmap/practice${queryString ? `?${queryString}` : ""}`
+      );
+      if (!res.success || !res.data) {
+        throw new Error(res.error || "Failed to fetch practice problems");
       }
       return res.data;
     },
@@ -91,6 +127,7 @@ export function useSolveQuestion() {
       return res.data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["practice-problems"] });
       queryClient.invalidateQueries({ queryKey: ["user-revisions"] });
       queryClient.invalidateQueries({ queryKey: ["topic-questions"] });
       queryClient.invalidateQueries({ queryKey: ["roadmap-subject"] });

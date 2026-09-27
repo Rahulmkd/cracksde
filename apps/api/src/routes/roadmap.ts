@@ -7,11 +7,14 @@ import {
   getItemProgress,
   getUserRevisionItems,
   getRoadmapSummary,
+  getPracticeProblems,
 } from "../controllers/roadmap.controller.js";
 
 const router = Router();
 
 router.get("/roadmap/summary", getRoadmapSummary);
+router.get("/roadmap/practice", getPracticeProblems);
+router.get("/roadmap/problems", getPracticeProblems);
 router.get("/roadmap/subjects", getRoadmapSubjects);
 router.get("/roadmap/subjects/:slug", getRoadmapSubjectBySlug);
 router.get("/roadmap/subjects/:slug/topics/:topicSlug/questions", getTopicQuestions);
