@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Calendar as CalendarIcon,
@@ -25,10 +25,15 @@ import {
   CalendarDays,
   ListTree,
   RotateCcw,
+  AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -37,24 +42,33 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Slider } from "@/components/ui/slider";
 import { useStudyPlan } from "@/hooks/use-study-plan";
 import { useRevisionList } from "@/hooks/use-revision-list";
+import { useUserRevisions, useSolveQuestion } from "@/hooks/use-roadmap";
+import { useAuth } from "@/hooks/use-auth";
 import { usePlannerStore } from "@/store/planner-store";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import type { StudyTaskDto } from "@starter/shared";
+import type { StudyTaskDto, StudySprintDto, StudyDayDto } from "@starter/shared";
 
 export default function PlanlyPage() {
   const {
     plan,
     isLoading,
+    isError,
+    error,
+    refetch,
     updateTask,
+    isUpdatingTask,
     updatePlan,
+    isUpdatingPlan,
   } = useStudyPlan("crack-sde");
 
   const { data: revisionListData } = useRevisionList();
+  const { data: userRevisionsData } = useUserRevisions();
+  const solveMutation = useSolveQuestion();
   const { addPoints } = usePlannerStore();
+  const { isAuthenticated } = useAuth();
 
   // Tab State: Active / Completed
   const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
@@ -68,9 +82,9 @@ export default function PlanlyPage() {
   // Menu State
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
 
-  // Expanded Tree State
-  const [expandedSprintId, setExpandedSprintId] = useState<string>("1");
-  const [expandedDayId, setExpandedDayId] = useState<string>("1");
+  // Expanded Tree State (defaults to first sprint and first day)
+  const [expandedSprintId, setExpandedSprintId] = useState<string>("");
+  const [expandedDayId, setExpandedDayId] = useState<string>("");
 
   // Modals
   const [isStartDateModalOpen, setIsStartDateModalOpen] = useState(false);
@@ -80,34 +94,134 @@ export default function PlanlyPage() {
   const [isCatchupModalOpen, setIsCatchupModalOpen] = useState(false);
 
   // Form states
-  const [planNameInput, setPlanNameInput] = useState("Crack SDE Master Sprint");
-  const [newStartDate, setNewStartDate] = useState("2026-10-01");
+  const [planNameInput, setPlanNameInput] = useState("");
+  const [newStartDate, setNewStartDate] = useState("");
   const [dailyHours, setDailyHours] = useState(4);
 
+  // Revision Modal active tab
+  const [revisionModalTab, setRevisionModalTab] = useState<"due" | "upcoming" | "all">("due");
+
   const treeRef = useRef<HTMLDivElement>(null);
+
+  // Initialize expanded IDs and modal inputs from fetched plan
+  useEffect(() => {
+    if (plan) {
+      if (plan.name) setPlanNameInput(plan.name);
+      if (plan.dailyHours) setDailyHours(plan.dailyHours);
+      if (plan.startDate) {
+        try {
+          const d = new Date(plan.startDate);
+          if (!isNaN(d.getTime())) {
+            setNewStartDate(d.toISOString().split("T")[0]);
+          }
+        } catch {
+          // fallback
+        }
+      }
+
+      if (plan.sprints && plan.sprints.length > 0) {
+        if (!expandedSprintId) {
+          // Default to first active sprint or sprint 1
+          const activeSprint = plan.sprints.find((s) => s.status === "in_progress") || plan.sprints[0];
+          setExpandedSprintId(activeSprint.sprintId);
+
+          if (activeSprint.days && activeSprint.days.length > 0) {
+            const activeDay = activeSprint.days.find((d) => d.status === "in_progress" || d.tasksCompleted < (d.tasksTotal || 1)) || activeSprint.days[0];
+            setExpandedDayId(activeDay.dayId);
+          }
+        }
+      }
+    }
+  }, [plan, expandedSprintId]);
 
   // Plan Calculations
   const sprints = plan?.sprints || [];
   const allDays = sprints.flatMap((s) => s.days || []);
   const allTasks = allDays.flatMap((d) => d.tasks || []);
 
-  const totalTasksCount = allTasks.length || 847;
-  const completedTasksCount = allTasks.filter((t) => t.status === "completed").length;
-  const progressPercent = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
-  const completedDaysCount = allDays.filter((d) => d.tasksCompleted >= (d.tasksTotal || 1) && d.tasksTotal > 0).length;
+  const totalTasksCount = plan?.totalTasks ?? (allTasks.length || 847);
+  const completedTasksCount = plan?.completedTasks ?? allTasks.filter((t) => t.status === "completed").length;
+  const progressPercent = plan?.progressPercent ?? (totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0);
 
-  const totalMinutes = sprints.reduce((acc, s) => acc + (s.totalEstimatedMinutes || 0), 0) || 16253;
+  const totalDaysCount = plan?.totalDays ?? (allDays.length || 61);
+  const completedDaysCount = plan?.completedDays ?? allDays.filter((d) => (d.tasksCompleted || 0) >= (d.tasksTotal || 1) && (d.tasksTotal || 0) > 0).length;
+
+  const totalMinutes = plan?.totalEstimatedMinutes ?? (sprints.reduce((acc, s) => acc + (s.totalEstimatedMinutes || 0), 0) || 16253);
+  const completedMinutes = plan?.completedEstimatedMinutes ?? allTasks.filter((t) => t.status === "completed").reduce((acc, t) => acc + (t.estimatedMinutes || 0), 0);
+
   const totalHours = Math.floor(totalMinutes / 60);
   const remainingMinutes = totalMinutes % 60;
+  const completedHours = Math.floor(completedMinutes / 60);
+  const completedMinutesRem = completedMinutes % 60;
+  const curriculumTimePercent = totalMinutes > 0 ? Math.round((completedMinutes / totalMinutes) * 100) : 0;
 
-  const completedSprintsCount = sprints.filter((s) => s.status === "completed").length;
+  const completedSprintsCount = plan?.completedSprints ?? sprints.filter((s) => s.status === "completed").length;
   const totalSprintsCount = sprints.length || 9;
 
-  // Active Sprint 1 & Day 1 for preview
-  const sprint1 = sprints.find((s) => s.sprintNo === 1) || sprints[0];
-  const day1 = sprint1?.days?.find((d) => d.sprintDayNo === 1) || sprint1?.days?.[0];
-  const day1Tasks = day1?.tasks || [];
+  // Active Sprint & Day Focus
+  const activeSprint = sprints.find((s) => s.status === "in_progress") || sprints[0];
+  const activeDay = activeSprint?.days?.find((d) => d.status === "in_progress" || (d.tasksCompleted || 0) < (d.tasksTotal || 1)) || activeSprint?.days?.[0];
+  const activeDayTasks = activeDay?.tasks || [];
 
+  // Completed Sprints and Days for Completed Tab
+  const completedSprints = sprints.filter((s) => s.status === "completed");
+
+  // Format Dates helper
+  const formatDateDisplay = (dateStr?: string | null) => {
+    if (!dateStr) return "30 Nov 2026";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "30 Nov 2026";
+    return d.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  const formatCompletionTarget = () => {
+    if (plan?.targetDate) return formatDateDisplay(plan.targetDate);
+    const lastSprint = sprints[sprints.length - 1];
+    if (lastSprint?.plannedEndDate) return formatDateDisplay(lastSprint.plannedEndDate);
+    return "30 Nov 2026";
+  };
+
+  const getCompletionYear = () => {
+    const target = plan?.targetDate || sprints[sprints.length - 1]?.plannedEndDate;
+    if (target) {
+      const d = new Date(target);
+      if (!isNaN(d.getTime())) return d.getFullYear().toString();
+    }
+    return "2026";
+  };
+
+  const getCompletionDayMonth = () => {
+    const target = plan?.targetDate || sprints[sprints.length - 1]?.plannedEndDate;
+    if (target) {
+      const d = new Date(target);
+      if (!isNaN(d.getTime())) {
+        return `${d.getDate()} ${d.toLocaleDateString("en-US", { month: "short" })}`;
+      }
+    }
+    return "30 Nov";
+  };
+
+  // Helper to extract dynamic topic/subject summary for each sprint
+  const getSprintSubjectSummary = (sprint: StudySprintDto) => {
+    const sprintDays = sprint.days || [];
+    const subjects = new Set<string>();
+    sprintDays.forEach((d) => {
+      (d.tasks || []).forEach((t) => {
+        if (t.item?.subjectName) subjects.add(t.item.subjectName);
+      });
+    });
+
+    if (subjects.size > 0) {
+      return Array.from(subjects).join(" + ");
+    }
+
+    if (sprint.sprintNo <= 3) return "DSA & Foundations";
+    if (sprint.sprintNo <= 5) return "DSA & Operating Systems";
+    if (sprint.sprintNo <= 7) return "Computer Networks & LLD";
+    return "DBMS & System Design";
+  };
+
+  // Task Actions
   const handleToggleTaskStatus = (task: StudyTaskDto) => {
     const nextStatus = task.status === "completed" ? "not_started" : "completed";
     updateTask(
@@ -117,6 +231,8 @@ export default function PlanlyPage() {
           if (nextStatus === "completed") {
             addPoints(15);
             toast.success(`🎉 Completed: ${task.item?.title || "Task"} (+15 pts!)`);
+          } else {
+            toast.info(`Marked incomplete: ${task.item?.title || "Task"}`);
           }
         },
       }
@@ -130,7 +246,7 @@ export default function PlanlyPage() {
       {
         onSuccess: () => {
           if (nextRevision) {
-            toast.success(`Added to Revision List: ${task.item?.title || "Task"}`);
+            toast.success(`⭐ Added to Revision List: ${task.item?.title || "Task"}`);
           } else {
             toast.info(`Removed from Revision List: ${task.item?.title || "Task"}`);
           }
@@ -140,20 +256,24 @@ export default function PlanlyPage() {
   };
 
   const handleJumpToToday = () => {
-    setExpandedSprintId("1");
-    setExpandedDayId("1");
+    if (activeSprint) {
+      setExpandedSprintId(activeSprint.sprintId);
+      if (activeDay) {
+        setExpandedDayId(activeDay.dayId);
+      }
+    }
     setIsPlanDetailOpen(true);
     treeRef.current?.scrollIntoView({ behavior: "smooth" });
-    toast.success("Navigated to Sprint 1 &bull; Day 1");
+    toast.success(`Navigated to Sprint ${activeSprint?.sprintNo || 1} • Day ${activeDay?.sprintDayNo || 1}`);
   };
 
   const handleSmartReschedule = () => {
     setIsCatchupModalOpen(false);
-    toast.success("⚡ Smart Catch-Up Mode applied: Backlog redistributed across Sprint 1-3.");
+    toast.success("⚡ Smart Catch-Up Mode applied: Backlog redistributed across remaining sprint days.");
   };
 
   const getSubjectBadge = (subjectSlug?: string, subjectName?: string) => {
-    const slug = (subjectSlug || "dsa").toLowerCase();
+    const slug = (subjectSlug || subjectName || "dsa").toLowerCase();
     if (slug.includes("dsa")) {
       return (
         <Badge variant="blue" className="py-0.5 px-1.5 font-medium text-[11px]">
@@ -161,7 +281,7 @@ export default function PlanlyPage() {
         </Badge>
       );
     }
-    if (slug.includes("dbms")) {
+    if (slug.includes("dbms") || slug.includes("data")) {
       return (
         <Badge variant="success" className="py-0.5 px-1.5 font-medium text-[11px]">
           DBMS
@@ -182,6 +302,13 @@ export default function PlanlyPage() {
         </Badge>
       );
     }
+    if (slug.includes("oop")) {
+      return (
+        <Badge variant="success" className="py-0.5 px-1.5 font-medium text-[11px]">
+          OOPs
+        </Badge>
+      );
+    }
     return (
       <Badge variant="cyan" className="py-0.5 px-1.5 font-medium text-[11px]">
         LLD
@@ -189,6 +316,84 @@ export default function PlanlyPage() {
     );
   };
 
+  // Combined Revision Items from Spaced Repetition + Starred Tasks
+  const userRevisionItems = userRevisionsData?.items || [];
+  const dueRevisionItems = userRevisionItems.filter((it) => it.progress?.isDue);
+  const upcomingRevisionItems = userRevisionItems.filter((it) => !it.progress?.isDue && Boolean(it.progress?.nextRevisionAt));
+  const starredTasksList = revisionListData || allTasks.filter((t) => t.isRevision);
+  const totalRevisionCount = Math.max(userRevisionsData?.totalCount || 0, starredTasksList.length);
+
+  // =========================================================================
+  // 1. LOADING SKELETON STATE
+  // =========================================================================
+  if (isLoading) {
+    return (
+      <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200 select-none">
+        {/* Banner Skeleton */}
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 space-y-3">
+          <Skeleton className="h-5 w-36 bg-zinc-800" />
+          <Skeleton className="h-7 w-72 bg-zinc-800" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-6 bg-zinc-800/80 rounded" />
+            ))}
+          </div>
+        </div>
+
+        {/* 4 Metric Cards Skeleton */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-3 space-y-2">
+              <Skeleton className="h-4 w-28 bg-zinc-800" />
+              <Skeleton className="h-6 w-20 bg-zinc-800" />
+              <Skeleton className="h-2 w-full bg-zinc-800" />
+            </div>
+          ))}
+        </div>
+
+        {/* Content Layout Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div className="lg:col-span-8 space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-16 bg-zinc-900/50 rounded-xl border border-zinc-800" />
+            ))}
+          </div>
+          <div className="lg:col-span-4 space-y-3">
+            <Skeleton className="h-64 bg-zinc-900/50 rounded-xl border border-zinc-800" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 2. ERROR STATE
+  // =========================================================================
+  if (isError) {
+    return (
+      <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-950/20 p-6 text-center space-y-3">
+          <AlertTriangle className="h-8 w-8 text-rose-400 mx-auto" />
+          <h2 className="text-[16px] font-semibold text-zinc-100">Failed to load study plan</h2>
+          <p className="text-[12px] text-zinc-400 max-w-md mx-auto">
+            {error instanceof Error ? error.message : "An error occurred while fetching your study plan."}
+          </p>
+          <Button
+            size="sm"
+            onClick={() => refetch()}
+            className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] h-8 px-4"
+          >
+            <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 3. MAIN RENDER
+  // =========================================================================
   return (
     <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200 select-none">
       {/* ========================================================================= */}
@@ -209,7 +414,7 @@ export default function PlanlyPage() {
               <span>Study Planner Engine</span>
             </div>
             <h1 className="text-[18px] sm:text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
-              Personalized 61-Day Sprint Roadmap
+              Personalized {totalDaysCount}-Day Sprint Roadmap
             </h1>
 
             {/* 4 Benefits Chips */}
@@ -232,7 +437,7 @@ export default function PlanlyPage() {
                 <div className="flex h-5 w-5 items-center justify-center rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
                   <Layers className="h-3 w-3" />
                 </div>
-                <span className="text-[11px] text-zinc-400 font-normal">9 structured sprints</span>
+                <span className="text-[11px] text-zinc-400 font-normal">{totalSprintsCount} structured sprints</span>
               </div>
 
               <div className="flex items-center gap-1.5 text-[12px]">
@@ -284,7 +489,7 @@ export default function PlanlyPage() {
           >
             <span>Active Sprint Plan</span>
             <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600/20 border border-blue-500/30 px-1 text-[10px] font-semibold text-blue-400 font-mono">
-              1
+              {totalSprintsCount - completedSprintsCount}
             </span>
           </button>
 
@@ -299,7 +504,7 @@ export default function PlanlyPage() {
           >
             <span>Completed</span>
             <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-800 px-1 text-[10px] font-semibold text-zinc-500 font-mono">
-              0
+              {completedSprintsCount}
             </span>
           </button>
         </div>
@@ -345,9 +550,11 @@ export default function PlanlyPage() {
             <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-950/60 px-4 py-2 text-[12px] text-blue-400 font-normal">
               <div className="flex items-center gap-1.5">
                 <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
-                <span>Sprint 1 In Progress &middot; Day 1 Focus &middot; 61 days total</span>
+                <span>
+                  Sprint {activeSprint?.sprintNo || 1} In Progress &middot; Day {activeDay?.sprintDayNo || 1} Focus &middot; {totalDaysCount} days total
+                </span>
               </div>
-              <span className="text-[11px] text-zinc-500 font-mono">Completion Target: 30 Nov 2026</span>
+              <span className="text-[11px] text-zinc-500 font-mono">Completion Target: {formatCompletionTarget()}</span>
             </div>
 
             {/* Plan Card Body */}
@@ -363,11 +570,11 @@ export default function PlanlyPage() {
                   </Badge>
                 </div>
                 <div className="text-[12px] text-zinc-400 flex flex-wrap items-center gap-2 font-normal leading-normal">
-                  <span>Role: <strong className="text-zinc-300 font-normal">Software Engineer</strong></span>
+                  <span>Role: <strong className="text-zinc-300 font-normal">{plan?.role || "Software Engineer"}</strong></span>
                   <span>&middot;</span>
-                  <span>Pacing: <strong className="text-zinc-300 font-normal">4 hrs/day</strong></span>
+                  <span>Pacing: <strong className="text-zinc-300 font-normal">{dailyHours} hrs/day</strong></span>
                   <span>&middot;</span>
-                  <span>9 Sprints &middot; 847 Problems</span>
+                  <span>{totalSprintsCount} Sprints &middot; {totalTasksCount} Problems</span>
                 </div>
               </div>
 
@@ -437,7 +644,7 @@ export default function PlanlyPage() {
                     </div>
                     <div className="flex items-baseline gap-1.5 pt-0.5">
                       <span className="text-[16px] font-semibold font-mono text-zinc-100">{progressPercent}%</span>
-                      <span className="text-[11px] text-zinc-500 font-mono">{completedDaysCount} / 61 days</span>
+                      <span className="text-[11px] text-zinc-500 font-mono">{completedDaysCount} / {totalDaysCount} days</span>
                     </div>
                     <Progress value={progressPercent} className="mt-1.5" />
                   </div>
@@ -448,10 +655,12 @@ export default function PlanlyPage() {
                       <span>Curriculum Time</span>
                     </div>
                     <div className="flex items-baseline gap-1.5 pt-0.5">
-                      <span className="text-[16px] font-semibold font-mono text-zinc-100">0h</span>
+                      <span className="text-[16px] font-semibold font-mono text-zinc-100">
+                        {completedHours > 0 ? `${completedHours}h ` : ""}{completedMinutesRem}m
+                      </span>
                       <span className="text-[11px] text-zinc-500 font-mono">of {totalHours}h {remainingMinutes}m</span>
                     </div>
-                    <Progress value={0} className="mt-1.5" />
+                    <Progress value={curriculumTimePercent} className="mt-1.5" />
                   </div>
 
                   <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3 space-y-1 shadow-subtle">
@@ -464,7 +673,7 @@ export default function PlanlyPage() {
                       <span className="text-[11px] text-zinc-500 font-mono">of {totalSprintsCount} sprints</span>
                     </div>
                     <Progress
-                      value={(completedSprintsCount / totalSprintsCount) * 100}
+                      value={(completedSprintsCount / Math.max(1, totalSprintsCount)) * 100}
                       className="mt-1.5"
                     />
                   </div>
@@ -475,11 +684,18 @@ export default function PlanlyPage() {
                       <span>Est. Completion</span>
                     </div>
                     <div className="flex items-baseline gap-1.5 pt-0.5">
-                      <span className="text-[16px] font-semibold text-zinc-100">30 Nov</span>
-                      <span className="text-[11px] text-zinc-500 font-mono">2026</span>
+                      <span className="text-[16px] font-semibold text-zinc-100">{getCompletionDayMonth()}</span>
+                      <span className="text-[11px] text-zinc-500 font-mono">{getCompletionYear()}</span>
                     </div>
-                    <div className="text-[11px] text-emerald-400 font-normal pt-0.5 flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> On Schedule
+                    <div className={cn(
+                      "text-[11px] font-normal pt-0.5 flex items-center gap-1",
+                      plan?.isOnSchedule !== false ? "text-emerald-400" : "text-amber-400"
+                    )}>
+                      <span className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        plan?.isOnSchedule !== false ? "bg-emerald-500" : "bg-amber-500"
+                      )} />
+                      {plan?.scheduleStatusText || (plan?.isOnSchedule !== false ? "On Schedule" : "Behind Schedule")}
                     </div>
                   </div>
                 </div>
@@ -493,15 +709,8 @@ export default function PlanlyPage() {
                         const isSprintExpanded = expandedSprintId === sprint.sprintId;
                         const sprintTotalHours = Math.floor((sprint.totalEstimatedMinutes || 0) / 60);
                         const sprintRemainingMinutes = (sprint.totalEstimatedMinutes || 0) % 60;
-
-                        const sprintSubjects =
-                          sprint.sprintNo <= 3
-                            ? "DSA + OOPS"
-                            : sprint.sprintNo <= 5
-                            ? "DSA + Operating System"
-                            : sprint.sprintNo <= 7
-                            ? "Computer Networks + LLD"
-                            : "DBMS";
+                        const sprintSubjects = getSprintSubjectSummary(sprint);
+                        const isSprintCompleted = sprint.status === "completed";
 
                         return (
                           <div
@@ -510,6 +719,8 @@ export default function PlanlyPage() {
                               "rounded-xl border transition-all duration-200 overflow-hidden shadow-subtle",
                               isSprintExpanded
                                 ? "border-blue-500/30 bg-zinc-900/50"
+                                : isSprintCompleted
+                                ? "border-emerald-500/20 bg-zinc-900/30 opacity-80 hover:opacity-100"
                                 : "border-zinc-800/80 bg-zinc-900/30 hover:border-zinc-700/80"
                             )}
                           >
@@ -523,8 +734,11 @@ export default function PlanlyPage() {
                               className="flex items-center justify-between p-3 sm:p-3.5 cursor-pointer select-none hover:bg-zinc-900/60 transition-colors"
                             >
                               <div className="flex items-center gap-2">
-                                <Badge variant="blue" className="text-[10px] font-medium py-0.5 px-1.5 leading-none">
-                                  Sprint {sprint.sprintNo}
+                                <Badge
+                                  variant={isSprintCompleted ? "success" : "blue"}
+                                  className="text-[10px] font-medium py-0.5 px-1.5 leading-none"
+                                >
+                                  {isSprintCompleted ? "✓ Sprint " : "Sprint "}{sprint.sprintNo}
                                 </Badge>
                                 <span className="text-[12px] text-zinc-300 font-normal hidden sm:inline">
                                   • {sprintSubjects}
@@ -551,11 +765,17 @@ export default function PlanlyPage() {
                                   const isDayExpanded = expandedDayId === day.dayId;
                                   const dayHours = Math.floor((day.estimatedMinutes || 0) / 60);
                                   const dayMinutes = (day.estimatedMinutes || 0) % 60;
+                                  const isDayComplete = (day.tasksCompleted || 0) >= (day.tasksTotal || 1) && (day.tasksTotal || 0) > 0;
 
                                   return (
                                     <div
                                       key={day.dayId}
-                                      className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 overflow-hidden"
+                                      className={cn(
+                                        "rounded-lg border overflow-hidden transition-colors",
+                                        isDayComplete
+                                          ? "border-emerald-500/20 bg-zinc-900/30"
+                                          : "border-zinc-800/80 bg-zinc-900/40"
+                                      )}
                                     >
                                       <div
                                         onClick={() =>
@@ -574,8 +794,11 @@ export default function PlanlyPage() {
                                           />
                                           <span>Day {day.sprintDayNo}</span>
                                           <span className="text-[11px] text-zinc-500 font-normal font-mono">
-                                            ({day.tasksCompleted} / {day.tasksTotal} done)
+                                            ({day.tasksCompleted || 0} / {day.tasksTotal || 0} done)
                                           </span>
+                                          {isDayComplete && (
+                                            <span className="text-emerald-400 text-[10px] font-mono">✓</span>
+                                          )}
                                         </div>
 
                                         <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono">
@@ -605,6 +828,7 @@ export default function PlanlyPage() {
                                                 <div className="flex items-center gap-2 overflow-hidden">
                                                   <button
                                                     type="button"
+                                                    disabled={isUpdatingTask}
                                                     onClick={() => handleToggleTaskStatus(task)}
                                                     className={cn(
                                                       "flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border transition-colors",
@@ -679,9 +903,9 @@ export default function PlanlyPage() {
                           <div className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-200">
                             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                             <span>Revision List</span>
-                            {revisionListData && revisionListData.length > 0 && (
+                            {totalRevisionCount > 0 && (
                               <Badge variant="blue" className="text-[10px] py-0.5 px-1.5 font-medium leading-none font-mono">
-                                {revisionListData.length}
+                                {totalRevisionCount}
                               </Badge>
                             )}
                           </div>
@@ -693,29 +917,40 @@ export default function PlanlyPage() {
                           </button>
                         </div>
 
-                        {/* Day 1 Preview */}
+                        {/* Active Day Focus Preview */}
                         <div className="space-y-1.5 pt-0.5">
                           <div className="text-[12px] font-medium text-zinc-300">
-                            Sprint 1 &middot; Day 1 Focus
+                            Sprint {activeSprint?.sprintNo || 1} &middot; Day {activeDay?.sprintDayNo || 1} Focus
                           </div>
                           <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-950/60 p-1.5 rounded-lg border border-zinc-800/80 font-mono">
-                            <span>{day1Tasks.length || 20} topics</span>
+                            <span>{activeDayTasks.length} topics</span>
                             <span>&middot;</span>
-                            <span>3h 53m planned</span>
+                            <span>
+                              {Math.floor((activeDay?.estimatedMinutes || 0) / 60)}h {(activeDay?.estimatedMinutes || 0) % 60}m planned
+                            </span>
                           </div>
 
                           <div className="space-y-0.5 max-h-56 overflow-y-auto pr-1">
-                            {day1Tasks.slice(0, 6).map((t, idx) => (
-                              <div
-                                key={t.taskId || idx}
-                                className="flex items-center justify-between py-1 px-1.5 rounded text-[11px] text-zinc-300 hover:bg-zinc-800/40 transition-colors"
-                              >
-                                <span className="truncate pr-2">{t.item?.title || `Task #${idx + 1}`}</span>
-                                <span className="text-zinc-500 text-[10px] shrink-0 font-mono">
-                                  {t.estimatedMinutes}m
-                                </span>
-                              </div>
-                            ))}
+                            {activeDayTasks.slice(0, 6).map((t, idx) => {
+                              const isTaskDone = t.status === "completed";
+                              return (
+                                <div
+                                  key={t.taskId || idx}
+                                  onClick={() => handleToggleTaskStatus(t)}
+                                  className={cn(
+                                    "flex items-center justify-between py-1 px-1.5 rounded text-[11px] cursor-pointer transition-colors",
+                                    isTaskDone
+                                      ? "text-zinc-500 line-through bg-zinc-900/20"
+                                      : "text-zinc-300 hover:bg-zinc-800/40"
+                                  )}
+                                >
+                                  <span className="truncate pr-2">{t.item?.title || `Task #${idx + 1}`}</span>
+                                  <span className="text-zinc-500 text-[10px] shrink-0 font-mono">
+                                    {t.estimatedMinutes}m
+                                  </span>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
@@ -727,39 +962,57 @@ export default function PlanlyPage() {
                 {viewMode === "calendar" && (
                   <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-[13px] font-semibold text-zinc-100">9-Sprint Schedule Timeline</span>
-                      <span className="text-[11px] text-zinc-400 font-mono">Oct 2026 – Nov 2026</span>
+                      <span className="text-[13px] font-semibold text-zinc-100">{totalSprintsCount}-Sprint Schedule Timeline</span>
+                      <span className="text-[11px] text-zinc-400 font-mono">
+                        {formatDateDisplay(plan?.startDate || sprints[0]?.plannedStartDate)} – {formatCompletionTarget()}
+                      </span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      {sprints.map((s) => (
-                        <div
-                          key={s.sprintId}
-                          onClick={() => {
-                            setExpandedSprintId(s.sprintId);
-                            setViewMode("tree");
-                          }}
-                          className="rounded-lg border border-zinc-800 bg-zinc-950/70 p-3 space-y-2 hover:border-blue-500/40 cursor-pointer transition-all shadow-subtle group"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-[12px] font-semibold text-zinc-200 group-hover:text-blue-400 transition-colors">
-                              Sprint {s.sprintNo}
-                            </span>
-                            <Badge variant={s.sprintNo === 1 ? "blue" : "secondary"} className="text-[10px] py-0 px-1.5">
-                              {s.sprintNo === 1 ? "In Progress" : "Upcoming"}
-                            </Badge>
-                          </div>
+                      {sprints.map((s) => {
+                        const isCompleted = s.status === "completed";
+                        const isInProgress = s.status === "in_progress" || s.sprintNo === activeSprint?.sprintNo;
+                        const sprintSubjects = getSprintSubjectSummary(s);
 
-                          <div className="text-[11px] text-zinc-400">
-                            {s.sprintNo <= 3 ? "DSA & Algorithms" : s.sprintNo <= 5 ? "Operating Systems" : s.sprintNo <= 7 ? "Networks & LLD" : "DBMS & SQL"}
-                          </div>
+                        return (
+                          <div
+                            key={s.sprintId}
+                            onClick={() => {
+                              setExpandedSprintId(s.sprintId);
+                              setViewMode("tree");
+                            }}
+                            className={cn(
+                              "rounded-lg border p-3 space-y-2 cursor-pointer transition-all shadow-subtle group",
+                              isInProgress
+                                ? "border-blue-500/40 bg-zinc-950/90"
+                                : isCompleted
+                                ? "border-emerald-500/30 bg-zinc-950/70"
+                                : "border-zinc-800 bg-zinc-950/70 hover:border-zinc-700"
+                            )}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-[12px] font-semibold text-zinc-200 group-hover:text-blue-400 transition-colors">
+                                Sprint {s.sprintNo}
+                              </span>
+                              <Badge
+                                variant={isCompleted ? "success" : isInProgress ? "blue" : "secondary"}
+                                className="text-[10px] py-0 px-1.5"
+                              >
+                                {isCompleted ? "Completed" : isInProgress ? "In Progress" : "Upcoming"}
+                              </Badge>
+                            </div>
 
-                          <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono pt-1 border-t border-zinc-800/60">
-                            <span>{(s.days || []).length} Days</span>
-                            <span>{Math.floor((s.totalEstimatedMinutes || 0) / 60)}h</span>
+                            <div className="text-[11px] text-zinc-400 truncate">
+                              {sprintSubjects}
+                            </div>
+
+                            <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono pt-1 border-t border-zinc-800/60">
+                              <span>{(s.days || []).length} Days</span>
+                              <span>{Math.floor((s.totalEstimatedMinutes || 0) / 60)}h</span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -769,7 +1022,374 @@ export default function PlanlyPage() {
         </div>
       )}
 
-      {/* Catch-Up Modal */}
+      {/* ========================================================================= */}
+      {/* TAB CONTENT: COMPLETED SPRINTS */}
+      {/* ========================================================================= */}
+      {activeTab === "completed" && (
+        <div className="space-y-4">
+          {completedSprints.length === 0 ? (
+            <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-8 text-center space-y-2">
+              <CheckCircle2 className="h-8 w-8 text-zinc-600 mx-auto" />
+              <h3 className="text-[14px] font-medium text-zinc-200">No sprints completed yet</h3>
+              <p className="text-[12px] text-zinc-500 max-w-sm mx-auto">
+                Complete daily tasks in the active sprint to finish your sprints. Sprints will appear here once all assigned days are completed.
+              </p>
+              <Button
+                size="sm"
+                onClick={() => setActiveTab("active")}
+                className="mt-2 bg-blue-600 hover:bg-blue-700 text-white text-[12px] h-8"
+              >
+                Go to Active Sprint Plan
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {completedSprints.map((s) => (
+                <div
+                  key={s.sprintId}
+                  className="rounded-xl border border-emerald-500/20 bg-zinc-900/40 p-4 space-y-2 shadow-subtle"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="success" className="text-[10px] py-0.5 px-1.5 font-medium">
+                        ✓ Sprint {s.sprintNo}
+                      </Badge>
+                      <span className="text-[12px] font-medium text-zinc-200">{getSprintSubjectSummary(s)}</span>
+                    </div>
+                    <span className="text-[11px] text-emerald-400 font-mono">Completed</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono pt-2 border-t border-zinc-800">
+                    <span>{(s.days || []).length} Days completed</span>
+                    <span>{Math.floor((s.totalEstimatedMinutes || 0) / 60)}h mastered</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 1: RENAME PLAN */}
+      {/* ========================================================================= */}
+      <Dialog open={isRenameModalOpen} onOpenChange={setIsRenameModalOpen}>
+        <DialogContent className="max-w-md bg-zinc-950">
+          <DialogHeader>
+            <DialogTitle className="text-[15px] font-semibold leading-tight">Rename Study Plan</DialogTitle>
+            <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
+              Update the name of your active study plan in the database.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-3 space-y-2">
+            <label className="text-[12px] text-zinc-300 font-medium">Plan Name</label>
+            <Input
+              value={planNameInput}
+              onChange={(e) => setPlanNameInput(e.target.value)}
+              className="bg-zinc-900 border-zinc-800 text-zinc-100 text-[13px] h-9"
+              placeholder="Enter plan name"
+            />
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button variant="outline" size="sm" onClick={() => setIsRenameModalOpen(false)} className="text-[12px] h-7">
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={isUpdatingPlan || !planNameInput.trim()}
+              onClick={() => {
+                updatePlan(
+                  { name: planNameInput.trim() },
+                  {
+                    onSuccess: () => {
+                      setIsRenameModalOpen(false);
+                    },
+                  }
+                );
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] h-7"
+            >
+              {isUpdatingPlan ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 2: EDIT START DATE */}
+      {/* ========================================================================= */}
+      <Dialog open={isStartDateModalOpen} onOpenChange={setIsStartDateModalOpen}>
+        <DialogContent className="max-w-md bg-zinc-950">
+          <DialogHeader>
+            <DialogTitle className="text-[15px] font-semibold leading-tight">Edit Start Date</DialogTitle>
+            <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
+              Change your study plan start date. All sprint and daily calendar dates will be recalculated dynamically.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-3 space-y-2">
+            <label className="text-[12px] text-zinc-300 font-medium">Start Date</label>
+            <Input
+              type="date"
+              value={newStartDate}
+              onChange={(e) => setNewStartDate(e.target.value)}
+              className="bg-zinc-900 border-zinc-800 text-zinc-100 text-[13px] h-9"
+            />
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button variant="outline" size="sm" onClick={() => setIsStartDateModalOpen(false)} className="text-[12px] h-7">
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={isUpdatingPlan || !newStartDate}
+              onClick={() => {
+                updatePlan(
+                  { startDate: newStartDate },
+                  {
+                    onSuccess: () => {
+                      setIsStartDateModalOpen(false);
+                    },
+                  }
+                );
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] h-7"
+            >
+              {isUpdatingPlan ? "Updating..." : "Update Schedule"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: ADJUST DAILY HOURS */}
+      {/* ========================================================================= */}
+      <Dialog open={isAdjustPlanModalOpen} onOpenChange={setIsAdjustPlanModalOpen}>
+        <DialogContent className="max-w-md bg-zinc-950">
+          <DialogHeader>
+            <DialogTitle className="text-[15px] font-semibold leading-tight">Adjust Daily Hours</DialogTitle>
+            <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
+              Adjust your planned daily study hours. Target completion pacing will adapt accordingly.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-3 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] text-zinc-300 font-medium">Daily Study Hours</span>
+              <span className="text-[13px] font-bold font-mono text-blue-400">{dailyHours} hrs/day</span>
+            </div>
+            <Slider
+              value={dailyHours}
+              min={1}
+              max={10}
+              step={1}
+              onChange={(val) => setDailyHours(val)}
+            />
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-2.5 text-[11px] text-zinc-400 flex items-center justify-between">
+              <span>Estimated Duration:</span>
+              <span className="font-mono text-zinc-200">
+                {Math.ceil(totalMinutes / (dailyHours * 60))} days ({totalHours}h total)
+              </span>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button variant="outline" size="sm" onClick={() => setIsAdjustPlanModalOpen(false)} className="text-[12px] h-7">
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={isUpdatingPlan}
+              onClick={() => {
+                updatePlan(
+                  { dailyHours },
+                  {
+                    onSuccess: () => {
+                      setIsAdjustPlanModalOpen(false);
+                    },
+                  }
+                );
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[12px] h-7"
+            >
+              {isUpdatingPlan ? "Saving..." : "Apply Pacing"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 4: REVISION LIST MODAL ("View all") */}
+      {/* ========================================================================= */}
+      <Dialog open={isRevisionModalOpen} onOpenChange={setIsRevisionModalOpen}>
+        <DialogContent className="max-w-lg bg-zinc-950">
+          <DialogHeader>
+            <DialogTitle className="text-[15px] font-semibold leading-tight flex items-center gap-2">
+              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+              <span>Revision &amp; Spaced Repetition</span>
+            </DialogTitle>
+            <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
+              Review topics and problems scheduled by the automated spaced repetition system.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Revision Filter Tabs */}
+          <div className="flex items-center gap-1 border-b border-zinc-800 pb-2 text-[11px]">
+            <button
+              onClick={() => setRevisionModalTab("due")}
+              className={cn(
+                "px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1",
+                revisionModalTab === "due"
+                  ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
+                  : "text-zinc-400 hover:text-zinc-200"
+              )}
+            >
+              <span>Due Now</span>
+              {dueRevisionItems.length > 0 && (
+                <span className="font-mono text-[10px] px-1 rounded bg-amber-500/20 text-amber-300">
+                  {dueRevisionItems.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setRevisionModalTab("upcoming")}
+              className={cn(
+                "px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1",
+                revisionModalTab === "upcoming"
+                  ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
+                  : "text-zinc-400 hover:text-zinc-200"
+              )}
+            >
+              <span>Upcoming</span>
+              <span className="font-mono text-[10px] px-1 rounded bg-zinc-800 text-zinc-400">
+                {upcomingRevisionItems.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setRevisionModalTab("all")}
+              className={cn(
+                "px-2.5 py-1 rounded-md font-medium transition-colors flex items-center gap-1",
+                revisionModalTab === "all"
+                  ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
+                  : "text-zinc-400 hover:text-zinc-200"
+              )}
+            >
+              <span>Starred Tasks</span>
+              <span className="font-mono text-[10px] px-1 rounded bg-zinc-800 text-zinc-400">
+                {starredTasksList.length}
+              </span>
+            </button>
+          </div>
+
+          {/* Modal Items List */}
+          <div className="py-2 space-y-2 max-h-[300px] overflow-y-auto pr-1">
+            {revisionModalTab === "due" && (
+              dueRevisionItems.length === 0 ? (
+                <div className="py-6 text-center space-y-1.5">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-400 mx-auto" />
+                  <p className="text-[12px] font-medium text-emerald-400">All caught up!</p>
+                  <p className="text-[11px] text-zinc-500">No revisions are due today.</p>
+                </div>
+              ) : (
+                dueRevisionItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-2.5 rounded-lg border border-amber-500/30 bg-amber-500/[0.04] flex items-center justify-between"
+                  >
+                    <div className="space-y-0.5 overflow-hidden">
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="blue" className="text-[9px] py-0 px-1">
+                          {item.subjectSlug?.toUpperCase() || "DSA"}
+                        </Badge>
+                        <span className="text-[10px] text-zinc-400 truncate">{item.topicName}</span>
+                      </div>
+                      <h4 className="text-[12px] font-medium text-zinc-200 truncate">{item.title}</h4>
+                    </div>
+                    <Badge variant="destructive" className="text-[10px] py-0 px-1.5 font-mono shrink-0 ml-2">
+                      Due Today
+                    </Badge>
+                  </div>
+                ))
+              )
+            )}
+
+            {revisionModalTab === "upcoming" && (
+              upcomingRevisionItems.length === 0 ? (
+                <div className="py-6 text-center space-y-1">
+                  <p className="text-[12px] text-zinc-400">No upcoming revisions scheduled yet.</p>
+                </div>
+              ) : (
+                upcomingRevisionItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-2.5 rounded-lg border border-zinc-800 bg-zinc-900/60 flex items-center justify-between"
+                  >
+                    <div className="space-y-0.5 overflow-hidden">
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="blue" className="text-[9px] py-0 px-1">
+                          {item.subjectSlug?.toUpperCase() || "DSA"}
+                        </Badge>
+                        <span className="text-[10px] text-zinc-400 truncate">{item.topicName}</span>
+                      </div>
+                      <h4 className="text-[12px] font-medium text-zinc-200 truncate">{item.title}</h4>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] py-0 px-1.5 text-blue-400 border-blue-500/20 bg-blue-500/10 font-mono shrink-0 ml-2">
+                      {item.progress?.revisionStatusText || "Scheduled"}
+                    </Badge>
+                  </div>
+                ))
+              )
+            )}
+
+            {revisionModalTab === "all" && (
+              starredTasksList.length === 0 ? (
+                <div className="py-6 text-center space-y-1">
+                  <p className="text-[12px] text-zinc-400">No starred tasks in this plan.</p>
+                  <p className="text-[11px] text-zinc-500">Click the star icon next to any task to add it here.</p>
+                </div>
+              ) : (
+                starredTasksList.map((task) => (
+                  <div
+                    key={task.taskId}
+                    className="p-2.5 rounded-lg border border-zinc-800 bg-zinc-900/60 flex items-center justify-between"
+                  >
+                    <div className="space-y-0.5 overflow-hidden">
+                      <div className="flex items-center gap-1.5">
+                        {getSubjectBadge(task.item?.subjectSlug, task.item?.subjectName)}
+                        <span className="text-[10px] text-zinc-400 truncate">{task.item?.topicName}</span>
+                      </div>
+                      <h4 className="text-[12px] font-medium text-zinc-200 truncate">{task.item?.title}</h4>
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-400 bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded shrink-0 ml-2">
+                      {task.estimatedMinutes}m
+                    </span>
+                  </div>
+                ))
+              )
+            )}
+          </div>
+
+          <DialogFooter className="pt-2 flex items-center justify-between sm:justify-between">
+            <Link
+              href="/prep-hub?tab=revision"
+              className="text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+            >
+              Open in PrepHub <ArrowRight className="h-3 w-3" />
+            </Link>
+            <Button size="sm" onClick={() => setIsRevisionModalOpen(false)} className="text-[12px] h-7 bg-zinc-800 hover:bg-zinc-700 text-zinc-200">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================================= */}
+      {/* MODAL 5: CATCH-UP & RESCHEDULE */}
+      {/* ========================================================================= */}
       <Dialog open={isCatchupModalOpen} onOpenChange={setIsCatchupModalOpen}>
         <DialogContent className="max-w-md bg-zinc-950">
           <DialogHeader>

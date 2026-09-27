@@ -71,6 +71,11 @@ export function useStudyPlan(slug: string = "crack-sde") {
       });
 
       queryClient.invalidateQueries({ queryKey: ["revision-list"] });
+      queryClient.invalidateQueries({ queryKey: ["user-revisions"] });
+      queryClient.invalidateQueries({ queryKey: ["topic-questions"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap-subject"] });
+      queryClient.invalidateQueries({ queryKey: ["study-plan", slug] });
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to update task");
@@ -81,13 +86,15 @@ export function useStudyPlan(slug: string = "crack-sde") {
     mutationFn: async ({
       name,
       startDate,
+      dailyHours,
     }: {
       name?: string;
       startDate?: string;
+      dailyHours?: number;
     }) => {
       const res = await api.patch<ApiResponse<StudyPlanDto>>(
         `/api/study-plans/${slug}`,
-        { name, startDate }
+        { name, startDate, dailyHours }
       );
       if (!res.success || !res.data) {
         throw new Error(res.error || "Failed to update study plan");

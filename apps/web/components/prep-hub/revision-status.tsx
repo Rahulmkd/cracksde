@@ -23,19 +23,32 @@ interface RevisionStatusProps {
   className?: string;
 }
 
-export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusProps) {
+export function RevisionStatus({
+  onSelectQuestion,
+  className,
+}: RevisionStatusProps) {
   const { isAuthenticated } = useAuth();
   const { data: revisionsData, isLoading } = useUserRevisions();
-  const [activeTab, setActiveTab] = useState<"due" | "upcoming" | "completed">("due");
+  const [activeTab, setActiveTab] = useState<"due" | "upcoming" | "completed">(
+    "due",
+  );
 
-  const dueItems = revisionsData?.items.filter((it) => it.progress?.isDue) || [];
+  const dueItems =
+    revisionsData?.items.filter((it) => it.progress?.isDue) || [];
   const upcomingItems =
-    revisionsData?.items.filter((it) => !it.progress?.isDue && Boolean(it.progress?.nextRevisionAt)) || [];
+    revisionsData?.items.filter(
+      (it) => !it.progress?.isDue && Boolean(it.progress?.nextRevisionAt),
+    ) || [];
   const completedItems =
-    revisionsData?.items.filter((it) => (it.progress?.solveCount ?? 0) > 0) || [];
+    revisionsData?.items.filter((it) => (it.progress?.solveCount ?? 0) > 0) ||
+    [];
 
   const displayItems =
-    activeTab === "due" ? dueItems : activeTab === "upcoming" ? upcomingItems : completedItems;
+    activeTab === "due"
+      ? dueItems
+      : activeTab === "upcoming"
+        ? upcomingItems
+        : completedItems;
 
   const dueCount = dueItems.length;
   const upcomingCount = upcomingItems.length;
@@ -44,10 +57,13 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
 
   // Earliest upcoming revision date
   const earliestUpcomingDate = upcomingItems[0]?.progress?.nextRevisionAt
-    ? new Date(upcomingItems[0].progress.nextRevisionAt).toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-      })
+    ? new Date(upcomingItems[0].progress.nextRevisionAt).toLocaleDateString(
+        "en-US",
+        {
+          day: "numeric",
+          month: "short",
+        },
+      )
     : null;
 
   const renderBadge = (item: RoadmapItemDto) => {
@@ -89,7 +105,9 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
           className="text-[10px] font-medium py-0 px-1.5 text-blue-400 border-blue-500/20 bg-blue-500/10 flex items-center gap-1"
         >
           <Calendar className="h-2.5 w-2.5" />
-          <span>Next: {day} {month}</span>
+          <span>
+            Next: {day} {month}
+          </span>
         </Badge>
       );
     }
@@ -109,7 +127,7 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
     <div
       className={cn(
         "rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-subtle space-y-3.5 select-none",
-        className
+        className,
       )}
     >
       {/* Header */}
@@ -119,8 +137,12 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
             <RotateCcw className="h-3.5 w-3.5" />
           </div>
           <div>
-            <h3 className="text-[13px] font-semibold text-zinc-100">Revision Status</h3>
-            <p className="text-[10px] text-zinc-500">Spaced Repetition Schedule</p>
+            <h3 className="text-[13px] font-semibold text-zinc-100">
+              Revision Status
+            </h3>
+            <p className="text-[10px] text-zinc-500">
+              Spaced Repetition Schedule
+            </p>
           </div>
         </div>
 
@@ -161,7 +183,7 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
               "px-2 py-0.5 rounded-md font-medium transition-colors flex items-center gap-1",
               activeTab === "due"
                 ? "bg-blue-600/15 text-blue-400 border border-blue-500/30"
-                : "text-zinc-400 hover:text-zinc-200"
+                : "text-zinc-400 hover:text-zinc-200",
             )}
           >
             <span>Due Now</span>
@@ -179,7 +201,7 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
               "px-2 py-0.5 rounded-md font-medium transition-colors flex items-center gap-1",
               activeTab === "upcoming"
                 ? "bg-blue-600/15 text-blue-400 border border-blue-500/30"
-                : "text-zinc-400 hover:text-zinc-200"
+                : "text-zinc-400 hover:text-zinc-200",
             )}
           >
             <span>Upcoming</span>
@@ -195,7 +217,7 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
               "px-2 py-0.5 rounded-md font-medium transition-colors flex items-center gap-1",
               activeTab === "completed"
                 ? "bg-blue-600/15 text-blue-400 border border-blue-500/30"
-                : "text-zinc-400 hover:text-zinc-200"
+                : "text-zinc-400 hover:text-zinc-200",
             )}
           >
             <span>Completed</span>
@@ -219,9 +241,12 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
       ) : !isAuthenticated ? (
         <div className="py-4 text-center space-y-1.5 px-2">
           <Sparkles className="h-4 w-4 text-zinc-500 mx-auto" />
-          <p className="text-[12px] font-medium text-zinc-300">Sign in to track revisions</p>
+          <p className="text-[12px] font-medium text-zinc-300">
+            Sign in to track revisions
+          </p>
           <p className="text-[11px] text-zinc-500 leading-tight">
-            Automated spaced repetition helps retain patterns and algorithms long-term.
+            Automated spaced repetition helps retain patterns and algorithms
+            long-term.
           </p>
         </div>
       ) : displayItems.length > 0 ? (
@@ -237,7 +262,7 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
                   "group p-2.5 rounded-lg border transition-all duration-200 cursor-pointer shadow-subtle",
                   isDue
                     ? "border-amber-500/30 bg-amber-500/[0.04] hover:border-amber-500/50 hover:bg-zinc-900/80"
-                    : "border-zinc-800/80 bg-zinc-950/60 hover:border-zinc-700/80 hover:bg-zinc-900/60"
+                    : "border-zinc-800/80 bg-zinc-950/60 hover:border-zinc-700/80 hover:bg-zinc-900/60",
                 )}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -247,7 +272,9 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
                       <span className="text-[10px] font-mono font-medium text-blue-400 uppercase tracking-wider">
                         {item.subjectSlug || "DSA"}
                       </span>
-                      <span className="text-zinc-600 text-[10px]">&middot;</span>
+                      <span className="text-zinc-600 text-[10px]">
+                        &middot;
+                      </span>
                       <span className="text-[10px] text-zinc-400 truncate max-w-[110px]">
                         {item.topicName}
                       </span>
@@ -258,13 +285,17 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
                     </h4>
 
                     <div className="flex items-center gap-2 text-[10px] text-zinc-500">
-                      <span className="font-mono">{item.progress?.solveCount}x reviewed</span>
+                      <span className="font-mono">
+                        {item.progress?.solveCount}x reviewed
+                      </span>
                       {item.progress?.lastSolvedAt && (
                         <>
                           <span>&middot;</span>
                           <span>
                             Last:{" "}
-                            {new Date(item.progress.lastSolvedAt).toLocaleDateString("en-US", {
+                            {new Date(
+                              item.progress.lastSolvedAt,
+                            ).toLocaleDateString("en-US", {
                               day: "numeric",
                               month: "short",
                             })}
@@ -288,19 +319,23 @@ export function RevisionStatus({ onSelectQuestion, className }: RevisionStatusPr
         /* Helpful empty state when nothing is due today */
         <div className="py-4 text-center space-y-1.5 px-3 rounded-lg border border-zinc-800/60 bg-zinc-950/40">
           <CheckCircle2 className="h-4 w-4 text-emerald-400 mx-auto" />
-          <p className="text-[12px] font-medium text-emerald-400">✓ No revisions due today</p>
+          <p className="text-[12px] font-medium text-emerald-400">
+            ✓ All caught up
+          </p>
           <p className="text-[11px] text-zinc-400">
             {earliestUpcomingDate
               ? `Next revision: ${earliestUpcomingDate}`
               : upcomingCount > 0
-              ? `${upcomingCount} revisions scheduled`
-              : "All questions up to date"}
+                ? `${upcomingCount} revisions scheduled`
+                : "All questions up to date"}
           </p>
         </div>
       ) : (
         <div className="py-4 text-center space-y-1 px-2 rounded-lg border border-zinc-800/60 bg-zinc-950/40">
           <TrendingUp className="h-4 w-4 text-blue-400 mx-auto" />
-          <p className="text-[12px] font-medium text-zinc-200">No {activeTab} questions</p>
+          <p className="text-[12px] font-medium text-zinc-200">
+            No {activeTab} questions
+          </p>
           <p className="text-[10px] text-zinc-500">
             Solve questions in PrepHub to start your spaced repetition schedule.
           </p>

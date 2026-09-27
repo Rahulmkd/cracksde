@@ -561,6 +561,35 @@ export async function solveQuestion(req: Request, res: Response): Promise<void> 
       },
     });
 
+    if (isCorrect) {
+      const matchingTasks = await prisma.studyTask.findMany({
+        where: { itemId },
+      });
+      if (matchingTasks.length > 0) {
+        await prisma.studyTask.updateMany({
+          where: { itemId },
+          data: { status: "completed" },
+        });
+
+        const dayIds = Array.from(new Set(matchingTasks.map((t) => t.dayId)));
+        for (const dayId of dayIds) {
+          const completedCount = await prisma.studyTask.count({
+            where: { dayId, status: "completed" },
+          });
+          const totalCount = await prisma.studyTask.count({
+            where: { dayId },
+          });
+          await prisma.studyDay.update({
+            where: { dayId },
+            data: {
+              tasksCompleted: completedCount,
+              status: completedCount >= totalCount && totalCount > 0 ? "completed" : completedCount > 0 ? "in_progress" : "upcoming",
+            },
+          });
+        }
+      }
+    }
+
     const formattedRevision = formatRevisionStatus(
       updatedProgress.nextRevisionAt,
       updatedProgress.solveCount,

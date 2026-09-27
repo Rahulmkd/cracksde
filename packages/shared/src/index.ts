@@ -239,6 +239,20 @@ export interface StudyPlanDto {
   slug: string;
   name: string;
   sourceUrl?: string | null;
+  role?: string;
+  dailyHours?: number;
+  startDate?: string | null;
+  targetDate?: string | null;
+  totalDays?: number;
+  totalEstimatedMinutes?: number;
+  completedEstimatedMinutes?: number;
+  totalTasks?: number;
+  completedTasks?: number;
+  progressPercent?: number;
+  completedDays?: number;
+  completedSprints?: number;
+  isOnSchedule?: boolean;
+  scheduleStatusText?: string;
   sprints?: StudySprintDto[];
 }
 
@@ -251,6 +265,7 @@ export interface UpdateTaskDto {
 export interface UpdateStudyPlanDto {
   name?: string;
   startDate?: string;
+  dailyHours?: number;
 }
 
 // ============================================================================
