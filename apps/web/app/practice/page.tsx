@@ -30,6 +30,7 @@ import {
 import {
   usePracticeProblems,
   useRoadmapSubjects,
+  useRoadmapSubjectDetail,
   useSolveQuestion,
 } from "@/hooks/use-roadmap";
 import { useAuth } from "@/hooks/use-auth";
@@ -37,6 +38,104 @@ import { usePlannerStore } from "@/store/planner-store";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { PracticeProblemDto } from "@starter/shared";
+
+const CURRICULUM_TOPICS: Record<string, string[]> = {
+  dsa: [
+    "Arrays",
+    "Sorting",
+    "Hashing",
+    "Strings",
+    "Binary Search",
+    "Recursion",
+    "Linked-List",
+    "Bit Manipulation",
+    "Sliding Window / 2 Pointer",
+    "Stack / Queues",
+    "Greedy Algorithms",
+    "Binary Trees",
+    "Binary Search Trees",
+    "Heaps",
+    "Graphs",
+    "Dynamic Programming",
+    "Tries",
+    "Strings (Advanced Algo)",
+    "Maths",
+  ],
+  oops: [
+    "Introduction to OOPS",
+    "Core Principles of OOPS",
+    "Advance OOPS features",
+    "Relationships and Object Behaviour",
+    "Advance Programming in OOPS",
+    "OOP Design and Lifecycle Management",
+  ],
+  dbms: [
+    "Getting Started",
+    "DBMS Foundations and Architecture",
+    "Core Foundations",
+    "Conceptual Data Modeling",
+    "Database Design",
+    "Relational Model and Formal Query Languages",
+    "Functional Dependencies and Database Design",
+    "Querying Essentials",
+    "Aggregation and Analysis",
+    "Set Operations",
+    "SQL Joins",
+    "Subqueries",
+    "Data Modification and Schema Evolution",
+    "Physical Storage, Indexing, and Hashing",
+    "Data Storage, Keys, and Query Optimization",
+    "Query Processing and Optimization",
+    "Query Performance",
+    "Transactions and Access Control",
+    "Transactions and Concurrency Control",
+    "Database Recovery and Durability",
+    "Integrity, Security, and Database Operations",
+    "Distributed Databases, NoSQL, and Analytical Systems",
+    "Applied Learning and Preparation",
+  ],
+  "operating-systems": [
+    "Module-1 (Operating System Basics and OS Introduction)",
+    "Module-2 (Process Management in Operating System)",
+    "Module-3 (CPU Scheduling Algorithms in Operating System)",
+    "Module-4 (Kernel, OS Structures, and Advanced Scheduling)",
+    "Module-5 (Threads and Multithreading in Operating System)",
+    "Module-6 (Process Synchronization and Concurrency Control)",
+    "Module-7 (Deadlock, Starvation, and Concurrency Bugs)",
+  ],
+  "computer-networks": [
+    "Module-1 (CN Foundations)",
+    "Module-2 (Network Models)",
+    "Module-3 (Physical and Data Link Layer)",
+    "Module-4 (Network Topologies and VLANs)",
+    "Module-5 (Network Layer: IP Addressing)",
+    "Module-6 (Network Layer: Routing)",
+    "Module-7 (Transport Layer)",
+    "Module-8 (Application Layer)",
+    "Module-9 (NAT and Internet Edge Networking)",
+    "Module-10 (Switching Techniques)",
+    "Module-11 (Network Security)",
+    "Module-12 (Cryptography and Secure Protocols)",
+    "Module-13: (Wireless Networking)",
+    "Module-14 (Network Performance)",
+    "Module-15 (Situation Based Explanations)",
+  ],
+  lld: [
+    "Introduction to LLD",
+    "Solid Principles",
+    "UML",
+    "Creational Design Patterns",
+    "Structural Design Patterns",
+    "Behavioural Design Patterns",
+    "Multithreading and Concurrency",
+    "Dependency Injection",
+    "Exceptions and Error Handling",
+    "Best practices in LLD",
+    "Interview Problems (Part-1)",
+    "Interview Problems (Part-2)",
+    "Interview Problems (Part-3)",
+  ],
+};
 
 export default function PracticePage() {
   const { isAuthenticated } = useAuth();
@@ -81,6 +180,9 @@ export default function PracticePage() {
 
   // Fetch subjects & topic metadata for dynamic filters
   const { data: roadmapSubjects } = useRoadmapSubjects();
+  const { data: subjectDetail } = useRoadmapSubjectDetail(
+    selectedSubject !== "all" ? selectedSubject : "",
+  );
 
   // Active Problem Note Modal State
   const [activeProblem, setActiveProblem] = useState<PracticeProblemDto | null>(
@@ -106,61 +208,23 @@ export default function PracticePage() {
   // Generate dynamic pattern options from roadmap topics
   const availablePatterns = useMemo(() => {
     const patterns = new Set<string>();
-    if (roadmapSubjects) {
-      roadmapSubjects.forEach((sub) => {
-        if (selectedSubject === "all" || sub.slug === selectedSubject) {
-          if (sub.slug === "dsa") {
-            [
-              "Arrays",
-              "Two Pointers",
-              "Sliding Window",
-              "Binary Search",
-              "Linked List",
-              "Recursion",
-              "Trees",
-              "Graphs",
-              "Dynamic Programming",
-            ].forEach((p) => patterns.add(p));
-          } else if (sub.slug === "dbms") {
-            [
-              "SQL Queries",
-              "Indexing & B+ Trees",
-              "Transactions & ACID",
-              "Normalization",
-              "Concurrency Control",
-            ].forEach((p) => patterns.add(p));
-          } else if (sub.slug === "operating-systems") {
-            [
-              "Process Synchronization",
-              "Deadlocks & Semaphores",
-              "Virtual Memory & Paging",
-              "CPU Scheduling",
-              "System Calls",
-            ].forEach((p) => patterns.add(p));
-          } else if (sub.slug === "computer-networks") {
-            [
-              "TCP/IP & OSI Model",
-              "HTTP & WebSocket",
-              "Routing Protocols",
-              "DNS & Sockets",
-            ].forEach((p) => patterns.add(p));
-          } else if (sub.slug === "oops") {
-            [
-              "Encapsulation & Inheritance",
-              "Polymorphism",
-              "Abstraction & Interfaces",
-              "Design Principles",
-            ].forEach((p) => patterns.add(p));
-          } else if (sub.slug === "lld") {
-            [
-              "Creational Patterns",
-              "Structural Patterns",
-              "Behavioral Patterns",
-              "SOLID Principles",
-              "System Design",
-            ].forEach((p) => patterns.add(p));
+
+    if (selectedSubject !== "all") {
+      const staticTopics = CURRICULUM_TOPICS[selectedSubject];
+      if (staticTopics) {
+        staticTopics.forEach((t) => patterns.add(t));
+      }
+      if (subjectDetail?.topics) {
+        subjectDetail.topics.forEach((t) => {
+          patterns.add(t.name);
+          if (t.subtopics) {
+            t.subtopics.forEach((st) => patterns.add(st.name));
           }
-        }
+        });
+      }
+    } else {
+      Object.values(CURRICULUM_TOPICS).forEach((topicList) => {
+        topicList.forEach((t) => patterns.add(t));
       });
     }
 
@@ -169,8 +233,8 @@ export default function PracticePage() {
       if (p.subtopic) patterns.add(p.subtopic);
     });
 
-    return Array.from(patterns).sort();
-  }, [roadmapSubjects, selectedSubject, problems]);
+    return Array.from(patterns);
+  }, [selectedSubject, subjectDetail, problems]);
 
   // Open note modal for a problem
   const handleOpenProblem = (problem: PracticeProblemDto) => {
@@ -482,6 +546,7 @@ export default function PracticePage() {
                 type="button"
                 onClick={() => {
                   setSelectedSubject(f.val);
+                  setSelectedPattern("all");
                   setCurrentPage(1);
                 }}
                 className={cn(

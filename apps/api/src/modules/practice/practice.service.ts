@@ -71,9 +71,11 @@ export class PracticeService {
           { topic: { slug: { equals: topicSlug, mode: "insensitive" } } },
           { topic: { slug: { equals: slugPattern, mode: "insensitive" } } },
           { topic: { name: { equals: topicSlug, mode: "insensitive" } } },
+          { topic: { name: { contains: topicSlug, mode: "insensitive" } } },
           { subtopic: { slug: { equals: topicSlug, mode: "insensitive" } } },
           { subtopic: { slug: { equals: slugPattern, mode: "insensitive" } } },
           { subtopic: { name: { equals: topicSlug, mode: "insensitive" } } },
+          { subtopic: { name: { contains: topicSlug, mode: "insensitive" } } },
         ],
       });
     }

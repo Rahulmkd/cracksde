@@ -24,7 +24,17 @@ export function validateBody(schema: ZodSchema) {
 export function validateQuery(schema: ZodSchema) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      req.query = await schema.parseAsync(req.query);
+      const parsed = await schema.parseAsync(req.query);
+      try {
+        req.query = parsed;
+      } catch {
+        Object.defineProperty(req, "query", {
+          value: parsed,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        });
+      }
       next();
     } catch (error) {
       if (error instanceof ZodError) {
@@ -44,7 +54,17 @@ export function validateQuery(schema: ZodSchema) {
 export function validateParams(schema: ZodSchema) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      req.params = await schema.parseAsync(req.params);
+      const parsed = await schema.parseAsync(req.params);
+      try {
+        req.params = parsed;
+      } catch {
+        Object.defineProperty(req, "params", {
+          value: parsed,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        });
+      }
       next();
     } catch (error) {
       if (error instanceof ZodError) {
