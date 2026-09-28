@@ -49,37 +49,49 @@ export class PracticeService {
       }
     }
 
-    const where: Prisma.RoadmapItemWhereInput = {};
+    const andConditions: Prisma.RoadmapItemWhereInput[] = [];
 
     if (subjectSlug !== "all") {
-      where.subject = { slug: subjectSlug };
+      const subjectSlugPattern = subjectSlug.replace(/\s+/g, "-");
+      andConditions.push({
+        subject: {
+          OR: [
+            { slug: { equals: subjectSlug, mode: "insensitive" } },
+            { slug: { equals: subjectSlugPattern, mode: "insensitive" } },
+            { name: { equals: subjectSlug, mode: "insensitive" } },
+          ],
+        },
+      });
     }
 
     if (topicSlug !== "all") {
-      where.OR = [
-        { topic: { slug: topicSlug } },
-        { subtopic: { slug: topicSlug } },
-      ];
+      const slugPattern = topicSlug.replace(/\s+/g, "-");
+      andConditions.push({
+        OR: [
+          { topic: { slug: { equals: topicSlug, mode: "insensitive" } } },
+          { topic: { slug: { equals: slugPattern, mode: "insensitive" } } },
+          { topic: { name: { equals: topicSlug, mode: "insensitive" } } },
+          { subtopic: { slug: { equals: topicSlug, mode: "insensitive" } } },
+          { subtopic: { slug: { equals: slugPattern, mode: "insensitive" } } },
+          { subtopic: { name: { equals: topicSlug, mode: "insensitive" } } },
+        ],
+      });
     }
 
     if (search) {
-      const searchConditions: Prisma.RoadmapItemWhereInput[] = [
-        { title: { contains: search, mode: "insensitive" } },
-        { topic: { name: { contains: search, mode: "insensitive" } } },
-        { subtopic: { name: { contains: search, mode: "insensitive" } } },
-      ];
-      if (where.OR) {
-        where.AND = [{ OR: where.OR }, { OR: searchConditions }];
-        delete where.OR;
-      } else {
-        where.OR = searchConditions;
-      }
+      andConditions.push({
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { topic: { name: { contains: search, mode: "insensitive" } } },
+          { subtopic: { name: { contains: search, mode: "insensitive" } } },
+        ],
+      });
     }
 
     if (difficulty !== "all") {
       const diffNorm = difficulty === "basic" ? "easy" : difficulty === "core" ? "medium" : difficulty === "pro" ? "hard" : difficulty;
       const targetDiff = diffNorm === "easy" ? "Easy" : diffNorm === "medium" ? "Medium" : "Hard";
-      where.difficulty = { equals: targetDiff, mode: "insensitive" };
+      andConditions.push({ difficulty: { equals: targetDiff, mode: "insensitive" } });
     }
 
     if (status !== "all" && userId) {
@@ -87,12 +99,12 @@ export class PracticeService {
         const solvedItemIds = Array.from(progressMap.entries())
           .filter(([_, p]) => p.solveCount > 0 || p.status === "completed")
           .map(([id]) => id);
-        where.id = { in: solvedItemIds };
+        andConditions.push({ id: { in: solvedItemIds } });
       } else if (status === "unsolved" || status === "not_solved") {
         const solvedItemIds = Array.from(progressMap.entries())
           .filter(([_, p]) => p.solveCount > 0 || p.status === "completed")
           .map(([id]) => id);
-        where.id = { notIn: solvedItemIds };
+        andConditions.push({ id: { notIn: solvedItemIds } });
       } else if (status === "due" || status === "revision_due") {
         const dueItemIds = Array.from(progressMap.entries())
           .filter(([_, p]) => {
@@ -101,7 +113,7 @@ export class PracticeService {
             return statusInfo.isDue;
           })
           .map(([id]) => id);
-        where.id = { in: dueItemIds };
+        andConditions.push({ id: { in: dueItemIds } });
       } else if (status === "upcoming" || status === "upcoming_revision") {
         const upcomingItemIds = Array.from(progressMap.entries())
           .filter(([_, p]) => {
@@ -110,11 +122,13 @@ export class PracticeService {
             return !statusInfo.isDue && Boolean(p.nextRevisionAt);
           })
           .map(([id]) => id);
-        where.id = { in: upcomingItemIds };
+        andConditions.push({ id: { in: upcomingItemIds } });
       } else if (status === "bookmarked") {
-        where.id = { in: Array.from(bookmarkedItemIds) };
+        andConditions.push({ id: { in: Array.from(bookmarkedItemIds) } });
       }
     }
+
+    const where: Prisma.RoadmapItemWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
 
     const totalMatching = await PracticeRepository.countProblems(where);
     const totalAllInDb = await PracticeRepository.countAllProblems();

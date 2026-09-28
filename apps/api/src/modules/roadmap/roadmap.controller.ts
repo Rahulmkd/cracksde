@@ -61,7 +61,16 @@ export class RoadmapController {
 
       const { isCorrect = true, notes } = req.body;
       const result = await RoadmapService.solveQuestion(itemId, isCorrect, notes, user.id);
-      sendSuccess(res, result.progress, 200, result.message);
+      sendSuccess(
+        res,
+        {
+          ...result.progress,
+          progress: result.progress,
+          message: result.message,
+        },
+        200,
+        result.message
+      );
     } catch (error) {
       next(error);
     }

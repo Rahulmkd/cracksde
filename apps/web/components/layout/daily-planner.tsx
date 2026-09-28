@@ -86,9 +86,9 @@ export function DailyPlanner({
 
   // 1-Click Import from Today's Active Sprint
   const handleImportSprintTasks = () => {
-    const sprint1 = plan?.sprints?.[0];
-    const day1 = sprint1?.days?.[0];
-    const sprintTasks = day1?.tasks || [];
+    const activeSprint = plan?.sprints?.find((s) => s.status === "in_progress") || plan?.sprints?.[0];
+    const activeDay = activeSprint?.days?.find((d) => d.status === "in_progress" || (d.tasksCompleted || 0) < (d.tasksTotal || 1)) || activeSprint?.days?.[0];
+    const sprintTasks = activeDay?.tasks || [];
 
     if (sprintTasks.length === 0) {
       toast.info("No active sprint tasks found to import.");

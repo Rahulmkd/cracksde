@@ -7,6 +7,11 @@ import { authRouter } from "./modules/auth/index.js";
 import routes from "./routes/index.js";
 import { errorHandler } from "./middleware/error-handler.js";
 
+// Ensure BigInt is safely serialized to JSON strings in Express responses
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 const app = express();
 
 // Security

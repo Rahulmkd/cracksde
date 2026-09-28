@@ -27,8 +27,10 @@ export class RoadmapRepository {
   }
 
   static async findSubjectBySlug(slug: string) {
-    return prisma.roadmapSubject.findUnique({
-      where: { slug },
+    return prisma.roadmapSubject.findFirst({
+      where: {
+        slug: { equals: slug, mode: "insensitive" },
+      },
       include: {
         topics: {
           orderBy: { sortOrder: "asc" },
@@ -78,8 +80,8 @@ export class RoadmapRepository {
   static async findTopicBySubjectAndSlug(subjectSlug: string, topicSlug: string) {
     return prisma.roadmapTopic.findFirst({
       where: {
-        slug: topicSlug,
-        subject: { slug: subjectSlug },
+        slug: { equals: topicSlug, mode: "insensitive" },
+        subject: { slug: { equals: subjectSlug, mode: "insensitive" } },
       },
       include: {
         subject: { select: { id: true, slug: true, name: true } },

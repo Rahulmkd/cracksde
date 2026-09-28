@@ -2,8 +2,10 @@ import { prisma } from "../../lib/prisma.js";
 
 export class StudyPlanRepository {
   static async findPlanBySlug(slug: string) {
-    return prisma.studyPlan.findUnique({
-      where: { slug },
+    return prisma.studyPlan.findFirst({
+      where: {
+        slug: { equals: slug, mode: "insensitive" },
+      },
       include: {
         sprints: {
           orderBy: { sprintNo: "asc" },
