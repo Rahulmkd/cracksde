@@ -1,5 +1,6 @@
-import { prisma } from "../../lib/prisma.js";
+import { PracticeRepository } from "./practice.repository.js";
 import { formatRevisionStatus } from "../repetition/repetition.service.js";
+import type { Prisma } from "@prisma/client";
 import type {
   PracticeProblemDto,
   PracticeProblemsResponseDto,
@@ -28,9 +29,7 @@ export class PracticeService {
     let totalDueCount = 0;
 
     if (userId) {
-      const userProgressList = await prisma.userItemProgress.findMany({
-        where: { userId },
-      });
+      const userProgressList = await PracticeRepository.findUserProgressList(userId);
 
       for (const p of userProgressList) {
         progressMap.set(p.itemId, p);
@@ -44,16 +43,13 @@ export class PracticeService {
         }
       }
 
-      const starredTasks = await prisma.studyTask.findMany({
-        where: { isRevision: true, itemId: { not: null } },
-        select: { itemId: true },
-      });
+      const starredTasks = await PracticeRepository.findStarredRevisionTaskItemIds();
       for (const t of starredTasks) {
         if (t.itemId) bookmarkedItemIds.add(t.itemId);
       }
     }
 
-    const where: any = {};
+    const where: Prisma.RoadmapItemWhereInput = {};
 
     if (subjectSlug !== "all") {
       where.subject = { slug: subjectSlug };
@@ -67,7 +63,7 @@ export class PracticeService {
     }
 
     if (search) {
-      const searchConditions = [
+      const searchConditions: Prisma.RoadmapItemWhereInput[] = [
         { title: { contains: search, mode: "insensitive" } },
         { topic: { name: { contains: search, mode: "insensitive" } } },
         { subtopic: { name: { contains: search, mode: "insensitive" } } },
@@ -120,24 +116,14 @@ export class PracticeService {
       }
     }
 
-    const totalMatching = await prisma.roadmapItem.count({ where });
-    const totalAllInDb = await prisma.roadmapItem.count();
+    const totalMatching = await PracticeRepository.countProblems(where);
+    const totalAllInDb = await PracticeRepository.countAllProblems();
 
-    const items = await prisma.roadmapItem.findMany({
+    const items = await PracticeRepository.findProblems(
       where,
-      orderBy: [
-        { subject: { sortOrder: "asc" } },
-        { topic: { sortOrder: "asc" } },
-        { sortOrder: "asc" },
-      ],
-      skip: (page - 1) * limit,
-      take: limit,
-      include: {
-        subject: { select: { id: true, slug: true, name: true } },
-        topic: { select: { id: true, slug: true, name: true } },
-        subtopic: { select: { id: true, slug: true, name: true } },
-      },
-    });
+      (page - 1) * limit,
+      limit
+    );
 
     const formattedProblems: PracticeProblemDto[] = items.map((item: any) => {
       const p = progressMap.get(item.id);

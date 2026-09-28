@@ -37,6 +37,68 @@ export class StudyPlanRepository {
     });
   }
 
+  static async findUserProgress(userId: string, itemId: number) {
+    return prisma.userItemProgress.findUnique({
+      where: {
+        uq_user_roadmap_item_progress: {
+          userId,
+          itemId,
+        },
+      },
+    });
+  }
+
+  static async upsertUserProgress(
+    userId: string,
+    itemId: number,
+    data: {
+      status: string;
+      solveCount: number;
+      lastSolvedAt: Date;
+      nextRevisionAt: Date;
+      lastScore: boolean;
+      completedAt: Date | null;
+    }
+  ) {
+    return prisma.userItemProgress.upsert({
+      where: {
+        uq_user_roadmap_item_progress: {
+          userId,
+          itemId,
+        },
+      },
+      update: {
+        status: data.status,
+        solveCount: data.solveCount,
+        lastSolvedAt: data.lastSolvedAt,
+        nextRevisionAt: data.nextRevisionAt,
+        lastScore: data.lastScore,
+        completedAt: data.completedAt,
+      },
+      create: {
+        userId,
+        itemId,
+        status: data.status,
+        solveCount: data.solveCount,
+        lastSolvedAt: data.lastSolvedAt,
+        nextRevisionAt: data.nextRevisionAt,
+        lastScore: data.lastScore,
+        completedAt: data.completedAt,
+      },
+    });
+  }
+
+  static async resetUserProgress(id: string, solveCount: number) {
+    return prisma.userItemProgress.update({
+      where: { id },
+      data: {
+        status: "not_started",
+        completedAt: null,
+        solveCount,
+      },
+    });
+  }
+
   static async findTaskById(taskId: bigint) {
     return prisma.studyTask.findUnique({
       where: { taskId },
@@ -56,6 +118,44 @@ export class StudyPlanRepository {
           },
         },
       },
+    });
+  }
+
+  static async countCompletedTasksInDay(dayId: bigint) {
+    return prisma.studyTask.count({
+      where: {
+        dayId,
+        status: "completed",
+      },
+    });
+  }
+
+  static async countTotalTasksInDay(dayId: bigint) {
+    return prisma.studyTask.count({
+      where: { dayId },
+    });
+  }
+
+  static async updateDayProgress(dayId: bigint, tasksCompleted: number, status: string) {
+    return prisma.studyDay.update({
+      where: { dayId },
+      data: {
+        tasksCompleted,
+        status,
+      },
+    });
+  }
+
+  static async findSprintDays(sprintId: bigint) {
+    return prisma.studyDay.findMany({
+      where: { sprintId },
+    });
+  }
+
+  static async updateSprintStatus(sprintId: bigint, status: string) {
+    return prisma.studySprint.update({
+      where: { sprintId },
+      data: { status },
     });
   }
 

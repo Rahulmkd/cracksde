@@ -1,4 +1,3 @@
-import { prisma } from "../../lib/prisma.js";
 import { StudyPlanRepository } from "./study-plan.repository.js";
 import {
   calculateNextRevision,
@@ -226,78 +225,35 @@ export class StudyPlanService {
 
     if (userId && updatedTask.itemId) {
       if (updates.status === "completed") {
-        const existingProgress = await prisma.userItemProgress.findUnique({
-          where: {
-            uq_user_roadmap_item_progress: {
-              userId,
-              itemId: updatedTask.itemId,
-            },
-          },
-        });
+        const existingProgress = await StudyPlanRepository.findUserProgress(userId, updatedTask.itemId);
 
         const currentSolveCount = existingProgress?.solveCount ?? 0;
         const now = new Date();
         const calculation = calculateNextRevision(currentSolveCount, true, now);
 
-        await prisma.userItemProgress.upsert({
-          where: {
-            uq_user_roadmap_item_progress: {
-              userId,
-              itemId: updatedTask.itemId,
-            },
-          },
-          update: {
-            status: calculation.status,
-            solveCount: calculation.solveCount,
-            lastSolvedAt: calculation.lastSolvedAt,
-            nextRevisionAt: calculation.nextRevisionAt,
-            lastScore: calculation.lastScore,
-            completedAt: now,
-          },
-          create: {
-            userId,
-            itemId: updatedTask.itemId,
-            status: calculation.status,
-            solveCount: calculation.solveCount,
-            lastSolvedAt: calculation.lastSolvedAt,
-            nextRevisionAt: calculation.nextRevisionAt,
-            lastScore: calculation.lastScore,
-            completedAt: now,
-          },
+        await StudyPlanRepository.upsertUserProgress(userId, updatedTask.itemId, {
+          status: calculation.status,
+          solveCount: calculation.solveCount,
+          lastSolvedAt: calculation.lastSolvedAt,
+          nextRevisionAt: calculation.nextRevisionAt,
+          lastScore: calculation.lastScore,
+          completedAt: now,
         });
       } else if (updates.status === "not_started") {
-        const existingProgress = await prisma.userItemProgress.findUnique({
-          where: {
-            uq_user_roadmap_item_progress: {
-              userId,
-              itemId: updatedTask.itemId,
-            },
-          },
-        });
+        const existingProgress = await StudyPlanRepository.findUserProgress(userId, updatedTask.itemId);
 
         if (existingProgress) {
-          await prisma.userItemProgress.update({
-            where: { id: existingProgress.id },
-            data: {
-              status: "not_started",
-              completedAt: null,
-              solveCount: Math.max(0, existingProgress.solveCount - 1),
-            },
-          });
+          await StudyPlanRepository.resetUserProgress(
+            existingProgress.id,
+            Math.max(0, existingProgress.solveCount - 1)
+          );
         }
       }
     }
 
     if (updates.status !== undefined) {
-      const completedCount = await prisma.studyTask.count({
-        where: {
-          dayId: updatedTask.dayId,
-          status: "completed",
-        },
-      });
-      const totalCount = await prisma.studyTask.count({
-        where: { dayId: updatedTask.dayId },
-      });
+      const completedCount = await StudyPlanRepository.countCompletedTasksInDay(updatedTask.dayId);
+      const totalCount = await StudyPlanRepository.countTotalTasksInDay(updatedTask.dayId);
 
       const dayStatus = completedCount >= totalCount && totalCount > 0
         ? "completed"
@@ -305,17 +261,9 @@ export class StudyPlanService {
         ? "in_progress"
         : "upcoming";
 
-      await prisma.studyDay.update({
-        where: { dayId: updatedTask.dayId },
-        data: {
-          tasksCompleted: completedCount,
-          status: dayStatus,
-        },
-      });
+      await StudyPlanRepository.updateDayProgress(updatedTask.dayId, completedCount, dayStatus);
 
-      const allSprintDays = await prisma.studyDay.findMany({
-        where: { sprintId: updatedTask.sprintId },
-      });
+      const allSprintDays = await StudyPlanRepository.findSprintDays(updatedTask.sprintId);
       const allDaysCompleted = allSprintDays.every((d: any) =>
         d.dayId === updatedTask.dayId ? dayStatus === "completed" : d.status === "completed"
       );
@@ -328,10 +276,7 @@ export class StudyPlanService {
         ? "in_progress"
         : "upcoming";
 
-      await prisma.studySprint.update({
-        where: { sprintId: updatedTask.sprintId },
-        data: { status: sprintStatus },
-      });
+      await StudyPlanRepository.updateSprintStatus(updatedTask.sprintId, sprintStatus);
     }
 
     return {

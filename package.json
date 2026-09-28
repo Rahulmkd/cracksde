@@ -8,9 +8,9 @@
   "scripts": {
     "dev": "npx concurrently --kill-others \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "npm run dev --workspace=@cracksde/api",
-    "dev:web": "npm run dev --workspace=@cracksde/web",
-    "build": "npm run build --workspace=@cracksde/shared && npm run build --workspace=@cracksde/api && npm run build --workspace=@cracksde/web",
-    "typecheck": "npm run typecheck --workspace=@cracksde/shared && npm run typecheck --workspace=@cracksde/api && npm run typecheck --workspace=@cracksde/web",
+    "dev:web": "npm run dev --workspace=@starter/web",
+    "build": "npm run build --workspace=@cracksde/shared && npm run build --workspace=@cracksde/api && npm run build --workspace=@starter/web",
+    "typecheck": "npm run typecheck --workspace=@cracksde/shared && npm run typecheck --workspace=@cracksde/api && npm run typecheck --workspace=@starter/web",
     "db:generate": "npm run db:generate --workspace=@cracksde/api",
     "db:migrate": "npm run db:migrate --workspace=@cracksde/api",
     "db:seed": "npm run db:seed --workspace=@cracksde/api",

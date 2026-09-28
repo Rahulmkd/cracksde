@@ -16,8 +16,6 @@
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./*"],
-      "@cracksde/shared": ["../../packages/shared/src/index.ts"],
-      "@cracksde/shared/*": ["../../packages/shared/src/*"],
       "@starter/shared": ["../../packages/shared/src/index.ts"],
       "@starter/shared/*": ["../../packages/shared/src/*"]
     }
