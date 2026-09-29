@@ -1,11 +1,10 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useOnboardingStore } from "@/store/onboarding-store";
+import { useOnboardingStore } from "@/features/onboarding/store/onboarding-store";
 import { TOTAL_ROADMAP_HOURS } from "@/constants/onboarding-options";
 import { toast } from "sonner";
 import { OnboardingStepper } from "./onboarding-stepper";
