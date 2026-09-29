@@ -6,6 +6,7 @@ export interface CategoryProgress {
   percent: number;
   icon: React.ElementType;
   color: string;
+  barColor?: string;
 }
 
 export interface PopularTopicItem {

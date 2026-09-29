@@ -58,7 +58,7 @@ export const usePlannerStore = create<PlannerState>()(
           createdAt: Date.now() - 900000,
         },
       ],
-      points: 240,
+      points: 315,
       streak: 3,
       lastActiveDate: getTodayDateString(),
 

@@ -81,9 +81,9 @@ export function DailyPlannerWidget({
     return (
       <div className={cn("space-y-4", className)}>
         {showProblemOfTheDay && (
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 animate-pulse h-36" />
+          <div className="rounded-xl border border-zinc-800/80 bg-[#0c1017] p-4 animate-pulse h-36" />
         )}
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 animate-pulse h-64" />
+        <div className="rounded-xl border border-zinc-800/80 bg-[#0c1017] p-4 animate-pulse h-64" />
       </div>
     );
   }
@@ -96,25 +96,23 @@ export function DailyPlannerWidget({
       {showProblemOfTheDay && <ProblemOfTheDay />}
 
       {/* Daily Planner Card */}
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-3 shadow-subtle">
+      <div className="rounded-xl border border-zinc-800/80 bg-[#0c1017] p-4 space-y-3 shadow-sm">
         {/* Planner Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-          <div className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-200">
-            <ListTodo className="h-3.5 w-3.5 text-blue-400" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-[13px] font-bold text-zinc-100">
+            <ListTodo className="h-4 w-4 text-blue-400" />
             <span>Daily Planner</span>
           </div>
-          {tasks.length > 0 && (
-            <span className="text-[11px] font-mono text-zinc-400">
-              {completedCount}/{tasks.length} done
-            </span>
-          )}
+          <span className="text-[11px] font-mono text-zinc-400">
+            {completedCount}/{tasks.length || 3} done
+          </span>
         </div>
 
         {/* 1-Click Import Sprint Tasks Button */}
         <button
           type="button"
           onClick={handleImportSprintTasks}
-          className="w-full rounded-lg border border-blue-500/20 bg-blue-950/20 hover:bg-blue-900/30 hover:border-blue-500/40 p-1.5 text-[11px] font-medium text-blue-300 flex items-center justify-center gap-1.5 transition-colors shadow-subtle"
+          className="w-full rounded-lg border border-blue-500/20 bg-blue-950/20 hover:bg-blue-900/30 hover:border-blue-500/40 py-2 px-3 text-[11px] font-medium text-blue-300 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
         >
           <DownloadCloud className="h-3.5 w-3.5 text-blue-400" />
           <span>+ Import Today&apos;s Sprint Tasks</span>
@@ -136,18 +134,18 @@ export function DailyPlannerWidget({
           onAddNewTaskClick={() => setIsAddingTask(true)}
         />
 
-        {/* Bottom "+ Add task" Button */}
+        {/* Bottom "+ Add custom task" Button */}
         {!isAddingTask && (
           <button
             type="button"
             onClick={() => setIsAddingTask(true)}
-            className="w-full rounded-lg border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900 hover:border-zinc-700/80 p-1.5 text-[12px] font-medium text-zinc-300 flex items-center justify-center gap-1.5 transition-colors shadow-subtle"
+            className="w-full py-1 text-[12px] font-medium text-zinc-400 hover:text-zinc-200 flex items-center justify-center gap-1.5 transition-colors"
           >
-            <Plus className="h-3 w-3 text-blue-400" />
-            <span>+ Add custom task</span>
+            <span>+ + Add custom task</span>
           </button>
         )}
       </div>
     </div>
   );
 }
+

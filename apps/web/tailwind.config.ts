@@ -6,6 +6,7 @@ const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
+    "./features/**/*.{ts,tsx}",
     "./providers/**/*.{ts,tsx}",
   ],
   theme: {
