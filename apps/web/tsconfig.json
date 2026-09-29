@@ -14,8 +14,17 @@
     "jsx": "preserve",
     "incremental": true,
     "plugins": [{ "name": "next" }],
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
+      "@/features/*": ["./features/*"],
+      "@/components/*": ["./components/*"],
+      "@/services/*": ["./services/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/store/*": ["./store/*"],
+      "@/constants/*": ["./constants/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/types/*": ["./types/*"],
       "@starter/shared": ["../../packages/shared/src/index.ts"],
       "@starter/shared/*": ["../../packages/shared/src/*"]
     }

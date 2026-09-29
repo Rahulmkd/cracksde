@@ -3,7 +3,7 @@
 import React from "react";
 import { AppShell } from "@/components/layout/app-shell";
 
-export default function PracticeLayout({
+export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Providers } from "@/providers";
-import { Navbar } from "@/components/navbar";
 import "./globals.css";
 
 const inter = Inter({
@@ -23,8 +22,7 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased bg-zinc-950 text-zinc-100`}>
         <Providers>
-          <Navbar />
-          <main className="min-h-screen">{children}</main>
+          {children}
         </Providers>
       </body>
     </html>
