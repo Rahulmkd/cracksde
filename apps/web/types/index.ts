@@ -1,11 +1,9 @@
-export interface NavItem {
-  title: string;
-  href: string;
-  disabled?: boolean;
-}
+export * from "./api";
+export * from "./navigation";
 
 export interface AuthFormData {
   email: string;
   password: string;
   name?: string;
+  confirmPassword?: string;
 }

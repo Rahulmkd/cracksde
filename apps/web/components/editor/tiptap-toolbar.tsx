@@ -31,12 +31,12 @@ export function TiptapToolbar({ editor }: TiptapToolbarProps) {
       disabled
         ? "opacity-30 cursor-not-allowed"
         : active
-          ? "bg-brand-600/15 text-brand-600 dark:bg-brand-400/15 dark:text-brand-400"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          ? "bg-blue-600/15 text-blue-500 dark:bg-blue-400/15 dark:text-blue-400"
+          : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
     }`;
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 border-b border-border bg-card/50 p-1.5">
+    <div className="flex flex-wrap items-center gap-0.5 border-b border-zinc-800 bg-zinc-900/50 p-1.5">
       {/* Undo / Redo */}
       <button
         type="button"
@@ -63,7 +63,7 @@ export function TiptapToolbar({ editor }: TiptapToolbarProps) {
         </svg>
       </button>
 
-      <div className="mx-1 h-5 w-px bg-border" />
+      <div className="mx-1 h-5 w-px bg-zinc-800" />
 
       {/* Headings */}
       <button
@@ -91,7 +91,7 @@ export function TiptapToolbar({ editor }: TiptapToolbarProps) {
         <span className="text-xs font-bold">H3</span>
       </button>
 
-      <div className="mx-1 h-5 w-px bg-border" />
+      <div className="mx-1 h-5 w-px bg-zinc-800" />
 
       {/* Bold, Italic, Underline, Code */}
       <button
@@ -139,7 +139,7 @@ export function TiptapToolbar({ editor }: TiptapToolbarProps) {
         </svg>
       </button>
 
-      <div className="mx-1 h-5 w-px bg-border" />
+      <div className="mx-1 h-5 w-px bg-zinc-800" />
 
       {/* Lists & Blockquote */}
       <button
@@ -186,7 +186,7 @@ export function TiptapToolbar({ editor }: TiptapToolbarProps) {
         </svg>
       </button>
 
-      <div className="mx-1 h-5 w-px bg-border" />
+      <div className="mx-1 h-5 w-px bg-zinc-800" />
 
       {/* Link */}
       <button

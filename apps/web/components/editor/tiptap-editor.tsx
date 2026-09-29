@@ -14,7 +14,7 @@ export interface TiptapEditorProps {
   className?: string;
 }
 
-export default function TiptapEditor({
+export function TiptapEditor({
   value = "",
   onChange,
   editable = true,
@@ -33,7 +33,7 @@ export default function TiptapEditor({
         autolink: true,
         defaultProtocol: "https",
         HTMLAttributes: {
-          class: "text-brand-600 dark:text-brand-400 underline cursor-pointer",
+          class: "text-blue-400 underline cursor-pointer",
         },
       }),
     ],
@@ -43,7 +43,7 @@ export default function TiptapEditor({
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[200px] p-4",
+          "prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[200px] p-4 text-zinc-100",
       },
     },
     onUpdate: ({ editor }) => {
@@ -62,16 +62,18 @@ export default function TiptapEditor({
 
   if (!editor) {
     return (
-      <div className="h-64 animate-pulse rounded-xl border border-border bg-card" />
+      <div className="h-64 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900/40" />
     );
   }
 
   return (
     <div
-      className={`overflow-hidden rounded-xl border border-border bg-card shadow-sm ${className}`}
+      className={`overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/40 shadow-sm ${className}`}
     >
       <TiptapToolbar editor={editor} />
       <EditorContent editor={editor} />
     </div>
   );
 }
+
+export default TiptapEditor;

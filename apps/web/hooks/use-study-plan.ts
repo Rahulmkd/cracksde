@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api-client";
-import type { ApiResponse, StudyPlanDto, StudyTaskDto } from "@starter/shared";
+import { studyPlanService } from "@/services/study-plan-service";
+import type { StudyPlanDto } from "@starter/shared";
 import { toast } from "sonner";
 
 export function useStudyPlan(slug: string = "crack-sde") {
@@ -10,17 +10,11 @@ export function useStudyPlan(slug: string = "crack-sde") {
 
   const planQuery = useQuery({
     queryKey: ["study-plan", slug],
-    queryFn: async () => {
-      const res = await api.get<ApiResponse<StudyPlanDto>>(`/api/study-plans/${slug}`);
-      if (!res.success || !res.data) {
-        throw new Error(res.error || "Failed to load study plan");
-      }
-      return res.data;
-    },
+    queryFn: () => studyPlanService.getStudyPlan(slug),
   });
 
   const updateTaskMutation = useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       taskId,
       status,
       isRevision,
@@ -30,16 +24,7 @@ export function useStudyPlan(slug: string = "crack-sde") {
       status?: string;
       isRevision?: boolean;
       actualMinutes?: number;
-    }) => {
-      const res = await api.patch<ApiResponse<StudyTaskDto>>(
-        `/api/study-plans/tasks/${taskId}`,
-        { status, isRevision, actualMinutes }
-      );
-      if (!res.success || !res.data) {
-        throw new Error(res.error || "Failed to update task");
-      }
-      return res.data;
-    },
+    }) => studyPlanService.updateTask(taskId, { status, isRevision, actualMinutes }),
     onSuccess: (updatedTask) => {
       queryClient.setQueryData<StudyPlanDto>(["study-plan", slug], (oldPlan) => {
         if (!oldPlan || !oldPlan.sprints) return oldPlan;
@@ -83,7 +68,7 @@ export function useStudyPlan(slug: string = "crack-sde") {
   });
 
   const updatePlanMutation = useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       name,
       startDate,
       dailyHours,
@@ -91,16 +76,7 @@ export function useStudyPlan(slug: string = "crack-sde") {
       name?: string;
       startDate?: string;
       dailyHours?: number;
-    }) => {
-      const res = await api.patch<ApiResponse<StudyPlanDto>>(
-        `/api/study-plans/${slug}`,
-        { name, startDate, dailyHours }
-      );
-      if (!res.success || !res.data) {
-        throw new Error(res.error || "Failed to update study plan");
-      }
-      return res.data;
-    },
+    }) => studyPlanService.updatePlan(slug, { name, startDate, dailyHours }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["study-plan", slug] });
       toast.success("Study plan updated successfully");

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import TiptapEditor from "@/components/tiptap-editor";
+import { TiptapEditor } from "@/components/editor/tiptap-editor";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
