@@ -40,7 +40,7 @@ export function Header() {
               <span className="hidden sm:inline">Search problems, tracks, tools...</span>
               <span className="sm:hidden">Search</span>
               <kbd className="hidden rounded bg-zinc-800 border border-zinc-700/60 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400 sm:inline">
-                ⌘K
+                ⌘
               </kbd>
             </button>
 

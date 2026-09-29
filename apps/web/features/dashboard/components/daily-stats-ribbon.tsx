@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 interface DailyStatsRibbonProps {
   streak: number;
   points: number;
+  userName?: string;
 }
 
-export function DailyStatsRibbon({ streak, points }: DailyStatsRibbonProps) {
+export function DailyStatsRibbon({ streak, points, userName = "Rahul" }: DailyStatsRibbonProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Announcement Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-xl border border-blue-500/20 bg-blue-950/20 px-3.5 py-2.5 text-[12px] text-zinc-300 shadow-subtle">
         <div className="flex items-center gap-2 overflow-hidden">
@@ -35,7 +36,7 @@ export function DailyStatsRibbon({ streak, points }: DailyStatsRibbonProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-0.5">
           <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100 flex items-center gap-2">
-            <span>Welcome back</span>
+            <span>Welcome back, {userName}</span>
             <span className="inline-block text-[18px]">👋</span>
           </h1>
           <p className="text-[12px] font-normal leading-normal text-zinc-400">

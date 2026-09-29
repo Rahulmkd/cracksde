@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { Code2, Layers, Cpu, Database } from "lucide-react";
 import { useStudyPlan } from "@/hooks/use-study-plan";
 import { usePlannerStore } from "@/store/planner-store";
+import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import { DailyPlanner } from "@/components/layout/daily-planner";
 import { DailyStatsRibbon } from "./daily-stats-ribbon";
 import { SprintStatusCard } from "./sprint-status-card";
@@ -64,6 +65,8 @@ const POPULAR_TOPICS: PopularTopicItem[] = [
 ];
 
 export function DashboardOverview() {
+  const { user } = useAuthSession();
+  const userName = user?.name ? user.name.split(" ")[0] : "Rahul";
   const { plan } = useStudyPlan("crack-sde");
   const { points, streak } = usePlannerStore();
 
@@ -140,7 +143,7 @@ export function DashboardOverview() {
   return (
     <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200 select-none">
       {/* 1. Header Ribbon */}
-      <DailyStatsRibbon streak={streak} points={points} />
+      <DailyStatsRibbon streak={streak} points={points} userName={userName} />
 
       {/* 2. Responsive 2-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
