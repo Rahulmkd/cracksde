@@ -89,3 +89,8 @@ export const DEFAULT_SUBJECT_THEME: SubjectTheme = {
   iconBorder: "border-zinc-700/40",
   badgeVariant: "blue",
 };
+
+export function getSubjectTheme(slug: string): SubjectTheme {
+  return SUBJECT_THEMES[slug.toLowerCase()] || DEFAULT_SUBJECT_THEME;
+}
+

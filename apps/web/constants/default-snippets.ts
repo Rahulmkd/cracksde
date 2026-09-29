@@ -40,4 +40,6 @@ if __name__ == "__main__":
 solve();`,
 } as const;
 
+export const DEFAULT_CODE_SNIPPETS = DEFAULT_SNIPPETS;
 export type SupportedLanguage = keyof typeof DEFAULT_SNIPPETS;
+
