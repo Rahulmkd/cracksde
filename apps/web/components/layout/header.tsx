@@ -8,7 +8,7 @@ import { usePlannerStore } from "@/store/planner-store";
 import { CommandPaletteDialog } from "@/components/search/command-palette-dialog";
 
 export function Header() {
-  const { toggleSidebar } = useUIStore();
+  const { sidebarOpen, toggleSidebar } = useUIStore();
   const { points, streak } = usePlannerStore();
   const [searchOpen, setSearchOpen] = useState(false);
   const router = useRouter();
@@ -21,8 +21,9 @@ export function Header() {
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 lg:hidden transition-colors"
-              aria-label="Toggle Navigation Menu"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 lg:hidden transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
+              aria-label="Toggle navigation drawer"
+              aria-expanded={sidebarOpen}
             >
               <Menu className="h-4 w-4" />
             </button>

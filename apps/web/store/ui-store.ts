@@ -17,8 +17,10 @@ interface UIState {
   activeNavRect: NavRect | null;
   activeNavHref: string | null;
   toggleSidebar: () => void;
+  setSidebarOpen: (open: boolean) => void;
   toggleMobileMenu: () => void;
   closeMobileMenu: () => void;
+  setMobileMenuOpen: (open: boolean) => void;
   togglePrepOpen: () => void;
   toggleExploreOpen: () => void;
   toggleSpacesOpen: () => void;
@@ -35,8 +37,10 @@ export const useUIStore = create<UIState>((set) => ({
   activeNavRect: null,
   activeNavHref: null,
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+  setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),
   toggleMobileMenu: () => set((state) => ({ mobileMenuOpen: !state.mobileMenuOpen })),
   closeMobileMenu: () => set({ mobileMenuOpen: false }),
+  setMobileMenuOpen: (open: boolean) => set({ mobileMenuOpen: open }),
   togglePrepOpen: () => set((state) => ({ prepOpen: !state.prepOpen })),
   toggleExploreOpen: () => set((state) => ({ exploreOpen: !state.exploreOpen })),
   toggleSpacesOpen: () => set((state) => ({ spacesOpen: !state.spacesOpen })),

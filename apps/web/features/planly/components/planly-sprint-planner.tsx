@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Calendar as CalendarIcon,
@@ -36,45 +36,54 @@ export function PlanlySprintPlanner() {
   const { addPoints } = usePlannerStore();
   const catchupData = useSmartCatchup(plan);
 
-  // Independent expand/collapse states for sprints and days
-  const [expandedSprintIds, setExpandedSprintIds] = useState<Record<string, boolean>>({});
-  const [expandedDayIds, setExpandedDayIds] = useState<Record<string, boolean>>({});
-  const hasInitializedRef = useRef(false);
+  // Independent expand/collapse states for sprints and days with localStorage persistence
+  const [expandedSprintIds, setExpandedSprintIds] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const saved = localStorage.getItem("cracksde_planly_expanded_sprints");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [expandedDayIds, setExpandedDayIds] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const saved = localStorage.getItem("cracksde_planly_expanded_days");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
 
   const [isCatchupModalOpen, setIsCatchupModalOpen] = useState(false);
   const [isAdjustPlanModalOpen, setIsAdjustPlanModalOpen] = useState(false);
 
-  // Initialize first expanded sprint and day only once upon initial data load
-  useEffect(() => {
-    if (plan?.sprints && plan.sprints.length > 0 && !hasInitializedRef.current) {
-      hasInitializedRef.current = true;
-      const activeSprint =
-        plan.sprints.find((s) => s.status === "in_progress") || plan.sprints[0];
-
-      setExpandedSprintIds({ [activeSprint.sprintId]: true });
-
-      if (activeSprint.days && activeSprint.days.length > 0) {
-        const activeDay =
-          activeSprint.days.find(
-            (d) => d.status === "in_progress" || (d.tasksCompleted || 0) < (d.tasksTotal || 1)
-          ) || activeSprint.days[0];
-        setExpandedDayIds({ [activeDay.dayId]: true });
-      }
-    }
-  }, [plan]);
-
   const handleToggleSprintExpand = (sprintId: string) => {
-    setExpandedSprintIds((prev) => ({
-      ...prev,
-      [sprintId]: !prev[sprintId],
-    }));
+    setExpandedSprintIds((prev) => {
+      const next = {
+        ...prev,
+        [sprintId]: !prev[sprintId],
+      };
+      try {
+        localStorage.setItem("cracksde_planly_expanded_sprints", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
   const handleToggleDayExpand = (dayId: string) => {
-    setExpandedDayIds((prev) => ({
-      ...prev,
-      [dayId]: !prev[dayId],
-    }));
+    setExpandedDayIds((prev) => {
+      const next = {
+        ...prev,
+        [dayId]: !prev[dayId],
+      };
+      try {
+        localStorage.setItem("cracksde_planly_expanded_days", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
   const handleToggleTaskStatus = (task: StudyTaskDto) => {
