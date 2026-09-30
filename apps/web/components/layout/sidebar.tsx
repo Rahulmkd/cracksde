@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/store/ui-store";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -47,6 +48,17 @@ export function Sidebar() {
     toggleExploreOpen,
     toggleSpacesOpen,
   } = useUIStore();
+  const { user } = useAuth();
+
+  const userInitials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2)
+    : "ME";
+  const displayName = user?.name || "Developer";
 
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
@@ -351,20 +363,34 @@ export function Sidebar() {
 
             {/* Profile Drawer */}
             <div className="flex items-center justify-between rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-1.5">
-              <div className="flex items-center gap-2 overflow-hidden">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30">
-                  RA
+              <Link
+                href="/profile"
+                onClick={handleLinkClick}
+                className="flex items-center gap-2 overflow-hidden flex-1 group hover:opacity-90 transition-opacity"
+              >
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 overflow-hidden">
+                  {user?.image ? (
+                    <img
+                      src={user.image}
+                      alt={displayName}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span>{userInitials}</span>
+                  )}
                 </div>
                 <div className="truncate">
-                  <div className="text-[12px] font-medium text-zinc-100 truncate">Rahul</div>
+                  <div className="text-[12px] font-medium text-zinc-100 truncate group-hover:text-blue-400 transition-colors">
+                    {displayName}
+                  </div>
                   <div className="text-[11px] text-zinc-500 font-normal leading-none">Free Plan</div>
                 </div>
-              </div>
+              </Link>
               <Button
                 asChild
                 size="sm"
                 variant="outline"
-                className="h-5 px-1.5 text-[10px] font-medium border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:scale-95 transition-transform"
+                className="h-5 px-1.5 text-[10px] font-medium border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:scale-95 transition-transform shrink-0"
               >
                 <Link href="/unlock" onClick={handleLinkClick}>
                   <Sparkles className="h-2.5 w-2.5 mr-1 text-amber-400" />
@@ -401,16 +427,24 @@ export function Sidebar() {
             {/* Profile Avatar */}
             <div className="relative group/prof">
               <Link
-                href="/dashboard"
+                href="/profile"
                 onClick={handleLinkClick}
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 cursor-pointer hover:scale-105 hover:border-blue-400 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
-                aria-label="Rahul profile"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 cursor-pointer hover:scale-105 hover:border-blue-400 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 overflow-hidden"
+                aria-label={`${displayName} profile`}
               >
-                RA
+                {user?.image ? (
+                  <img
+                    src={user.image}
+                    alt={displayName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span>{userInitials}</span>
+                )}
               </Link>
               {/* Tooltip */}
               <div className="hidden lg:block absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700/90 text-[11px] font-medium text-zinc-100 shadow-dialog opacity-0 -translate-x-1 group-hover/prof:opacity-100 group-hover/prof:translate-x-0 transition-all duration-150">
-                Rahul (Free Plan)
+                {displayName} (My Profile)
                 <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-zinc-900 border-l border-b border-zinc-700/90" />
               </div>
             </div>

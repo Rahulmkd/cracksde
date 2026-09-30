@@ -22,6 +22,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   itemProgress  UserItemProgress[]
+  profile       UserProfile?
 
   @@map("users")
 }
@@ -68,6 +69,31 @@ model Verification {
   updatedAt  DateTime? @updatedAt
 
   @@map("verifications")
+}
+
+model UserProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique @map("user_id")
+  headline           String?  @db.VarChar(255)
+  bio                String?  @db.Text
+  targetRole         String?  @default("Software Engineer") @map("target_role") @db.VarChar(100)
+  targetCompany      String?  @default("Open to all") @map("target_company") @db.VarChar(100)
+  experience         String?  @default("0 - 2 years") @db.VarChar(50)
+  targetRegion       String?  @default("India") @map("target_region") @db.VarChar(100)
+  preferredLanguage  String?  @default("TypeScript") @map("preferred_language") @db.VarChar(50)
+  dailyGoalMinutes   Int      @default(60) @map("daily_goal_minutes")
+  githubUrl          String?  @map("github_url") @db.VarChar(255)
+  linkedinUrl        String?  @map("linkedin_url") @db.VarChar(255)
+  leetcodeUrl        String?  @map("leetcode_url") @db.VarChar(255)
+  websiteUrl         String?  @map("website_url") @db.VarChar(255)
+  emailNotifications Boolean  @default(true) @map("email_notifications")
+  weeklyDigest       Boolean  @default(true) @map("weekly_digest")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_user_profiles_user_id")
+  @@map("user_profiles")
 }
 
 // =====================================================================

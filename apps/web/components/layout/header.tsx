@@ -5,13 +5,24 @@ import { useRouter } from "next/navigation";
 import { Search, Flame, Menu, Bell } from "lucide-react";
 import { useUIStore } from "@/store/ui-store";
 import { usePlannerStore } from "@/store/planner-store";
+import { useAuth } from "@/hooks/use-auth";
 import { CommandPaletteDialog } from "@/components/search/command-palette-dialog";
 
 export function Header() {
   const { sidebarOpen, toggleSidebar } = useUIStore();
   const { points, streak } = usePlannerStore();
+  const { user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const router = useRouter();
+
+  const userInitials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .substring(0, 2)
+    : "ME";
 
   return (
     <>
@@ -71,12 +82,20 @@ export function Header() {
 
             {/* Profile Avatar */}
             <button
-              onClick={() => router.push("/dashboard")}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-800 bg-blue-600/20 text-[11px] font-semibold text-blue-400 transition-colors hover:border-blue-500/50 hover:bg-blue-600/30"
+              onClick={() => router.push("/profile")}
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-800 bg-blue-600/20 text-[11px] font-semibold text-blue-400 transition-colors hover:border-blue-500/50 hover:bg-blue-600/30 overflow-hidden"
               aria-label="User Profile"
-              title="Rahul Mahakud"
+              title={user?.name ? `${user.name} - View Profile` : "My Profile"}
             >
-              <Bell />
+              {user?.image ? (
+                <img
+                  src={user.image}
+                  alt={user.name || "User"}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span>{userInitials}</span>
+              )}
             </button>
           </div>
         </div>

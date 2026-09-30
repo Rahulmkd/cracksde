@@ -15,6 +15,7 @@ import {
   Play,
   Sparkles,
   Compass,
+  User,
 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 
@@ -156,6 +157,14 @@ export const allSearchEntries: SearchEntry[] = [
   },
 
   // Actions
+  {
+    title: "My Profile & Career Settings",
+    category: "Actions",
+    href: ROUTES.PROFILE,
+    description: "Manage your developer profile, target role, bio, and study stats",
+    icon: User,
+    keywords: ["profile", "account", "settings", "bio", "headline", "target role", "experience", "stats", "streak"],
+  },
   {
     title: "Solve Problem of the Day (+20 pts)",
     category: "Actions",
