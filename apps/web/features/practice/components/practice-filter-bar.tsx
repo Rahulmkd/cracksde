@@ -49,7 +49,7 @@ export function PracticeFilterBar({
   onFilterChange,
 }: PracticeFilterBarProps) {
   return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-3 shadow-subtle">
+    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3 space-y-2.5 shadow-subtle">
       {/* Search Bar - Compact */}
       <div className="relative">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
@@ -64,9 +64,9 @@ export function PracticeFilterBar({
           <button
             type="button"
             onClick={() => setSearchQuery("")}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-0.5"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 p-0.5 transition-colors"
           >
-            <X className="h-3 w-3" />
+            <X className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
@@ -110,7 +110,7 @@ export function PracticeFilterBar({
                 setSelectedPattern(e.target.value);
                 onFilterChange?.();
               }}
-              className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500"
+              className="h-6.5 rounded-md border border-zinc-800 bg-zinc-950/90 px-2 py-0.5 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500/80 transition-colors cursor-pointer"
             >
               <option value="all">All Patterns</option>
               {availablePatterns.map((p) => (
@@ -130,7 +130,7 @@ export function PracticeFilterBar({
                 setSelectedDifficulty(e.target.value);
                 onFilterChange?.();
               }}
-              className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500"
+              className="h-6.5 rounded-md border border-zinc-800 bg-zinc-950/90 px-2 py-0.5 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500/80 transition-colors cursor-pointer"
             >
               <option value="all">All Levels</option>
               <option value="basic">Easy</option>
@@ -148,7 +148,7 @@ export function PracticeFilterBar({
                 setSelectedStatus(e.target.value);
                 onFilterChange?.();
               }}
-              className="rounded-md border border-zinc-800 bg-zinc-950 px-2 py-0.5 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500"
+              className="h-6.5 rounded-md border border-zinc-800 bg-zinc-950/90 px-2 py-0.5 text-[11px] text-zinc-300 focus:outline-none focus:border-blue-500/80 transition-colors cursor-pointer"
             >
               <option value="all">All Status</option>
               <option value="unsolved">Not Solved</option>
@@ -166,7 +166,7 @@ export function PracticeFilterBar({
               variant="ghost"
               size="sm"
               onClick={onClearFilters}
-              className="h-6 px-2 text-[11px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition-colors flex items-center gap-1 ml-0.5"
+              className="h-6.5 px-2 text-[11px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 border border-zinc-800/60 rounded-md transition-colors flex items-center gap-1"
             >
               <RotateCcw className="h-3 w-3 text-zinc-400" />
               <span>Reset</span>

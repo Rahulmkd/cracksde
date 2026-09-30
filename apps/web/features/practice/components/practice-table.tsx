@@ -36,24 +36,35 @@ export function PracticeTable({
   return (
     <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-subtle">
       {/* Table Header */}
-      <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/60 px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wider items-center">
+      <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/70 px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wider items-center select-none">
         <div className="col-span-7 sm:col-span-5">Problem</div>
-        <div className="col-span-3 hidden sm:block">Subject</div>
+        <div className="col-span-2 hidden sm:block">Subject</div>
         <div className="col-span-2 text-center">Difficulty</div>
-        <div className="col-span-1 hidden sm:block text-center">Revision</div>
+        <div className="col-span-2 hidden md:block text-center">Revision</div>
         <div className="col-span-3 sm:col-span-1 text-right pr-2">Action</div>
       </div>
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="divide-y divide-zinc-800/40 p-2 space-y-2">
+        <div className="divide-y divide-zinc-800/40 p-2 space-y-1">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="flex items-center justify-between py-3 px-3">
-              <Skeleton className="h-4 w-64 bg-zinc-800 rounded" />
-              <Skeleton className="h-4 w-32 bg-zinc-800 rounded hidden sm:block" />
-              <Skeleton className="h-4 w-16 bg-zinc-800 rounded" />
-              <Skeleton className="h-4 w-16 bg-zinc-800 rounded hidden sm:block" />
-              <Skeleton className="h-6 w-14 bg-zinc-800 rounded" />
+            <div key={i} className="grid grid-cols-12 gap-3 items-center py-2.5 px-3">
+              <div className="col-span-7 sm:col-span-5 flex items-center gap-2.5">
+                <Skeleton className="h-4 w-4 rounded-full bg-zinc-800 shrink-0" />
+                <Skeleton className="h-4 w-48 bg-zinc-800 rounded" />
+              </div>
+              <div className="col-span-2 hidden sm:block">
+                <Skeleton className="h-4 w-20 bg-zinc-800 rounded" />
+              </div>
+              <div className="col-span-2 flex justify-center">
+                <Skeleton className="h-5 w-14 bg-zinc-800 rounded" />
+              </div>
+              <div className="col-span-2 hidden md:flex justify-center">
+                <Skeleton className="h-4 w-16 bg-zinc-800 rounded" />
+              </div>
+              <div className="col-span-3 sm:col-span-1 flex justify-end">
+                <Skeleton className="h-6 w-14 bg-zinc-800 rounded" />
+              </div>
             </div>
           ))}
         </div>

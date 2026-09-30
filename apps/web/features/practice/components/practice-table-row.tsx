@@ -65,20 +65,20 @@ export function getDifficultyBadge(diff: string) {
   const d = (diff || "Medium").toLowerCase();
   if (d.includes("basic") || d.includes("easy")) {
     return (
-      <Badge variant="success" className="font-medium text-[11px] py-0 px-2">
+      <Badge variant="success" className="font-medium text-[11px] py-0.5 px-2">
         Easy
       </Badge>
     );
   }
   if (d.includes("pro") || d.includes("hard")) {
     return (
-      <Badge variant="destructive" className="font-medium text-[11px] py-0 px-2">
+      <Badge variant="destructive" className="font-medium text-[11px] py-0.5 px-2">
         Hard
       </Badge>
     );
   }
   return (
-    <Badge variant="warning" className="font-medium text-[11px] py-0 px-2">
+    <Badge variant="warning" className="font-medium text-[11px] py-0.5 px-2">
       Medium
     </Badge>
   );
@@ -148,23 +148,25 @@ export function PracticeTableRow({ problem, onOpenProblem }: PracticeTableRowPro
   return (
     <div
       onClick={() => onOpenProblem(problem)}
-      className="grid grid-cols-12 gap-3 items-center px-4 py-3 text-[13px] transition-colors hover:bg-zinc-900/80 cursor-pointer group"
+      className="grid grid-cols-12 gap-3 items-center px-4 py-2.5 text-[13px] transition-colors hover:bg-zinc-900/70 cursor-pointer group select-none border-b border-zinc-800/40 last:border-b-0"
     >
-      {/* 1. Problem Column with checkmark directly beside title */}
-      <div className="col-span-7 sm:col-span-5 flex items-center gap-2 overflow-hidden pr-2">
+      {/* 1. Problem Column with check indicator beside title */}
+      <div className="col-span-7 sm:col-span-5 flex items-center gap-2.5 overflow-hidden pr-2">
         {problem.solved ? (
-          <Check className="h-4 w-4 text-emerald-400 stroke-[2.5] shrink-0" />
+          <div className="h-4 w-4 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0">
+            <Check className="h-2.5 w-2.5 text-emerald-400 stroke-[3]" />
+          </div>
         ) : (
-          <div className="h-4 w-4 shrink-0" />
+          <div className="h-4 w-4 rounded-full border border-zinc-800 bg-zinc-950/60 shrink-0" />
         )}
-        <span className="font-medium text-zinc-100 text-[13px] leading-snug group-hover:text-blue-400 transition-colors truncate">
+        <span className="font-medium text-zinc-200 text-[13px] leading-snug group-hover:text-blue-400 transition-colors truncate">
           {problem.title}
         </span>
       </div>
 
       {/* 2. Subject · Topic Column */}
-      <div className="col-span-3 hidden sm:flex flex-col justify-center min-w-0">
-        <span className="text-[12px] font-medium text-zinc-200 leading-tight">
+      <div className="col-span-2 hidden sm:flex flex-col justify-center min-w-0 pr-1">
+        <span className="text-[12px] font-medium text-zinc-300 leading-tight truncate">
           {getSubjectDisplayName(problem.subjectSlug, problem.subject)}
         </span>
         <span className="text-[11px] text-zinc-500 truncate leading-tight mt-0.5">
@@ -172,13 +174,13 @@ export function PracticeTableRow({ problem, onOpenProblem }: PracticeTableRowPro
         </span>
       </div>
 
-      {/* 3. Difficulty Column (Easy / Medium / Hard only) */}
-      <div className="col-span-2 flex justify-center">
+      {/* 3. Difficulty Column */}
+      <div className="col-span-2 flex justify-center items-center">
         {getDifficultyBadge(problem.difficulty)}
       </div>
 
-      {/* 4. Revision Column (Only timing: Tomorrow, 30 Sep, Today, or —) */}
-      <div className="col-span-1 hidden sm:flex justify-center items-center">
+      {/* 4. Revision Column */}
+      <div className="col-span-2 hidden md:flex justify-center items-center">
         {getRevisionBadge(problem)}
       </div>
 
@@ -191,7 +193,7 @@ export function PracticeTableRow({ problem, onOpenProblem }: PracticeTableRowPro
             e.stopPropagation();
             onOpenProblem(problem);
           }}
-          className="h-6 px-2.5 text-[11px] font-medium border-zinc-800 bg-zinc-900 group-hover:border-blue-500/40 group-hover:text-blue-400"
+          className="h-6 px-2.5 text-[11px] font-medium border-zinc-800 bg-zinc-900/80 text-zinc-300 group-hover:border-blue-500/40 group-hover:text-blue-400 rounded-md transition-colors"
         >
           <span>Solve</span>
           <ChevronRight className="h-3 w-3 ml-0.5" />
