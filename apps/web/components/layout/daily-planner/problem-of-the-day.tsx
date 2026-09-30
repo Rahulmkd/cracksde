@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/constants/routes";
 
 export function ProblemOfTheDay() {
@@ -30,14 +29,15 @@ export function ProblemOfTheDay() {
   const formatDigits = (num: number) => num.toString().padStart(2, "0");
 
   return (
-    <div className="rounded-xl border border-zinc-800/80 bg-[#0c1017] p-4 space-y-3 shadow-sm hover:border-zinc-700/80 transition-all duration-200 select-none">
+    <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-3.5 shadow-subtle hover:border-zinc-700/80 hover:bg-zinc-900/60 transition-all duration-200 select-none">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-[13px] font-bold text-zinc-100">
-          <span className="text-blue-400 text-sm">✦</span>
+        <div className="flex items-center gap-1.5 text-[14px] font-bold text-zinc-100">
           <span>Problem Of The Day</span>
+          <ArrowUpRight className="h-3.5 w-3.5 text-zinc-500" />
         </div>
-        <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-400 font-mono">
-          +20 pts
+        <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-400 font-mono flex items-center gap-1">
+          <span>🟡</span>
+          <span>+20</span>
         </span>
       </div>
 
@@ -53,19 +53,19 @@ export function ProblemOfTheDay() {
       {/* Countdown Display */}
       <div className="flex items-center justify-center gap-2 py-1">
         <div className="flex flex-col items-center">
-          <span className="rounded-md border border-zinc-800/90 bg-[#080c14] px-2.5 py-1 font-mono text-[13px] font-semibold text-zinc-100 shadow-inner">
+          <span className="rounded-lg border border-zinc-800 bg-zinc-950/90 px-3 py-1.5 font-mono text-[14px] font-bold text-zinc-100 shadow-inner min-w-[40px] text-center">
             {formatDigits(timeLeft.hours)}
           </span>
         </div>
-        <span className="text-zinc-500 font-bold text-[12px]">:</span>
+        <span className="text-zinc-500 font-bold text-[13px]">:</span>
         <div className="flex flex-col items-center">
-          <span className="rounded-md border border-zinc-800/90 bg-[#080c14] px-2.5 py-1 font-mono text-[13px] font-semibold text-zinc-100 shadow-inner">
+          <span className="rounded-lg border border-zinc-800 bg-zinc-950/90 px-3 py-1.5 font-mono text-[14px] font-bold text-zinc-100 shadow-inner min-w-[40px] text-center">
             {formatDigits(timeLeft.minutes)}
           </span>
         </div>
-        <span className="text-zinc-500 font-bold text-[12px]">:</span>
+        <span className="text-zinc-500 font-bold text-[13px]">:</span>
         <div className="flex flex-col items-center">
-          <span className="rounded-md border border-zinc-800/90 bg-[#080c14] px-2.5 py-1 font-mono text-[13px] font-semibold text-zinc-100 shadow-inner">
+          <span className="rounded-lg border border-zinc-800 bg-zinc-950/90 px-3 py-1.5 font-mono text-[14px] font-bold text-zinc-100 shadow-inner min-w-[40px] text-center">
             {formatDigits(timeLeft.seconds)}
           </span>
         </div>
@@ -75,7 +75,7 @@ export function ProblemOfTheDay() {
       <Button
         asChild
         size="sm"
-        className="w-full h-8 text-[12px] font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm rounded-lg transition-colors"
+        className="w-full h-9 text-[12px] font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm rounded-xl transition-all active:scale-[0.98]"
       >
         <Link href={`${ROUTES.PRACTICE}?subject=dsa&search=Trapping+Rain+Water`} className="flex items-center justify-center gap-1.5">
           <span>Solve problem</span>

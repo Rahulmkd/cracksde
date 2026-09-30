@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Flame, Menu } from "lucide-react";
+import { Search, Flame, Menu, Bell } from "lucide-react";
 import { useUIStore } from "@/store/ui-store";
 import { usePlannerStore } from "@/store/planner-store";
 import { CommandPaletteDialog } from "@/components/search/command-palette-dialog";
@@ -37,7 +37,9 @@ export function Header() {
               className="flex h-8 items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/60 px-2.5 text-[12px] font-normal text-zinc-400 transition-colors hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-200"
             >
               <Search className="h-3.5 w-3.5 text-zinc-500" />
-              <span className="hidden sm:inline">Search problems, tracks, tools...</span>
+              <span className="hidden sm:inline">
+                Search problems, tracks, tools...
+              </span>
               <span className="sm:hidden">Search</span>
               <kbd className="hidden rounded bg-zinc-800 border border-zinc-700/60 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400 sm:inline">
                 ⌘
@@ -50,7 +52,9 @@ export function Header() {
               title={`${points} CrackSDE Study Points (Earn +15 per task solved)`}
             >
               <span className="text-[12px]">🟡</span>
-              <span className="text-[12px] font-mono font-medium">{points}</span>
+              <span className="text-[12px] font-mono font-medium">
+                {points}
+              </span>
             </div>
 
             {/* Reactive Streak Counter */}
@@ -59,7 +63,9 @@ export function Header() {
               title={`Current Daily Streak: ${streak} days`}
             >
               <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-500 animate-pulse" />
-              <span className="text-[12px] font-mono font-medium">{streak}</span>
+              <span className="text-[12px] font-mono font-medium">
+                {streak}
+              </span>
             </div>
 
             {/* Profile Avatar */}
@@ -69,7 +75,7 @@ export function Header() {
               aria-label="User Profile"
               title="Rahul Mahakud"
             >
-              RA
+              <Bell />
             </button>
           </div>
         </div>

@@ -23,27 +23,30 @@ export function DailyStatsRibbon({
   return (
     <div className="space-y-4 select-none">
       {/* 1. Announcement Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-xl border border-blue-900/40 bg-[#080f20]/90 px-4 py-2.5 text-[12px] text-zinc-300 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-xl border border-zinc-800/80 bg-zinc-900/40 px-4 py-2.5 text-[12px] text-zinc-300 shadow-subtle">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-500/20 text-blue-400 font-semibold text-[10px] shrink-0">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 text-blue-400 font-semibold text-[10px] shrink-0">
             ✦
           </span>
           <p className="truncate text-zinc-300 text-[12px] font-normal leading-normal">
-            <strong className="text-blue-400 font-medium">Sprint {sprintNumber} Active</strong> &middot; Focus: {sprintFocus}
+            <strong className="text-blue-400 font-semibold">Sprint {sprintNumber} Active</strong>
+            <span className="text-zinc-600 mx-1.5">·</span>
+            <span className="text-zinc-300">Focus: {sprintFocus}</span>
           </p>
         </div>
         <Link
           href="/planly"
-          className="shrink-0 text-[12px] font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors self-start sm:self-auto"
+          className="shrink-0 text-[12px] font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors self-start sm:self-auto"
         >
-          View Sprint Schedule <ArrowRight className="h-3 w-3" />
+          <span>View Sprint Schedule</span>
+          <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
       {/* 2. Greeting & Streak Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-0.5">
         <div className="space-y-1">
-          <h1 className="text-[22px] sm:text-[24px] font-bold leading-tight tracking-tight text-zinc-100 flex items-center gap-2">
+          <h1 className="text-[22px] sm:text-[24px] font-bold leading-tight tracking-tight text-white flex items-center gap-2">
             <span>Welcome back, {userName}</span>
             <span className="inline-block text-[20px]">👋</span>
           </h1>
@@ -56,8 +59,8 @@ export function DailyStatsRibbon({
 
         <div className="flex items-center gap-2.5">
           {/* Gamified Points Pill */}
-          <div className="rounded-lg border border-zinc-800/90 bg-[#0c1017] px-3.5 py-1.5 text-[12px] flex items-center gap-2 text-amber-300 font-mono font-medium shadow-sm">
-            <span className="text-[12px]">🟡</span>
+          <div className="rounded-xl border border-zinc-800 bg-zinc-950/80 px-3.5 py-1.5 text-[12px] flex items-center gap-2 text-amber-300 font-mono font-semibold shadow-subtle">
+            <span className="text-[13px]">🟡</span>
             <span>{points} Pts</span>
           </div>
 
@@ -65,7 +68,7 @@ export function DailyStatsRibbon({
           <Button
             asChild
             size="sm"
-            className="h-8 px-3.5 text-[12px] font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm rounded-lg transition-colors active:scale-[0.98]"
+            className="h-9 px-4 text-[13px] font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm rounded-xl transition-all active:scale-[0.98]"
           >
             <Link href="/planly" className="flex items-center gap-1.5">
               <Zap className="h-3.5 w-3.5 fill-current" />

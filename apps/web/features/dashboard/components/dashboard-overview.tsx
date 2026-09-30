@@ -184,9 +184,10 @@ export function DashboardOverview() {
 
           {/* "Your Progress" Section */}
           <div className="space-y-3">
-            <h2 className="text-[16px] font-bold tracking-tight text-zinc-100">
-              Your Progress
-            </h2>
+            <div className="flex items-center gap-2 text-[16px] font-bold tracking-tight text-white">
+              <span className="text-blue-400 text-sm">✦</span>
+              <h2>Your Progress</h2>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <ProgressDonut

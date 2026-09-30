@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ListTodo, Plus, DownloadCloud } from "lucide-react";
+import { ListTodo, Plus } from "lucide-react";
 import { usePlannerStore } from "@/store/planner-store";
-import { useStudyPlan } from "@/hooks/use-study-plan";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ProblemOfTheDay } from "./problem-of-the-day";
@@ -19,8 +18,7 @@ export function DailyPlannerWidget({
   showProblemOfTheDay = true,
   className,
 }: DailyPlannerWidgetProps) {
-  const { tasks, addTask, importTasks, toggleTask, deleteTask } = usePlannerStore();
-  const { plan } = useStudyPlan("crack-sde");
+  const { tasks, addTask, toggleTask, deleteTask } = usePlannerStore();
 
   const [mounted, setMounted] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -48,47 +46,19 @@ export function DailyPlannerWidget({
     toast.info("Task removed");
   };
 
-  // 1-Click Import from Today's Active Sprint
-  const handleImportSprintTasks = () => {
-    const activeSprint =
-      plan?.sprints?.find((s) => s.status === "in_progress") || plan?.sprints?.[0];
-    const activeDay =
-      activeSprint?.days?.find(
-        (d) => d.status === "in_progress" || (d.tasksCompleted || 0) < (d.tasksTotal || 1)
-      ) || activeSprint?.days?.[0];
-    const sprintTasks = activeDay?.tasks || [];
-
-    if (sprintTasks.length === 0) {
-      toast.info("No active sprint tasks found to import.");
-      return;
-    }
-
-    const tasksToImport = sprintTasks.slice(0, 3).map((t) => ({
-      title: t.item?.title || "Sprint Study Topic",
-      duration: `${t.estimatedMinutes || 20}m`,
-      category: t.item?.subjectSlug?.toUpperCase() || "DSA",
-    }));
-
-    const count = importTasks(tasksToImport);
-    if (count > 0) {
-      toast.success(`⚡ Imported ${count} sprint tasks into your Daily Planner!`);
-    } else {
-      toast.info("Today's sprint tasks are already in your planner.");
-    }
-  };
-
   if (!mounted) {
     return (
       <div className={cn("space-y-4", className)}>
         {showProblemOfTheDay && (
-          <div className="rounded-xl border border-zinc-800/80 bg-[#0c1017] p-4 animate-pulse h-36" />
+          <div className="rounded-2xl border border-zinc-800/80 bg-[#0c1017] p-4 animate-pulse h-36" />
         )}
-        <div className="rounded-xl border border-zinc-800/80 bg-[#0c1017] p-4 animate-pulse h-64" />
+        <div className="rounded-2xl border border-zinc-800/80 bg-[#0c1017] p-4 animate-pulse h-64" />
       </div>
     );
   }
 
   const completedCount = tasks.filter((t) => t.completed).length;
+  const progressPercent = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
 
   return (
     <div className={cn("space-y-4 select-none", className)}>
@@ -96,27 +66,42 @@ export function DailyPlannerWidget({
       {showProblemOfTheDay && <ProblemOfTheDay />}
 
       {/* Daily Planner Card */}
-      <div className="rounded-xl border border-zinc-800/80 bg-[#0c1017] p-4 space-y-3 shadow-sm">
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-4 shadow-subtle">
         {/* Planner Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-[13px] font-bold text-zinc-100">
+          <div className="flex items-center gap-2 text-[14px] font-bold text-zinc-100">
             <ListTodo className="h-4 w-4 text-blue-400" />
             <span>Daily Planner</span>
           </div>
-          <span className="text-[11px] font-mono text-zinc-400">
-            {completedCount}/{tasks.length || 3} done
-          </span>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono text-zinc-400 bg-zinc-950/80 border border-zinc-800 px-2 py-0.5 rounded-md">
+              {completedCount}/{tasks.length} done
+            </span>
+            {!isAddingTask && (
+              <button
+                type="button"
+                onClick={() => setIsAddingTask(true)}
+                className="h-6 w-6 rounded-md bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:text-blue-400 text-zinc-400 flex items-center justify-center transition-colors"
+                title="Add task"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* 1-Click Import Sprint Tasks Button */}
-        <button
-          type="button"
-          onClick={handleImportSprintTasks}
-          className="w-full rounded-lg border border-blue-500/20 bg-blue-950/20 hover:bg-blue-900/30 hover:border-blue-500/40 py-2 px-3 text-[11px] font-medium text-blue-300 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
-        >
-          <DownloadCloud className="h-3.5 w-3.5 text-blue-400" />
-          <span>+ Import Today&apos;s Sprint Tasks</span>
-        </button>
+        {/* Progress Bar (Visible when tasks exist) */}
+        {tasks.length > 0 && (
+          <div className="space-y-1">
+            <div className="h-1.5 w-full rounded-full bg-zinc-800/80 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-emerald-500 transition-all duration-500 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Inline Add Task Form */}
         {isAddingTask && (
@@ -135,13 +120,14 @@ export function DailyPlannerWidget({
         />
 
         {/* Bottom "+ Add custom task" Button */}
-        {!isAddingTask && (
+        {!isAddingTask && tasks.length > 0 && (
           <button
             type="button"
             onClick={() => setIsAddingTask(true)}
-            className="w-full py-1 text-[12px] font-medium text-zinc-400 hover:text-zinc-200 flex items-center justify-center gap-1.5 transition-colors"
+            className="w-full py-2 rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 hover:bg-zinc-900/60 hover:border-zinc-700 text-[12px] font-medium text-zinc-400 hover:text-blue-400 flex items-center justify-center gap-1.5 transition-all"
           >
-            <span>+ + Add custom task</span>
+            <Plus className="h-3.5 w-3.5" />
+            <span>Add task</span>
           </button>
         )}
       </div>
