@@ -8,3 +8,4 @@ export * from "./components/profile-subject-progress";
 export * from "./components/profile-activity-list";
 export * from "./components/profile-edit-form";
 export * from "./components/profile-skeleton";
+export * from "./components/delete-account-dialog";

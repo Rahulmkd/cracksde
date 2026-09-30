@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/features/profile/hooks/use-profile";
+import { DeleteAccountDialog } from "@/features/profile";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,8 @@ import {
   LogOut,
   User,
   Sparkles,
+  Trash2,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -25,6 +28,7 @@ export default function AccountPage() {
   const { user, session, signOut } = useAuth();
   const { data } = useProfile();
   const router = useRouter();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleSignOutAll = async () => {
     try {
@@ -205,6 +209,53 @@ export default function AccountPage() {
           </Button>
         </CardFooter>
       </Card>
+
+      {/* Danger Zone */}
+      <Card className="border-rose-950/60 bg-rose-950/10">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-base font-semibold text-rose-400 flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4 text-rose-400" />
+                Danger Zone
+              </CardTitle>
+              <p className="text-xs text-zinc-400 font-normal">
+                Irreversible actions regarding your account and stored progress
+              </p>
+            </div>
+            <Badge variant="outline" className="border-rose-500/30 text-rose-400 bg-rose-500/10 text-[10px]">
+              Irreversible
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-rose-900/40 bg-zinc-950/60">
+            <div className="space-y-1">
+              <h3 className="text-xs font-semibold text-zinc-200">
+                Permanently Delete CrackSDE Account
+              </h3>
+              <p className="text-[11px] text-zinc-400 max-w-xl leading-relaxed">
+                Delete your account and all associated data, including solved interview problems, streak history, study analytics, and active login sessions. Once deleted, this data cannot be recovered.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="h-8 text-xs font-medium border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all flex-shrink-0 gap-1.5"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete Account
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Delete Account Confirmation Dialog Modal */}
+      <DeleteAccountDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
     </div>
   );
 }

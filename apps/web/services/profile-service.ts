@@ -39,4 +39,15 @@ export const profileService = {
     }
     return res.data;
   },
+
+  /**
+   * Permanently delete user account and progress
+   */
+  async deleteAccount(): Promise<{ success: boolean; message?: string }> {
+    const res = await api.delete<ApiResponse<{ deleted: boolean }>>("/api/profile/account");
+    if (!res.success) {
+      throw new Error(res.error || "Failed to delete account");
+    }
+    return { success: true, message: res.message };
+  },
 };

@@ -58,4 +58,22 @@ export class ProfileController {
       next(error);
     }
   }
+
+  /**
+   * DELETE /api/profile/account or DELETE /api/profile
+   * Permanently deletes current user's account and progress
+   */
+  static async deleteAccount(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const user = await getAuthenticatedUser(req);
+      if (!user) {
+        throw new UnauthorizedError("Authentication required to delete account");
+      }
+
+      const result = await ProfileService.deleteAccount(user.id);
+      sendSuccess(res, result, 200, result.message);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
