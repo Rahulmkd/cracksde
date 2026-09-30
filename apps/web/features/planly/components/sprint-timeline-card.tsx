@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ChevronDown, Circle } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMinutes } from "@/lib/formatters";
 import { DayTaskDrawer } from "./day-task-drawer";
@@ -10,7 +10,7 @@ import type { StudySprintDto, StudyTaskDto } from "@starter/shared";
 interface SprintTimelineCardProps {
   sprint: StudySprintDto;
   isExpanded: boolean;
-  expandedDayId: string;
+  expandedDayIds: Record<string, boolean>;
   onToggleSprintExpand: () => void;
   onToggleDayExpand: (dayId: string) => void;
   onToggleTaskStatus: (task: StudyTaskDto) => void;
@@ -20,7 +20,7 @@ interface SprintTimelineCardProps {
 export function SprintTimelineCard({
   sprint,
   isExpanded,
-  expandedDayId,
+  expandedDayIds,
   onToggleSprintExpand,
   onToggleDayExpand,
   onToggleTaskStatus,
@@ -46,27 +46,37 @@ export function SprintTimelineCard({
   const formattedEst = formatMinutes(totalMinutes);
 
   return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-4 space-y-3.5 shadow-subtle overflow-hidden">
+    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-3.5 space-y-3 shadow-subtle overflow-hidden">
       {/* Sprint Header Row */}
       <div
         onClick={onToggleSprintExpand}
-        className="flex items-center justify-between gap-3 cursor-pointer select-none group"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onToggleSprintExpand();
+          }
+        }}
+        className="flex items-center justify-between gap-3 cursor-pointer select-none group p-1 -m-1 rounded-lg hover:bg-zinc-800/30 active:bg-zinc-800/50 transition-colors"
+        aria-expanded={isExpanded}
+        aria-label={`Toggle Sprint ${sprint.sprintNo}`}
       >
         {/* Left: Radio circle + Sprint badge + Status */}
-        <div className="flex items-center gap-3">
-          <div className="w-4 h-4 rounded-full border border-zinc-700 bg-zinc-950 flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-3.5 h-3.5 rounded-full border border-zinc-700 bg-zinc-950 flex items-center justify-center shrink-0">
             {isCompleted ? (
-              <div className="w-2 h-2 rounded-full bg-emerald-400" />
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
             ) : isInProgress ? (
-              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
             ) : null}
           </div>
 
-          <div className="rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 font-semibold px-3 py-0.5 text-xs font-mono">
+          <div className="rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 font-semibold px-2.5 py-0.5 text-[11px] font-mono">
             Sprint {sprint.sprintNo}
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs font-medium text-blue-400">
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-blue-400">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
             <span>
               {isCompleted ? "Completed" : isInProgress ? "In Progress" : "Upcoming"}
@@ -75,7 +85,7 @@ export function SprintTimelineCard({
         </div>
 
         {/* Right: Est. time · Time spent & Chevron toggle */}
-        <div className="flex items-center gap-3 text-xs text-zinc-400 font-mono">
+        <div className="flex items-center gap-2.5 text-[11px] text-zinc-400 font-mono">
           <span className="hidden sm:inline text-zinc-400">
             Est. {formattedEst} &middot; Time spent : {formattedSpent}
           </span>
@@ -85,7 +95,7 @@ export function SprintTimelineCard({
 
           <ChevronDown
             className={cn(
-              "h-4 w-4 text-zinc-500 transition-transform duration-200 group-hover:text-zinc-300",
+              "h-3.5 w-3.5 text-zinc-500 transition-transform duration-200 group-hover:text-zinc-200",
               isExpanded && "rotate-180 text-zinc-200"
             )}
           />
@@ -94,22 +104,20 @@ export function SprintTimelineCard({
 
       {/* Indented Tree Structure (Sprint -> Days -> Topics) */}
       {isExpanded && (
-        <div className="relative border-l-2 border-blue-500/25 ml-2 pl-2 pt-1 pb-1 space-y-3 animate-in fade-in-0 duration-150">
+        <div className="relative border-l-2 border-blue-500/25 ml-1.5 pl-2 pt-0.5 pb-0.5 space-y-2.5 animate-in fade-in-0 duration-150">
           {days.length > 0 ? (
             days.map((day) => (
               <DayTaskDrawer
                 key={day.dayId}
                 day={day}
-                isExpanded={expandedDayId === day.dayId}
-                onToggleExpand={() =>
-                  onToggleDayExpand(expandedDayId === day.dayId ? "" : day.dayId)
-                }
+                isExpanded={Boolean(expandedDayIds[day.dayId])}
+                onToggleExpand={() => onToggleDayExpand(day.dayId)}
                 onToggleTaskStatus={onToggleTaskStatus}
                 isUpdatingTask={isUpdatingTask}
               />
             ))
           ) : (
-            <div className="py-4 text-center text-xs text-zinc-500 italic">
+            <div className="py-3 text-center text-[11px] text-zinc-500 italic">
               No day intervals assigned for this sprint.
             </div>
           )}

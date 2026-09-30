@@ -58,55 +58,63 @@ export function SprintMetricsPanel({ plan }: SprintMetricsPanelProps) {
   const estYear = !isNaN(estEndDate.getTime()) ? estEndDate.getFullYear() : "2026";
 
   return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-subtle select-none">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 divide-y lg:divide-y-0 sm:divide-x-0">
+    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 shadow-subtle select-none">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {/* Metric 1: Overall Progress */}
-        <div className="space-y-1.5 pt-2 first:pt-0 lg:pt-0">
+        <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-zinc-400">
-            <TrendingUp className="h-3.5 w-3.5 text-zinc-400" />
+            <TrendingUp className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
             <span className="text-[11px] font-medium tracking-tight">Overall progress</span>
           </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-xl font-bold font-mono text-zinc-100">{progressPercent} %</span>
-            <span className="text-xs text-zinc-500 font-mono">
+          <div className="flex items-baseline gap-1">
+            <span className="text-[18px] sm:text-[20px] font-bold font-mono text-zinc-100 leading-none">
+              {progressPercent} %
+            </span>
+            <span className="text-[11px] text-zinc-500 font-mono">
               {completedDays} / {totalDays} days
             </span>
           </div>
         </div>
 
         {/* Metric 2: Time Spent */}
-        <div className="space-y-1.5 pt-2 lg:pt-0">
+        <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-zinc-400">
-            <Clock className="h-3.5 w-3.5 text-zinc-400" />
+            <Clock className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
             <span className="text-[11px] font-medium tracking-tight">Time spent</span>
           </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-xl font-bold font-mono text-zinc-100">{timeSpentStr}</span>
-            <span className="text-xs text-zinc-500 font-mono">of {totalTimeStr}</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-[18px] sm:text-[20px] font-bold font-mono text-zinc-100 leading-none">
+              {timeSpentStr}
+            </span>
+            <span className="text-[11px] text-zinc-500 font-mono">of {totalTimeStr}</span>
           </div>
         </div>
 
         {/* Metric 3: Sprints Completed */}
-        <div className="space-y-1.5 pt-2 lg:pt-0">
+        <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-zinc-400">
-            <Layers className="h-3.5 w-3.5 text-zinc-400" />
+            <Layers className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
             <span className="text-[11px] font-medium tracking-tight">Sprints completed</span>
           </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-xl font-bold font-mono text-zinc-100">{completedSprints}</span>
-            <span className="text-xs text-zinc-500 font-mono">of {totalSprints} sprints</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-[18px] sm:text-[20px] font-bold font-mono text-zinc-100 leading-none">
+              {completedSprints}
+            </span>
+            <span className="text-[11px] text-zinc-500 font-mono">of {totalSprints} sprints</span>
           </div>
         </div>
 
         {/* Metric 4: Est. Completion */}
-        <div className="space-y-1.5 pt-2 lg:pt-0">
+        <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-zinc-400">
-            <Calendar className="h-3.5 w-3.5 text-zinc-400" />
+            <Calendar className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
             <span className="text-[11px] font-medium tracking-tight">Est. completion</span>
           </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-xl font-bold font-mono text-zinc-100">{estDayMonth}</span>
-            <span className="text-xs text-zinc-500 font-mono">{estYear}</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-[18px] sm:text-[20px] font-bold font-mono text-zinc-100 leading-none">
+              {estDayMonth}
+            </span>
+            <span className="text-[11px] text-zinc-500 font-mono">{estYear}</span>
           </div>
         </div>
       </div>

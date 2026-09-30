@@ -30,41 +30,49 @@ export function DayTaskDrawer({
     233; // ~3h 53m
 
   return (
-    <div className="relative pl-6 space-y-2">
+    <div className="relative pl-5 space-y-1.5">
       {/* Day Header Trigger */}
       <div
         onClick={onToggleExpand}
-        className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-zinc-900/40 cursor-pointer select-none group transition-colors -ml-2"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onToggleExpand();
+          }
+        }}
+        className="flex items-center justify-between py-1 px-2 rounded-lg hover:bg-zinc-900/60 active:bg-zinc-900/80 cursor-pointer select-none group transition-colors -ml-1.5"
+        aria-expanded={isExpanded}
+        aria-label={`Toggle Day ${dayNumber}`}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           {/* Day Tree Node Icon */}
-          <button
-            type="button"
+          <div
             className={cn(
-              "w-5 h-5 rounded-full border border-blue-500/50 bg-zinc-950 flex items-center justify-center text-blue-400 shrink-0 transition-colors shadow-xs group-hover:border-blue-400",
-              isExpanded && "bg-blue-600/10 text-blue-300"
+              "w-4.5 h-4.5 rounded-full border border-blue-500/40 bg-zinc-950 flex items-center justify-center text-blue-400 shrink-0 transition-colors shadow-xs group-hover:border-blue-400",
+              isExpanded && "bg-blue-600/15 text-blue-300 border-blue-400"
             )}
-            aria-label={`Toggle Day ${dayNumber}`}
           >
             {isExpanded ? (
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className="h-2.5 w-2.5" />
             ) : (
-              <ChevronRight className="h-3 w-3" />
+              <ChevronRight className="h-2.5 w-2.5" />
             )}
-          </button>
+          </div>
 
-          <span className="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors">
+          <span className="text-[13px] font-semibold text-zinc-100 group-hover:text-white transition-colors">
             Day {dayNumber}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-zinc-400">
+          <span className="text-[11px] font-mono text-zinc-400">
             Est. {formatMinutes(totalMinutes)}
           </span>
           <ChevronRight
             className={cn(
-              "h-3.5 w-3.5 text-zinc-600 group-hover:text-zinc-400 transition-transform duration-150",
+              "h-3 w-3 text-zinc-600 group-hover:text-zinc-300 transition-transform duration-150",
               isExpanded && "rotate-90 text-zinc-300"
             )}
           />
@@ -73,7 +81,7 @@ export function DayTaskDrawer({
 
       {/* Tasks List (indented under Day) */}
       {isExpanded && (
-        <div className="relative border-l border-zinc-800/80 ml-0.5 pl-3 py-1 space-y-0.5 animate-in fade-in-50 duration-150">
+        <div className="relative border-l border-zinc-800/80 ml-0.5 pl-2.5 py-0.5 space-y-0.5 animate-in fade-in-50 duration-150">
           {tasks.length > 0 ? (
             tasks.map((task) => (
               <TaskItemRow
@@ -84,7 +92,7 @@ export function DayTaskDrawer({
               />
             ))
           ) : (
-            <div className="py-2 text-xs text-zinc-500 italic pl-3">
+            <div className="py-2 text-[11px] text-zinc-500 italic pl-2.5">
               No topics scheduled for this day yet.
             </div>
           )}
