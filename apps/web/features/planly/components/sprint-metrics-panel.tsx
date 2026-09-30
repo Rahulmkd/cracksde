@@ -1,32 +1,15 @@
 "use client";
 
 import React from "react";
-import {
-  CalendarDays,
-  CheckCircle2,
-  Clock,
-  Sparkles,
-  Zap,
-  RotateCcw,
-  Settings2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { TrendingUp, Clock, Layers, Calendar } from "lucide-react";
 import { formatMinutes } from "@/lib/formatters";
 import type { StudyPlanDto } from "@starter/shared";
 
 interface SprintMetricsPanelProps {
   plan?: StudyPlanDto;
-  onOpenCatchupModal: () => void;
-  onOpenAdjustPlanModal: () => void;
 }
 
-export function SprintMetricsPanel({
-  plan,
-  onOpenCatchupModal,
-  onOpenAdjustPlanModal,
-}: SprintMetricsPanelProps) {
+export function SprintMetricsPanel({ plan }: SprintMetricsPanelProps) {
   const sprints = plan?.sprints || [];
   const allDays = sprints.flatMap((s) => s.days || []);
   const allTasks = allDays.flatMap((d) => d.tasks || []);
@@ -37,86 +20,94 @@ export function SprintMetricsPanel({
   const progressPercent =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const totalDays = plan?.totalDays ?? (allDays.length || 61);
+  const totalDays = plan?.totalDays ?? (allDays.length || 56);
   const completedDays =
     plan?.completedDays ??
     allDays.filter((d) => (d.tasksCompleted || 0) >= (d.tasksTotal || 1) && (d.tasksTotal || 0) > 0)
       .length;
 
+  // Time calculations
+  const totalMinutes =
+    plan?.totalEstimatedMinutes ||
+    allTasks.reduce((acc, t) => acc + (t.estimatedMinutes || 20), 0) ||
+    16253; // ~270h 53m
+  const completedMinutes =
+    plan?.completedEstimatedMinutes ||
+    allTasks
+      .filter((t) => t.status === "completed")
+      .reduce((acc, t) => acc + (t.actualMinutes || t.estimatedMinutes || 20), 0) ||
+    0;
+
+  const timeSpentStr = formatMinutes(completedMinutes);
+  const totalTimeStr = formatMinutes(totalMinutes);
+
+  // Sprints calculation
+  const totalSprints = sprints.length || 9;
+  const completedSprints =
+    plan?.completedSprints ?? sprints.filter((s) => s.status === "completed").length;
+
+  // Est. Completion Date calculation
+  const baseStartDate = plan?.startDate ? new Date(plan.startDate) : new Date(2026, 9, 1);
+  const estEndDate = plan?.targetDate
+    ? new Date(plan.targetDate)
+    : new Date(baseStartDate.getTime() + totalDays * 24 * 60 * 60 * 1000);
+
+  const estDayMonth = !isNaN(estEndDate.getTime())
+    ? estEndDate.toLocaleDateString("en-US", { day: "numeric", month: "short" })
+    : "30 Nov";
+  const estYear = !isNaN(estEndDate.getTime()) ? estEndDate.getFullYear() : "2026";
+
   return (
-    <div className="space-y-4 select-none">
-      {/* Overview Cards Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="p-4 border-zinc-800/80 bg-zinc-900/40 space-y-1.5">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Overall Progress</span>
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 shadow-subtle select-none">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 divide-y lg:divide-y-0 sm:divide-x-0">
+        {/* Metric 1: Overall Progress */}
+        <div className="space-y-1.5 pt-2 first:pt-0 lg:pt-0">
+          <div className="flex items-center gap-1.5 text-zinc-400">
+            <TrendingUp className="h-3.5 w-3.5 text-zinc-400" />
+            <span className="text-[11px] font-medium tracking-tight">Overall progress</span>
           </div>
-          <div className="text-[20px] font-bold text-zinc-100 font-mono">
-            {progressPercent}%
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl font-bold font-mono text-zinc-100">{progressPercent} %</span>
+            <span className="text-xs text-zinc-500 font-mono">
+              {completedDays} / {totalDays} days
+            </span>
           </div>
-          <Progress value={progressPercent} className="h-1" />
-        </Card>
-
-        <Card className="p-4 border-zinc-800/80 bg-zinc-900/40 space-y-1.5">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Tasks Solved</span>
-            <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-          </div>
-          <div className="text-[20px] font-bold text-zinc-100 font-mono">
-            {completedTasks}/{totalTasks}
-          </div>
-          <p className="text-[10px] text-zinc-500 font-mono">{totalTasks - completedTasks} remaining</p>
-        </Card>
-
-        <Card className="p-4 border-zinc-800/80 bg-zinc-900/40 space-y-1.5">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Sprint Days</span>
-            <CalendarDays className="h-3.5 w-3.5 text-purple-400" />
-          </div>
-          <div className="text-[20px] font-bold text-zinc-100 font-mono">
-            {completedDays}/{totalDays}
-          </div>
-          <p className="text-[10px] text-zinc-500 font-mono">{totalDays - completedDays} days left</p>
-        </Card>
-
-        <Card className="p-4 border-zinc-800/80 bg-zinc-900/40 space-y-1.5">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Daily Target</span>
-            <Clock className="h-3.5 w-3.5 text-amber-400" />
-          </div>
-          <div className="text-[20px] font-bold text-zinc-100 font-mono">
-            {plan?.dailyHours || 4}h/day
-          </div>
-          <p className="text-[10px] text-zinc-500 font-mono">Role Paced</p>
-        </Card>
-      </div>
-
-      {/* Quick Action Ribbon */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border border-zinc-800/80 bg-zinc-900/30">
-        <div className="flex items-center gap-2 text-xs text-zinc-300">
-          <Zap className="h-3.5 w-3.5 text-amber-400" />
-          <span>Fell behind schedule? Use smart catch-up to redistribute tasks.</span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onOpenCatchupModal}
-            className="h-7 text-xs font-medium border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
-          >
-            <RotateCcw className="h-3 w-3 mr-1" /> Smart Catch-Up Mode
-          </Button>
+        {/* Metric 2: Time Spent */}
+        <div className="space-y-1.5 pt-2 lg:pt-0">
+          <div className="flex items-center gap-1.5 text-zinc-400">
+            <Clock className="h-3.5 w-3.5 text-zinc-400" />
+            <span className="text-[11px] font-medium tracking-tight">Time spent</span>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl font-bold font-mono text-zinc-100">{timeSpentStr}</span>
+            <span className="text-xs text-zinc-500 font-mono">of {totalTimeStr}</span>
+          </div>
+        </div>
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onOpenAdjustPlanModal}
-            className="h-7 text-xs font-medium border-zinc-800 bg-zinc-900 text-zinc-300 hover:bg-zinc-800"
-          >
-            <Settings2 className="h-3 w-3 mr-1" /> Adjust Plan
-          </Button>
+        {/* Metric 3: Sprints Completed */}
+        <div className="space-y-1.5 pt-2 lg:pt-0">
+          <div className="flex items-center gap-1.5 text-zinc-400">
+            <Layers className="h-3.5 w-3.5 text-zinc-400" />
+            <span className="text-[11px] font-medium tracking-tight">Sprints completed</span>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl font-bold font-mono text-zinc-100">{completedSprints}</span>
+            <span className="text-xs text-zinc-500 font-mono">of {totalSprints} sprints</span>
+          </div>
+        </div>
+
+        {/* Metric 4: Est. Completion */}
+        <div className="space-y-1.5 pt-2 lg:pt-0">
+          <div className="flex items-center gap-1.5 text-zinc-400">
+            <Calendar className="h-3.5 w-3.5 text-zinc-400" />
+            <span className="text-[11px] font-medium tracking-tight">Est. completion</span>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl font-bold font-mono text-zinc-100">{estDayMonth}</span>
+            <span className="text-xs text-zinc-500 font-mono">{estYear}</span>
+          </div>
         </div>
       </div>
     </div>

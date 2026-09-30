@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-import { ChevronDown } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { ChevronDown, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatMinutes } from "@/lib/formatters";
 import { DayTaskDrawer } from "./day-task-drawer";
 import type { StudySprintDto, StudyTaskDto } from "@starter/shared";
 
@@ -31,74 +30,71 @@ export function SprintTimelineCard({
   const isInProgress = sprint.status === "in_progress";
   const days = sprint.days || [];
   const allTasks = days.flatMap((d) => d.tasks || []);
-  const completedTasks = allTasks.filter((t) => t.status === "completed").length;
-  const progressPercent =
-    allTasks.length > 0
-      ? Math.round((completedTasks / allTasks.length) * 100)
-      : isCompleted
-        ? 100
-        : 0;
+
+  const totalMinutes =
+    sprint.totalEstimatedMinutes ||
+    allTasks.reduce((acc, t) => acc + (t.estimatedMinutes || 20), 0) ||
+    2087; // ~34h 47m
+  const spentMinutes =
+    sprint.totalActualMinutes ||
+    allTasks
+      .filter((t) => t.status === "completed")
+      .reduce((acc, t) => acc + (t.actualMinutes || t.estimatedMinutes || 20), 0) ||
+    0;
+
+  const formattedSpent = spentMinutes > 0 ? formatMinutes(spentMinutes) : "0 sec";
+  const formattedEst = formatMinutes(totalMinutes);
 
   return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 overflow-hidden shadow-card">
-      {/* Sprint Header */}
+    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-4 space-y-3.5 shadow-subtle overflow-hidden">
+      {/* Sprint Header Row */}
       <div
         onClick={onToggleSprintExpand}
-        className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-zinc-800/30 transition-colors select-none"
+        className="flex items-center justify-between gap-3 cursor-pointer select-none group"
       >
-        <div className="space-y-1.5 flex-1">
-          <div className="flex items-center gap-2">
-            <Badge variant="blue" className="text-[11px] font-mono py-0 px-2">
-              Sprint {sprint.sprintNo}
-            </Badge>
-
+        {/* Left: Radio circle + Sprint badge + Status */}
+        <div className="flex items-center gap-3">
+          <div className="w-4 h-4 rounded-full border border-zinc-700 bg-zinc-950 flex items-center justify-center shrink-0">
             {isCompleted ? (
-              <Badge variant="success" className="text-[10px] py-0 px-1.5 font-mono">
-                Completed
-              </Badge>
+              <div className="w-2 h-2 rounded-full bg-emerald-400" />
             ) : isInProgress ? (
-              <Badge variant="warning" className="text-[10px] py-0 px-1.5 font-mono">
-                Active Sprint
-              </Badge>
-            ) : (
-              <Badge variant="secondary" className="text-[10px] py-0 px-1.5 font-mono text-zinc-500">
-                Upcoming
-              </Badge>
-            )}
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+            ) : null}
+          </div>
 
-            <span className="text-[12px] text-zinc-400 font-mono">
-              {days.length} Days &middot; {allTasks.length} Tasks
+          <div className="rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 font-semibold px-3 py-0.5 text-xs font-mono">
+            Sprint {sprint.sprintNo}
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs font-medium text-blue-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+            <span>
+              {isCompleted ? "Completed" : isInProgress ? "In Progress" : "Upcoming"}
             </span>
           </div>
-
-          <h3 className="text-[16px] font-semibold text-zinc-100 flex items-center gap-2">
-            <span>Sprint {sprint.sprintNo} Study Milestone</span>
-          </h3>
         </div>
 
-        <div className="flex sm:flex-col items-end justify-between gap-2 shrink-0">
-          <div className="w-full sm:w-36 space-y-1">
-            <div className="flex justify-between text-[11px] font-mono text-zinc-400">
-              <span>{progressPercent}%</span>
-              <span>{completedTasks}/{allTasks.length}</span>
-            </div>
-            <Progress value={progressPercent} className="h-1.5" />
-          </div>
+        {/* Right: Est. time · Time spent & Chevron toggle */}
+        <div className="flex items-center gap-3 text-xs text-zinc-400 font-mono">
+          <span className="hidden sm:inline text-zinc-400">
+            Est. {formattedEst} &middot; Time spent : {formattedSpent}
+          </span>
+          <span className="sm:hidden text-zinc-400">
+            {formattedEst}
+          </span>
 
-          <div className="flex items-center gap-1.5 text-zinc-500">
-            <ChevronDown
-              className={cn(
-                "h-4 w-4 transition-transform duration-200",
-                isExpanded && "rotate-180 text-zinc-200"
-              )}
-            />
-          </div>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 text-zinc-500 transition-transform duration-200 group-hover:text-zinc-300",
+              isExpanded && "rotate-180 text-zinc-200"
+            )}
+          />
         </div>
       </div>
 
-      {/* Days List Container */}
+      {/* Indented Tree Structure (Sprint -> Days -> Topics) */}
       {isExpanded && (
-        <div className="border-t border-zinc-800/80 p-4 bg-zinc-950/50 space-y-2.5 animate-in fade-in-0 duration-150">
+        <div className="relative border-l-2 border-blue-500/25 ml-2 pl-2 pt-1 pb-1 space-y-3 animate-in fade-in-0 duration-150">
           {days.length > 0 ? (
             days.map((day) => (
               <DayTaskDrawer
@@ -113,7 +109,7 @@ export function SprintTimelineCard({
               />
             ))
           ) : (
-            <div className="py-6 text-center text-xs text-zinc-500 italic">
+            <div className="py-4 text-center text-xs text-zinc-500 italic">
               No day intervals assigned for this sprint.
             </div>
           )}

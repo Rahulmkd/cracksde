@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { ChevronDown, CheckCircle2, Circle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMinutes } from "@/lib/formatters";
 import { TaskItemRow } from "./task-item-row";
@@ -23,65 +22,60 @@ export function DayTaskDrawer({
   onToggleTaskStatus,
   isUpdatingTask,
 }: DayTaskDrawerProps) {
-  const isCompleted = (day.tasksCompleted || 0) >= (day.tasksTotal || 1) && (day.tasksTotal || 0) > 0;
-  const isInProgress = day.status === "in_progress" || ((day.tasksCompleted || 0) > 0 && !isCompleted);
+  const dayNumber = day.planDayNo || day.sprintDayNo || 1;
+  const tasks = day.tasks || [];
+  const totalMinutes =
+    day.estimatedMinutes ||
+    tasks.reduce((acc, t) => acc + (t.estimatedMinutes || 20), 0) ||
+    233; // ~3h 53m
 
   return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 overflow-hidden shadow-subtle">
+    <div className="relative pl-6 space-y-2">
       {/* Day Header Trigger */}
-      <button
-        type="button"
+      <div
         onClick={onToggleExpand}
-        className="w-full flex items-center justify-between p-3 text-left hover:bg-zinc-800/40 transition-colors select-none"
+        className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-zinc-900/40 cursor-pointer select-none group transition-colors -ml-2"
       >
         <div className="flex items-center gap-2.5">
-          {isCompleted ? (
-            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-          ) : isInProgress ? (
-            <div className="h-4 w-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin shrink-0" />
-          ) : (
-            <Circle className="h-4 w-4 text-zinc-600 shrink-0" />
-          )}
+          {/* Day Tree Node Icon */}
+          <button
+            type="button"
+            className={cn(
+              "w-5 h-5 rounded-full border border-blue-500/50 bg-zinc-950 flex items-center justify-center text-blue-400 shrink-0 transition-colors shadow-xs group-hover:border-blue-400",
+              isExpanded && "bg-blue-600/10 text-blue-300"
+            )}
+            aria-label={`Toggle Day ${dayNumber}`}
+          >
+            {isExpanded ? (
+              <ChevronDown className="h-3 w-3" />
+            ) : (
+              <ChevronRight className="h-3 w-3" />
+            )}
+          </button>
 
-          <div>
-            <div className="text-[13px] font-semibold text-zinc-100 flex items-center gap-2">
-              <span>Day {day.planDayNo || day.sprintDayNo}</span>
-            </div>
-            <div className="text-[11px] text-zinc-500 font-mono">
-              {day.tasksCompleted || 0}/{day.tasksTotal || 0} tasks &middot; {formatMinutes(day.estimatedMinutes || 120)}
-            </div>
-          </div>
+          <span className="text-sm font-semibold text-zinc-100 group-hover:text-white transition-colors">
+            Day {dayNumber}
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
-          {isCompleted ? (
-            <Badge variant="success" className="text-[10px] py-0 px-1.5 font-mono">
-              Completed
-            </Badge>
-          ) : isInProgress ? (
-            <Badge variant="blue" className="text-[10px] py-0 px-1.5 font-mono">
-              In Progress
-            </Badge>
-          ) : (
-            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 font-mono text-zinc-500">
-              Upcoming
-            </Badge>
-          )}
-
-          <ChevronDown
+          <span className="text-xs font-mono text-zinc-400">
+            Est. {formatMinutes(totalMinutes)}
+          </span>
+          <ChevronRight
             className={cn(
-              "h-4 w-4 text-zinc-500 transition-transform duration-200",
-              isExpanded && "rotate-180 text-zinc-200"
+              "h-3.5 w-3.5 text-zinc-600 group-hover:text-zinc-400 transition-transform duration-150",
+              isExpanded && "rotate-90 text-zinc-300"
             )}
           />
         </div>
-      </button>
+      </div>
 
-      {/* Accordion Tasks Content */}
+      {/* Tasks List (indented under Day) */}
       {isExpanded && (
-        <div className="border-t border-zinc-800/60 p-3 bg-zinc-950/40 space-y-2 animate-in fade-in-0 duration-150">
-          {(day.tasks && day.tasks.length > 0) ? (
-            day.tasks.map((task) => (
+        <div className="relative border-l border-zinc-800/80 ml-0.5 pl-3 py-1 space-y-0.5 animate-in fade-in-50 duration-150">
+          {tasks.length > 0 ? (
+            tasks.map((task) => (
               <TaskItemRow
                 key={task.taskId}
                 task={task}
@@ -90,8 +84,8 @@ export function DayTaskDrawer({
               />
             ))
           ) : (
-            <div className="py-4 text-center text-xs text-zinc-500 italic">
-              No specific tasks assigned for this day yet.
+            <div className="py-2 text-xs text-zinc-500 italic pl-3">
+              No topics scheduled for this day yet.
             </div>
           )}
         </div>
