@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/store/ui-store";
 import { useAuth } from "@/hooks/use-auth";
+import { UserDropdown } from "./user-dropdown";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -49,6 +50,7 @@ export function Sidebar() {
     toggleSpacesOpen,
   } = useUIStore();
   const { user } = useAuth();
+  const [sidebarDropdownOpen, setSidebarDropdownOpen] = useState(false);
 
   const userInitials = user?.name
     ? user.name
@@ -62,8 +64,11 @@ export function Sidebar() {
 
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-  // Close sidebar drawer on mobile/tablet when route changes
+  // Close sidebar drawer and dropdown on mobile/tablet when route changes
   useEffect(() => {
+    if (sidebarDropdownOpen) {
+      setSidebarDropdownOpen(false);
+    }
     if (typeof window !== "undefined" && window.innerWidth < 1024 && sidebarOpen) {
       setSidebarOpen(false);
     }
@@ -362,41 +367,53 @@ export function Sidebar() {
             </div>
 
             {/* Profile Drawer */}
-            <div className="flex items-center justify-between rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-1.5">
-              <Link
-                href="/profile"
-                onClick={handleLinkClick}
-                className="flex items-center gap-2 overflow-hidden flex-1 group hover:opacity-90 transition-opacity"
-              >
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 overflow-hidden">
-                  {user?.image ? (
-                    <img
-                      src={user.image}
-                      alt={displayName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span>{userInitials}</span>
-                  )}
-                </div>
-                <div className="truncate">
-                  <div className="text-[12px] font-medium text-zinc-100 truncate group-hover:text-blue-400 transition-colors">
-                    {displayName}
+            <div className="relative">
+              <div className="flex items-center justify-between rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSidebarDropdownOpen((prev) => !prev)}
+                  className="flex items-center gap-2 overflow-hidden flex-1 group hover:opacity-90 transition-opacity text-left focus-visible:outline-none"
+                  aria-label="Toggle user account menu"
+                  aria-expanded={sidebarDropdownOpen}
+                >
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 overflow-hidden">
+                    {user?.image ? (
+                      <img
+                        src={user.image}
+                        alt={displayName}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span>{userInitials}</span>
+                    )}
                   </div>
-                  <div className="text-[11px] text-zinc-500 font-normal leading-none">Free Plan</div>
-                </div>
-              </Link>
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                className="h-5 px-1.5 text-[10px] font-medium border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:scale-95 transition-transform shrink-0"
-              >
-                <Link href="/unlock" onClick={handleLinkClick}>
-                  <Sparkles className="h-2.5 w-2.5 mr-1 text-amber-400" />
-                  Upgrade
-                </Link>
-              </Button>
+                  <div className="truncate">
+                    <div className="text-[12px] font-medium text-zinc-100 truncate group-hover:text-blue-400 transition-colors">
+                      {displayName}
+                    </div>
+                    <div className="text-[11px] text-zinc-500 font-normal leading-none">Free Plan</div>
+                  </div>
+                </button>
+                <Button
+                  asChild
+                  size="sm"
+                  variant="outline"
+                  className="h-5 px-1.5 text-[10px] font-medium border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:scale-95 transition-transform shrink-0"
+                >
+                  <Link href="/unlock" onClick={handleLinkClick}>
+                    <Sparkles className="h-2.5 w-2.5 mr-1 text-amber-400" />
+                    Upgrade
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Sidebar Expanded User Dropdown */}
+              <UserDropdown
+                isOpen={sidebarDropdownOpen}
+                onClose={() => setSidebarDropdownOpen(false)}
+                placement="top-left"
+                className="bottom-full mb-2 left-0 w-full"
+              />
             </div>
           </div>
 
@@ -412,25 +429,29 @@ export function Sidebar() {
               className="relative group/notif cursor-pointer"
               title="4 updates available"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 transition-colors">
+              <Link
+                href="/notifications"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 transition-colors"
+              >
                 <BellRing className="h-4 w-4" />
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-500 ring-2 ring-zinc-950 animate-pulse" />
-              </div>
+              </Link>
 
               {/* Tooltip */}
               <div className="hidden lg:block absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700/90 text-[11px] font-medium text-zinc-100 shadow-dialog opacity-0 -translate-x-1 group-hover/notif:opacity-100 group-hover/notif:translate-x-0 transition-all duration-150">
-                4 new roadmap updates
+                4 new notifications
                 <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-zinc-900 border-l border-b border-zinc-700/90" />
               </div>
             </div>
 
-            {/* Profile Avatar */}
+            {/* Profile Avatar Trigger in Collapsed Sidebar */}
             <div className="relative group/prof">
-              <Link
-                href="/profile"
-                onClick={handleLinkClick}
+              <button
+                type="button"
+                onClick={() => setSidebarDropdownOpen((prev) => !prev)}
                 className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 cursor-pointer hover:scale-105 hover:border-blue-400 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 overflow-hidden"
-                aria-label={`${displayName} profile`}
+                aria-label={`${displayName} menu`}
+                aria-expanded={sidebarDropdownOpen}
               >
                 {user?.image ? (
                   <img
@@ -441,12 +462,20 @@ export function Sidebar() {
                 ) : (
                   <span>{userInitials}</span>
                 )}
-              </Link>
+              </button>
               {/* Tooltip */}
               <div className="hidden lg:block absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700/90 text-[11px] font-medium text-zinc-100 shadow-dialog opacity-0 -translate-x-1 group-hover/prof:opacity-100 group-hover/prof:translate-x-0 transition-all duration-150">
-                {displayName} (My Profile)
+                {displayName} (Account Menu)
                 <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-zinc-900 border-l border-b border-zinc-700/90" />
               </div>
+
+              {/* Sidebar Collapsed User Dropdown */}
+              <UserDropdown
+                isOpen={sidebarDropdownOpen}
+                onClose={() => setSidebarDropdownOpen(false)}
+                placement="top-left"
+                className="bottom-0 left-12 w-56"
+              />
             </div>
           </div>
         </div>

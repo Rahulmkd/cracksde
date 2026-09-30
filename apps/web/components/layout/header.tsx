@@ -7,12 +7,15 @@ import { useUIStore } from "@/store/ui-store";
 import { usePlannerStore } from "@/store/planner-store";
 import { useAuth } from "@/hooks/use-auth";
 import { CommandPaletteDialog } from "@/components/search/command-palette-dialog";
+import { UserDropdown } from "@/components/layout/user-dropdown";
+import { cn } from "@/lib/utils";
 
 export function Header() {
   const { sidebarOpen, toggleSidebar } = useUIStore();
   const { points, streak } = usePlannerStore();
   const { user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
 
   const userInitials = user?.name
@@ -80,23 +83,38 @@ export function Header() {
               </span>
             </div>
 
-            {/* Profile Avatar */}
-            <button
-              onClick={() => router.push("/profile")}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-800 bg-blue-600/20 text-[11px] font-semibold text-blue-400 transition-colors hover:border-blue-500/50 hover:bg-blue-600/30 overflow-hidden"
-              aria-label="User Profile"
-              title={user?.name ? `${user.name} - View Profile` : "My Profile"}
-            >
-              {user?.image ? (
-                <img
-                  src={user.image}
-                  alt={user.name || "User"}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span>{userInitials}</span>
-              )}
-            </button>
+            {/* Profile Avatar Dropdown Trigger */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setDropdownOpen((prev) => !prev)}
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-full border border-zinc-800 bg-blue-600/20 text-[11px] font-semibold text-blue-400 transition-all hover:border-blue-500/50 hover:bg-blue-600/30 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50",
+                  dropdownOpen && "ring-2 ring-blue-500/50 border-blue-500/80"
+                )}
+                aria-label="User Profile Menu"
+                aria-expanded={dropdownOpen}
+                aria-haspopup="true"
+                title={user?.name ? `${user.name} - Account Menu` : "Account Menu"}
+              >
+                {user?.image ? (
+                  <img
+                    src={user.image}
+                    alt={user.name || "User"}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span>{userInitials}</span>
+                )}
+              </button>
+
+              {/* User Profile Dropdown */}
+              <UserDropdown
+                isOpen={dropdownOpen}
+                onClose={() => setDropdownOpen(false)}
+                placement="bottom-right"
+              />
+            </div>
           </div>
         </div>
       </header>
