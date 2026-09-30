@@ -2,42 +2,63 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { roadmapService, type PracticeProblemsFilterParams } from "@/services/roadmap-service";
+import { useAuth } from "@/hooks/use-auth";
 import type { CreateRoadmapItemRequest } from "@starter/shared";
 
 export function useRoadmapSubjects() {
+  const { user } = useAuth();
+  const userId = user?.id ?? "anonymous";
+
   return useQuery({
-    queryKey: ["roadmap-subjects"],
+    queryKey: ["roadmap-subjects", userId],
     queryFn: () => roadmapService.getSubjects(),
+    staleTime: 1000 * 60 * 2,
   });
 }
 
 export function usePracticeProblems(params: PracticeProblemsFilterParams = {}) {
+  const { user } = useAuth();
+  const userId = user?.id ?? "anonymous";
+
   return useQuery({
-    queryKey: ["practice-problems", params],
+    queryKey: ["practice-problems", params, userId],
     queryFn: () => roadmapService.getPracticeProblems(params),
+    staleTime: 1000 * 60 * 2,
   });
 }
 
 export function useRoadmapSubjectDetail(slug: string) {
+  const { user } = useAuth();
+  const userId = user?.id ?? "anonymous";
+
   return useQuery({
-    queryKey: ["roadmap-subject", slug],
+    queryKey: ["roadmap-subject", slug, userId],
     queryFn: () => roadmapService.getSubjectDetail(slug),
     enabled: !!slug,
+    staleTime: 1000 * 60 * 2,
   });
 }
 
 export function useTopicQuestions(subjectSlug: string, topicSlug: string) {
+  const { user } = useAuth();
+  const userId = user?.id ?? "anonymous";
+
   return useQuery({
-    queryKey: ["topic-questions", subjectSlug, topicSlug],
+    queryKey: ["topic-questions", subjectSlug, topicSlug, userId],
     queryFn: () => roadmapService.getTopicQuestions(subjectSlug, topicSlug),
     enabled: !!subjectSlug && !!topicSlug,
+    staleTime: 1000 * 60 * 2,
   });
 }
 
 export function useUserRevisions() {
+  const { user } = useAuth();
+  const userId = user?.id ?? "anonymous";
+
   return useQuery({
-    queryKey: ["user-revisions"],
+    queryKey: ["user-revisions", userId],
     queryFn: () => roadmapService.getUserRevisions(),
+    staleTime: 1000 * 60 * 2,
   });
 }
 

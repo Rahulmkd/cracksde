@@ -104,6 +104,15 @@ export class StudyPlanRepository {
   static async findTaskById(taskId: bigint) {
     return prisma.studyTask.findUnique({
       where: { taskId },
+      include: {
+        item: {
+          include: {
+            subject: { select: { slug: true, name: true } },
+            topic: { select: { slug: true, name: true } },
+            subtopic: { select: { slug: true, name: true } },
+          },
+        },
+      },
     });
   }
 

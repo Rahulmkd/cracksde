@@ -2,14 +2,18 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { profileService } from "@/services/profile-service";
-import { authService } from "@/services/auth-service";
+import { useAuth } from "@/hooks/use-auth";
+import { usePlannerStore } from "@/store/planner-store";
 import type { UpdateProfileRequestDto } from "@starter/shared";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function useProfile() {
+  const { user } = useAuth();
+  const userId = user?.id ?? "anonymous";
+
   return useQuery({
-    queryKey: ["user-profile"],
+    queryKey: ["user-profile", userId],
     queryFn: () => profileService.getProfile(),
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 1,
@@ -17,8 +21,11 @@ export function useProfile() {
 }
 
 export function useProfileStats() {
+  const { user } = useAuth();
+  const userId = user?.id ?? "anonymous";
+
   return useQuery({
-    queryKey: ["user-profile-stats"],
+    queryKey: ["user-profile-stats", userId],
     queryFn: () => profileService.getStats(),
     staleTime: 1000 * 60 * 2, // 2 minutes
     retry: 1,
@@ -27,11 +34,13 @@ export function useProfileStats() {
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id ?? "anonymous";
 
   return useMutation({
     mutationFn: (data: UpdateProfileRequestDto) => profileService.updateProfile(data),
     onSuccess: (data) => {
-      queryClient.setQueryData(["user-profile"], data);
+      queryClient.setQueryData(["user-profile", userId], data);
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       queryClient.invalidateQueries({ queryKey: ["user-profile-stats"] });
       toast.success("Profile updated successfully!");
@@ -45,16 +54,28 @@ export function useUpdateProfile() {
 export function useDeleteAccount() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { signOut } = useAuth();
 
   return useMutation({
     mutationFn: () => profileService.deleteAccount(),
     onSuccess: async () => {
+      // 1. Purge all query caches
+      queryClient.clear();
+      // 2. Reset Zustand and LocalStorage
+      usePlannerStore.getState().resetStore();
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("cracksde-daily-planner-storage");
+          localStorage.removeItem("cracksde_planly_expanded_sprints");
+          localStorage.removeItem("cracksde_planly_expanded_days");
+        } catch {}
+      }
+      // 3. Invalidate auth session
       try {
-        await authService.signOut();
+        await signOut();
       } catch {
         // Ignore if already deleted on backend
       }
-      queryClient.clear();
       toast.success("Your account and all study data have been permanently deleted.");
       router.push("/login");
       router.refresh();
