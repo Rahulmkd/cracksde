@@ -9,6 +9,7 @@ import type { CategoryProgress } from "../types";
 interface SubjectProgressBarProps {
   categories: CategoryProgress[];
   title?: string;
+  isLoading?: boolean;
 }
 
 function CircularPercentIndicator({
@@ -69,7 +70,41 @@ function CircularPercentIndicator({
 export function SubjectProgressBar({
   categories,
   title = "Category-wise Progress",
+  isLoading = false,
 }: SubjectProgressBarProps) {
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 h-full flex flex-col justify-between select-none">
+        {/* Header */}
+        <div className="flex items-center justify-between shrink-0 mb-3 sm:mb-2">
+          <span className="text-[15px] font-semibold text-zinc-100">{title}</span>
+        </div>
+
+        {/* Skeleton Category List */}
+        <div className="flex-1 flex flex-col justify-between py-1 gap-1.5 sm:gap-2 animate-pulse">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between gap-3 p-1.5 -mx-1.5 rounded-xl"
+            >
+              {/* Left Skeleton */}
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-9 w-9 sm:h-9.5 sm:w-9.5 rounded-xl bg-zinc-800/70 shrink-0" />
+                <div className="flex flex-col gap-1.5">
+                  <div className="h-3.5 w-24 sm:w-28 bg-zinc-800/80 rounded" />
+                  <div className="h-2.5 w-14 bg-zinc-800/50 rounded" />
+                </div>
+              </div>
+
+              {/* Right Circular Skeleton */}
+              <div className="h-[34px] w-[34px] rounded-full border-2 border-zinc-800/70 bg-zinc-900/50 shrink-0" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 h-full flex flex-col justify-between hover:border-zinc-700/80 transition-all duration-200 shadow-subtle select-none">
       {/* Header */}

@@ -15,6 +15,7 @@ export interface ProgressDonutProps {
   proTotal?: number;
   title?: string;
   tooltipText?: string;
+  isLoading?: boolean;
 }
 
 function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
@@ -47,6 +48,7 @@ export function ProgressDonut({
   proTotal = 312,
   title = "DSA Progress",
   tooltipText = "DSA problem solving progress across Basic, Core, and Pro difficulty tiers",
+  isLoading = false,
 }: ProgressDonutProps) {
   // Total calculation
   const totalCount = (basicTotal + coreTotal + proTotal) || totalTasks || 1369;
@@ -103,6 +105,64 @@ export function ProgressDonut({
       },
     };
   }, [basicTotal, coreTotal, proTotal, basicCompleted, coreCompleted, proCompleted, totalCount, totalAvailableDegrees, radius]);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 h-full flex flex-col justify-between select-none">
+        {/* Header */}
+        <div className="flex items-center justify-between shrink-0 mb-3 sm:mb-2">
+          <span className="text-[15px] font-semibold text-zinc-100">{title}</span>
+          <div
+            className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+            title={tooltipText}
+          >
+            <Info className="h-4 w-4" />
+          </div>
+        </div>
+
+        {/* Skeleton Body */}
+        <div className="flex-1 flex items-center justify-center my-auto animate-pulse">
+          <div className="flex flex-row items-center justify-around w-full gap-4 sm:gap-6 py-1">
+            {/* Skeleton Circle */}
+            <div className="h-32 w-32 sm:h-36 sm:w-36 rounded-full border-[7px] border-zinc-800/60 bg-zinc-900/30 flex flex-col items-center justify-center shrink-0">
+              <div className="h-6 w-10 bg-zinc-800/80 rounded-md mb-1" />
+              <div className="h-3 w-14 bg-zinc-800/50 rounded" />
+            </div>
+
+            {/* Skeleton Breakdown Rows */}
+            <div className="space-y-3 sm:space-y-3.5 min-w-[110px] sm:min-w-[120px]">
+              {/* Basic Skeleton */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="h-2.5 w-2.5 rounded-[2px] bg-emerald-500/30 shrink-0" />
+                  <div className="h-3.5 w-12 bg-zinc-800/80 rounded" />
+                </div>
+                <div className="pl-4.5 h-3 w-16 bg-zinc-800/50 rounded" />
+              </div>
+
+              {/* Core Skeleton */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="h-2.5 w-2.5 rounded-[2px] bg-amber-500/30 shrink-0" />
+                  <div className="h-3.5 w-10 bg-zinc-800/80 rounded" />
+                </div>
+                <div className="pl-4.5 h-3 w-16 bg-zinc-800/50 rounded" />
+              </div>
+
+              {/* Pro Skeleton */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="h-2.5 w-2.5 rounded-[2px] bg-rose-500/30 shrink-0" />
+                  <div className="h-3.5 w-8 bg-zinc-800/80 rounded" />
+                </div>
+                <div className="pl-4.5 h-3 w-16 bg-zinc-800/50 rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 h-full flex flex-col justify-between hover:border-zinc-700/80 transition-all duration-200 shadow-subtle select-none">

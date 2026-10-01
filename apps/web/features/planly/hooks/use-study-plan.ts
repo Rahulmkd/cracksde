@@ -8,12 +8,13 @@ import { toast } from "sonner";
 
 export function useStudyPlan(slug: string = "crack-sde") {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   const planQuery = useQuery({
     queryKey: ["study-plan", slug, userId],
     queryFn: () => studyPlanService.getStudyPlan(slug),
+    enabled: !isAuthLoading && !!slug,
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 

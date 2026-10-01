@@ -67,15 +67,21 @@ const POPULAR_TOPICS: PopularTopicItem[] = [
 ];
 
 export function DashboardOverview() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const userName = user?.name ? user.name.split(" ")[0] : "Developer";
 
   // Dynamic remote data hooks with user-isolated queries
-  const { plan } = useStudyPlan("crack-sde");
-  const { data: profileStatsData } = useProfileStats();
-  const { data: subjectsData } = useRoadmapSubjects();
-  const { data: dsaSubjectDetail } = useRoadmapSubjectDetail("dsa");
+  const { plan, isLoading: isPlanLoading } = useStudyPlan("crack-sde");
+  const { data: profileStatsData, isLoading: isProfileLoading } = useProfileStats();
+  const { data: subjectsData, isLoading: isSubjectsLoading } = useRoadmapSubjects();
+  const { data: dsaSubjectDetail, isLoading: isDsaLoading } = useRoadmapSubjectDetail("dsa");
   const { points: storePoints, streak: storeStreak } = usePlannerStore();
+
+  const isProgressLoading =
+    isAuthLoading ||
+    isSubjectsLoading ||
+    isDsaLoading ||
+    (!subjectsData && !dsaSubjectDetail);
 
   const sprints = plan?.sprints || [];
   const activeSprint = sprints.find((s) => s.status === "in_progress") || sprints[0];
@@ -353,10 +359,12 @@ export function DashboardOverview() {
                 coreTotal={dsaCoreTotal}
                 proCompleted={dsaProCompleted}
                 proTotal={dsaProTotal}
+                isLoading={isProgressLoading}
               />
               <SubjectProgressBar
                 title="Category-wise Progress"
                 categories={categories}
+                isLoading={isProgressLoading}
               />
             </div>
           </div>

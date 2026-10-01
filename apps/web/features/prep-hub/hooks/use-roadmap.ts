@@ -6,58 +6,61 @@ import { useAuth } from "@/hooks/use-auth";
 import type { CreateRoadmapItemRequest } from "@starter/shared";
 
 export function useRoadmapSubjects() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   return useQuery({
     queryKey: ["roadmap-subjects", userId],
     queryFn: () => roadmapService.getSubjects(),
+    enabled: !isAuthLoading,
     staleTime: 1000 * 60 * 2,
   });
 }
 
 export function usePracticeProblems(params: PracticeProblemsFilterParams = {}) {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   return useQuery({
     queryKey: ["practice-problems", params, userId],
     queryFn: () => roadmapService.getPracticeProblems(params),
+    enabled: !isAuthLoading,
     staleTime: 1000 * 60 * 2,
   });
 }
 
 export function useRoadmapSubjectDetail(slug: string) {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   return useQuery({
     queryKey: ["roadmap-subject", slug, userId],
     queryFn: () => roadmapService.getSubjectDetail(slug),
-    enabled: !!slug,
+    enabled: !isAuthLoading && !!slug,
     staleTime: 1000 * 60 * 2,
   });
 }
 
 export function useTopicQuestions(subjectSlug: string, topicSlug: string) {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   return useQuery({
     queryKey: ["topic-questions", subjectSlug, topicSlug, userId],
     queryFn: () => roadmapService.getTopicQuestions(subjectSlug, topicSlug),
-    enabled: !!subjectSlug && !!topicSlug,
+    enabled: !isAuthLoading && !!subjectSlug && !!topicSlug,
     staleTime: 1000 * 60 * 2,
   });
 }
 
 export function useUserRevisions() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   return useQuery({
     queryKey: ["user-revisions", userId],
     queryFn: () => roadmapService.getUserRevisions(),
+    enabled: !isAuthLoading,
     staleTime: 1000 * 60 * 2,
   });
 }

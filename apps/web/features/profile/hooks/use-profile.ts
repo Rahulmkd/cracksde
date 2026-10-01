@@ -9,24 +9,26 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function useProfile() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   return useQuery({
     queryKey: ["user-profile", userId],
     queryFn: () => profileService.getProfile(),
+    enabled: !isAuthLoading,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 1,
   });
 }
 
 export function useProfileStats() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   return useQuery({
     queryKey: ["user-profile-stats", userId],
     queryFn: () => profileService.getStats(),
+    enabled: !isAuthLoading,
     staleTime: 1000 * 60 * 2, // 2 minutes
     retry: 1,
   });
