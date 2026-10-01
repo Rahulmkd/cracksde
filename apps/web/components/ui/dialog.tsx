@@ -73,11 +73,16 @@ export function Dialog({
   );
 }
 
+export interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  hideCloseButton?: boolean;
+}
+
 export function DialogContent({
   className,
   children,
+  hideCloseButton = false,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: DialogContentProps) {
   const context = React.useContext(DialogContext);
 
   return (
@@ -89,14 +94,16 @@ export function DialogContent({
       onClick={(e) => e.stopPropagation()}
       {...props}
     >
-      <button
-        type="button"
-        onClick={() => context?.onOpenChange(false)}
-        className="absolute right-4 top-4 rounded-md p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors focus:outline-none z-10"
-        aria-label="Close dialog"
-      >
-        <X className="h-4 w-4" />
-      </button>
+      {!hideCloseButton && (
+        <button
+          type="button"
+          onClick={() => context?.onOpenChange(false)}
+          className="absolute right-4 top-4 rounded-md p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors focus:outline-none z-10"
+          aria-label="Close dialog"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
       {children}
     </div>
   );

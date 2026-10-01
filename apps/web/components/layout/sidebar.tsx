@@ -331,7 +331,7 @@ export function Sidebar() {
         {/* Brand Header */}
         <div
           className={cn(
-            "flex h-14 items-center border-b border-zinc-800/80 bg-zinc-950/90 shrink-0 transition-all duration-300",
+            "flex h-12 items-center border-b border-zinc-800/80 bg-zinc-950/90 shrink-0 transition-all duration-300",
             sidebarOpen
               ? "justify-between px-3.5"
               : "justify-between px-3.5 lg:justify-center lg:px-2"
