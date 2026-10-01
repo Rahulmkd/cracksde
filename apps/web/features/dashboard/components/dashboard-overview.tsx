@@ -68,7 +68,7 @@ const POPULAR_TOPICS: PopularTopicItem[] = [
 
 export function DashboardOverview() {
   const { user, isLoading: isAuthLoading } = useAuth();
-  const userName = user?.name ? user.name.split(" ")[0] : "Developer";
+  const userName = user?.name ? user.name.trim().split(" ")[0] : isAuthLoading ? undefined : "Developer";
 
   // Dynamic remote data hooks with user-isolated queries
   const { plan, isLoading: isPlanLoading } = useStudyPlan("crack-sde");
@@ -327,6 +327,7 @@ export function DashboardOverview() {
         streak={streak}
         points={points}
         userName={userName}
+        isLoading={isAuthLoading}
         sprintNumber={sprintNumber}
         sprintFocus={sprintFocus}
       />

@@ -49,7 +49,7 @@ export function Sidebar() {
     toggleExploreOpen,
     toggleSpacesOpen,
   } = useUIStore();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [sidebarDropdownOpen, setSidebarDropdownOpen] = useState(false);
 
   const userInitials = user?.name
@@ -60,7 +60,7 @@ export function Sidebar() {
         .toUpperCase()
         .substring(0, 2)
     : "ME";
-  const displayName = user?.name || "Developer";
+  const displayName = user?.name || (isAuthLoading ? "" : "Developer");
 
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
@@ -388,9 +388,13 @@ export function Sidebar() {
                     )}
                   </div>
                   <div className="truncate">
-                    <div className="text-[12px] font-medium text-zinc-100 truncate group-hover:text-blue-400 transition-colors">
-                      {displayName}
-                    </div>
+                    {isAuthLoading && !user ? (
+                      <div className="h-3 w-16 bg-zinc-800 rounded animate-pulse my-0.5" />
+                    ) : (
+                      <div className="text-[12px] font-medium text-zinc-100 truncate group-hover:text-blue-400 transition-colors">
+                        {displayName || "Developer"}
+                      </div>
+                    )}
                     <div className="text-[11px] text-zinc-500 font-normal leading-none">Free Plan</div>
                   </div>
                 </button>
