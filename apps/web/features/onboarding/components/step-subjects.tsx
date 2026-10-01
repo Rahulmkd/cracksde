@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-import { Check, Plus } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CORE_SUBJECTS, ADDITIONAL_SUBJECTS } from "@/constants/onboarding-options";
+import { CORE_SUBJECTS } from "@/constants/onboarding-options";
 
 interface StepSubjectsProps {
   targetRole: string;
@@ -18,78 +17,105 @@ export function StepSubjects({
   onToggleSubject,
 }: StepSubjectsProps) {
   return (
-    <div className="space-y-6 animate-in fade-in-50 duration-200">
-      <div className="space-y-1">
-        <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
-          Recommended Subjects
+    <div className="space-y-7 animate-in fade-in-50 duration-200">
+      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-zinc-100">
+          Choose your subjects
         </h1>
-        <p className="text-[12px] font-normal leading-normal text-zinc-400">
-          We selected key subjects based on your target role ({targetRole}). You can customize them freely.
+
+        <p className="max-w-xl text-[13px] leading-5 text-zinc-400">
+          Select the subjects you want to focus on for your{" "}
+          <span className="font-medium text-zinc-200">{targetRole}</span>{" "}
+          preparation.
         </p>
       </div>
 
-      <div className="space-y-2.5">
-        <div className="text-[12px] font-medium text-zinc-300">
-          Core Recommended Track:
+      {/* Subject Section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-[13px] font-medium text-zinc-200">
+              Core subjects
+            </h2>
+            <p className="mt-0.5 text-[11px] text-zinc-500">
+              Recommended for your selected role
+            </p>
+          </div>
+
+          <span className="rounded-full border border-zinc-800 bg-zinc-900/70 px-2.5 py-1 text-[10px] font-medium text-zinc-400">
+            {selectedSubjects.length}/{CORE_SUBJECTS.length} selected
+          </span>
         </div>
-        <div className="space-y-2">
+
+        {/* Subjects */}
+        <div className="grid gap-2">
           {CORE_SUBJECTS.map((sub) => {
             const isChecked = selectedSubjects.includes(sub.slug);
-            return (
-              <div
-                key={sub.slug}
-                onClick={() => onToggleSubject(sub.slug)}
-                className={cn(
-                  "flex items-center justify-between rounded-xl border p-3.5 cursor-pointer transition-all duration-150 shadow-subtle",
-                  isChecked
-                    ? "border-blue-500/40 bg-zinc-900/80 text-zinc-100 ring-1 ring-blue-500/20"
-                    : "border-zinc-800/80 bg-zinc-950/40 text-zinc-400 hover:border-zinc-700"
-                )}
-              >
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={cn(
-                      "flex h-4 w-4 items-center justify-center rounded border transition-colors",
-                      isChecked
-                        ? "border-blue-600 bg-blue-600 text-white"
-                        : "border-zinc-700 bg-zinc-900"
-                    )}
-                  >
-                    {isChecked && <Check className="h-3 w-3 stroke-[3]" />}
-                  </div>
-                  <span className="text-[13px] font-medium text-zinc-200">{sub.name}</span>
-                </div>
-                {sub.recommended && (
-                  <Badge variant="blue" className="text-[10px] py-0 px-2 font-medium">
-                    Recommended
-                  </Badge>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Additional Subjects */}
-      <div className="space-y-2.5 pt-3.5 border-t border-zinc-800/80">
-        <div className="text-[12px] font-medium text-zinc-300">Optional Electives:</div>
-        <div className="flex flex-wrap gap-2">
-          {ADDITIONAL_SUBJECTS.map((sub) => {
-            const isChecked = selectedSubjects.includes(sub.slug);
             return (
               <button
                 key={sub.slug}
                 type="button"
                 onClick={() => onToggleSubject(sub.slug)}
+                aria-pressed={isChecked}
                 className={cn(
-                  "flex items-center gap-2 rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-all select-none",
+                  "group flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left",
+                  "transition-all duration-150 outline-none",
+                  "focus-visible:ring-2 focus-visible:ring-blue-500/40",
                   isChecked
-                    ? "border-blue-500 bg-blue-600/15 text-blue-400"
-                    : "border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
+                    ? [
+                        "border-blue-500/40",
+                        "bg-blue-500/[0.07]",
+                        "shadow-[0_0_0_1px_rgba(59,130,246,0.08)]",
+                      ]
+                    : [
+                        "border-zinc-800/80",
+                        "bg-zinc-900/30",
+                        "hover:border-zinc-700",
+                        "hover:bg-zinc-900/60",
+                      ],
                 )}
               >
-                <span>{sub.name}</span>
-                <Plus className={cn("h-3.5 w-3.5 transition-transform", isChecked && "rotate-45 text-blue-400")} />
+                <div className="flex min-w-0 items-center gap-3">
+                  {/* Checkbox */}
+                  <span
+                    className={cn(
+                      "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border",
+                      "transition-all duration-150",
+                      isChecked
+                        ? "border-blue-500 bg-blue-500 text-white"
+                        : "border-zinc-700 bg-zinc-950 text-transparent group-hover:border-zinc-600",
+                    )}
+                  >
+                    <Check
+                      className={cn(
+                        "h-3 w-3 stroke-[3]",
+                        isChecked ? "scale-100" : "scale-75",
+                        "transition-transform duration-150",
+                      )}
+                    />
+                  </span>
+
+                  {/* Subject */}
+                  <span
+                    className={cn(
+                      "truncate text-[13px] font-medium transition-colors",
+                      isChecked
+                        ? "text-zinc-100"
+                        : "text-zinc-300 group-hover:text-zinc-100",
+                    )}
+                  >
+                    {sub.name}
+                  </span>
+                </div>
+
+                {/* Selected Indicator */}
+                {isChecked && (
+                  <span className="ml-3 shrink-0 text-[10px] font-medium text-blue-400">
+                    Selected
+                  </span>
+                )}
               </button>
             );
           })}

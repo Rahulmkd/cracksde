@@ -8,8 +8,3 @@ export interface SubjectOption {
   name: string;
   recommended: boolean;
 }
-
-export interface LevelOption {
-  level: string;
-  desc: string;
-}

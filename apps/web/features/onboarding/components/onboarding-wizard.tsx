@@ -1,34 +1,70 @@
 "use client";
 
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnboardingStore } from "@/features/onboarding/store/onboarding-store";
 import { TOTAL_ROADMAP_HOURS } from "@/constants/onboarding-options";
+import { studyPlanService } from "@/services/study-plan-service";
 import { toast } from "sonner";
 import { OnboardingStepper } from "./onboarding-stepper";
-import { StepAboutYou } from "./step-about-you";
 import { StepSubjects } from "./step-subjects";
-import { StepLevels } from "./step-levels";
-import { StepReviewTopics } from "./step-review-topics";
 import { StepAvailability } from "./step-availability";
 import { StepFinalize } from "./step-finalize";
 
 export function OnboardingWizard() {
   const router = useRouter();
   const store = useOnboardingStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const totalWeeklyHours = store.getTotalWeeklyHours();
   const estimatedDays = Math.round((TOTAL_ROADMAP_HOURS / Math.max(1, totalWeeklyHours)) * 7);
 
-  const handleNext = () => {
-    if (store.currentStep === 6) {
+  const handleNext = async () => {
+    if (store.currentStep === 1) {
+      if (store.selectedSubjects.length === 0) {
+        toast.error("Please select at least one subject to continue.");
+        return;
+      }
+      store.nextStep();
+      return;
+    }
+
+    if (store.currentStep === 2) {
+      if (totalWeeklyHours <= 0) {
+        toast.error("Please allocate at least 1 study hour per week.");
+        return;
+      }
+      store.nextStep();
+      return;
+    }
+
+    if (store.currentStep === 3) {
+      if (!store.planName.trim()) {
+        toast.error("Please provide a name for your study plan.");
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        await studyPlanService.updatePlan("crack-sde", {
+          name: store.planName.trim(),
+          dailyHours: Math.max(1, Math.round(totalWeeklyHours / 7)),
+        });
+      } catch {
+        // Proceed even if update fails or server offline
+      } finally {
+        setIsSubmitting(false);
+      }
+
       toast.success("🚀 Study Plan created and activated!");
       router.push("/planly");
-    } else {
-      store.nextStep();
+      return;
     }
+
+    store.nextStep();
   };
 
   const handlePrev = () => {
@@ -83,19 +119,6 @@ export function OnboardingWizard() {
 
         {/* Step Views */}
         {store.currentStep === 1 && (
-          <StepAboutYou
-            targetRole={store.targetRole}
-            setTargetRole={store.setTargetRole}
-            experience={store.experience}
-            setExperience={store.setExperience}
-            targetCompany={store.targetCompany}
-            setTargetCompany={store.setTargetCompany}
-            targetRegion={store.targetRegion}
-            setTargetRegion={store.setTargetRegion}
-          />
-        )}
-
-        {store.currentStep === 2 && (
           <StepSubjects
             targetRole={store.targetRole}
             selectedSubjects={store.selectedSubjects}
@@ -103,17 +126,7 @@ export function OnboardingWizard() {
           />
         )}
 
-        {store.currentStep === 3 && (
-          <StepLevels
-            selectedSubjects={store.selectedSubjects}
-            subjectLevels={store.subjectLevels}
-            onSetSubjectLevel={store.setSubjectLevel}
-          />
-        )}
-
-        {store.currentStep === 4 && <StepReviewTopics />}
-
-        {store.currentStep === 5 && (
+        {store.currentStep === 2 && (
           <StepAvailability
             availability={store.availability}
             onSetDayAvailability={store.setDayAvailability}
@@ -122,7 +135,7 @@ export function OnboardingWizard() {
           />
         )}
 
-        {store.currentStep === 6 && (
+        {store.currentStep === 3 && (
           <StepFinalize
             planName={store.planName}
             setPlanName={store.setPlanName}
@@ -140,7 +153,7 @@ export function OnboardingWizard() {
             variant="outline"
             size="sm"
             onClick={handlePrev}
-            disabled={store.currentStep === 1}
+            disabled={store.currentStep === 1 || isSubmitting}
             className="h-8 px-3 text-[12px] font-medium"
           >
             <ChevronLeft className="h-4 w-4 mr-1" /> Back
@@ -149,12 +162,13 @@ export function OnboardingWizard() {
           <Button
             size="sm"
             onClick={handleNext}
+            disabled={isSubmitting}
             className="h-8 px-4 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
           >
-            {store.currentStep === 6 ? (
+            {store.currentStep === 3 ? (
               <>
                 <Zap className="h-3.5 w-3.5 mr-1" />
-                Launch My Roadmap
+                {isSubmitting ? "Activating..." : "Launch My Roadmap"}
               </>
             ) : (
               <>
