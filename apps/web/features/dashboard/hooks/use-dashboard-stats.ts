@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useStudyPlan } from "@/features/planly/hooks/use-study-plan";
 import { useRoadmapSubjects } from "@/features/prep-hub/hooks/use-roadmap";
+import { useProfileStats } from "@/features/profile/hooks/use-profile";
 import { usePlannerStore } from "@/store/planner-store";
 import type { RoadmapSubjectSummaryDto, StudySprintDto, StudyTaskDto } from "@starter/shared";
 
@@ -41,7 +42,8 @@ export interface DashboardStats {
 export function useDashboardStats(): DashboardStats {
   const { plan, isLoading: isPlanLoading } = useStudyPlan("crack-sde");
   const { data: subjectsData, isLoading: isSubjectsLoading } = useRoadmapSubjects();
-  const { streak, points, tasks: dailyTasks } = usePlannerStore();
+  const { data: profileStatsData, isLoading: isProfileLoading } = useProfileStats();
+  const { streak: storeStreak, points: storePoints, tasks: dailyTasks } = usePlannerStore();
 
   const stats = useMemo(() => {
     // Sprints calculation
@@ -53,9 +55,7 @@ export function useDashboardStats(): DashboardStats {
     const allSprintTasks: StudyTaskDto[] = allSprintDays.flatMap((d) => d.tasks || []);
     const completedTasks = allSprintTasks.filter((t) => t.status === "completed").length;
     const totalTasks = allSprintTasks.length > 0 ? allSprintTasks.length : 1;
-    const progressPercentage = Math.round(
-      (completedTasks / totalTasks) * 100
-    );
+    const progressPercentage = Math.round((completedTasks / totalTasks) * 100);
 
     // Subject breakdown
     const subjects: RoadmapSubjectSummaryDto[] = subjectsData || [];
@@ -72,20 +72,20 @@ export function useDashboardStats(): DashboardStats {
       };
     });
 
-    const totalCompletedItems = subjects.reduce(
-      (acc: number, s: RoadmapSubjectSummaryDto) => acc + (s.totalSolved || 0),
-      0
-    );
-    const totalItems = subjects.reduce(
-      (acc: number, s: RoadmapSubjectSummaryDto) => acc + (s.totalItems || 0),
-      0
-    );
+    const totalCompletedItems =
+      profileStatsData?.totalSolved ??
+      subjects.reduce((acc: number, s: RoadmapSubjectSummaryDto) => acc + (s.totalSolved || 0), 0);
+    const totalItems =
+      profileStatsData?.totalCurriculumItems ??
+      (subjects.reduce((acc: number, s: RoadmapSubjectSummaryDto) => acc + (s.totalItems || 0), 0) || 847);
     const overallPercentage =
-      totalItems > 0
-        ? Math.round((totalCompletedItems / totalItems) * 100)
-        : 0;
+      profileStatsData?.overallPercentage ??
+      (totalItems > 0 ? Math.round((totalCompletedItems / totalItems) * 100) : 0);
 
     const completedTodayCount = dailyTasks.filter((t) => t.completed).length;
+
+    const dynamicPoints = profileStatsData?.studyPoints ?? storePoints ?? 0;
+    const dynamicStreak = profileStatsData?.streakDays ?? storeStreak ?? 0;
 
     return {
       activeSprint: {
@@ -100,19 +100,29 @@ export function useDashboardStats(): DashboardStats {
       },
       overallProgress: {
         completedItems: totalCompletedItems,
-        totalItems: totalItems || 847,
+        totalItems,
         percentage: overallPercentage,
       },
       dailyStats: {
-        streakDays: streak || 1,
-        points: points || 0,
+        streakDays: dynamicStreak,
+        points: dynamicPoints,
         tasksTodayCount: dailyTasks.length,
         completedTodayCount,
       },
       subjectBreakdown,
-      isLoading: isPlanLoading || isSubjectsLoading,
+      isLoading: isPlanLoading || isSubjectsLoading || isProfileLoading,
     };
-  }, [plan, subjectsData, isPlanLoading, isSubjectsLoading, streak, points, dailyTasks]);
+  }, [
+    plan,
+    subjectsData,
+    profileStatsData,
+    isPlanLoading,
+    isSubjectsLoading,
+    isProfileLoading,
+    storeStreak,
+    storePoints,
+    dailyTasks,
+  ]);
 
   return stats;
 }

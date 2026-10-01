@@ -2,23 +2,25 @@
 
 import React from "react";
 import Link from "next/link";
-import { Zap, ArrowRight, Sparkles } from "lucide-react";
+import { Zap, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DailyStatsRibbonProps {
-  streak: number;
-  points: number;
+  streak?: number;
+  points?: number;
   userName?: string;
   sprintNumber?: number;
   sprintFocus?: string;
+  isLoading?: boolean;
 }
 
 export function DailyStatsRibbon({
-  streak,
-  points,
-  userName = "Rahul",
+  streak = 0,
+  points = 0,
+  userName,
   sprintNumber = 1,
   sprintFocus = "Data Structures & OOPS Foundations.",
+  isLoading = false,
 }: DailyStatsRibbonProps) {
   return (
     <div className="space-y-4 select-none">
@@ -46,8 +48,13 @@ export function DailyStatsRibbon({
       {/* 2. Greeting & Streak Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-0.5">
         <div className="space-y-1">
-          <h1 className="text-[22px] sm:text-[24px] font-bold leading-tight tracking-tight text-white flex items-center gap-2">
-            <span>Welcome back, {userName}</span>
+          <h1 className="text-[22px] sm:text-[24px] font-bold leading-tight tracking-tight text-white flex items-center gap-2 min-h-[32px]">
+            <span>Welcome back,</span>
+            {isLoading || !userName ? (
+              <span className="inline-block h-6 sm:h-7 w-28 sm:w-32 rounded-md bg-zinc-800/80 animate-pulse align-middle" />
+            ) : (
+              <span>{userName}</span>
+            )}
             <span className="inline-block text-[20px]">👋</span>
           </h1>
           <p className="text-[13px] font-normal leading-normal text-zinc-400">
@@ -80,4 +87,3 @@ export function DailyStatsRibbon({
     </div>
   );
 }
-

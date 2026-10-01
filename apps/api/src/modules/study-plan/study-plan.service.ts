@@ -3,7 +3,7 @@ import {
   calculateNextRevision,
   formatRevisionStatus,
 } from "../repetition/repetition.service.js";
-import { NotFoundError } from "../../shared/errors/app-error.js";
+import { NotFoundError, UnauthorizedError } from "../../shared/errors/app-error.js";
 import type {
   StudyPlanDto,
   UpdateTaskDto,
@@ -14,6 +14,10 @@ import type {
 } from "@cracksde/shared";
 
 export class StudyPlanService {
+  /**
+   * Fetch a study plan tailored strictly to the authenticated user's progress.
+   * If userId is absent or user has no progress, all tasks default to uncompleted.
+   */
   static async getStudyPlan(slug: string = "crack-sde", userId?: string): Promise<StudyPlanDto> {
     const plan = await StudyPlanRepository.findPlanBySlug(slug);
     if (!plan) {
@@ -46,29 +50,36 @@ export class StudyPlanService {
         totalPlanDays++;
         sprintDaysTotal++;
 
-        let dayTasksTotal = day.tasks.length;
+        const dayTasksTotal = day.tasks.length;
         let dayTasksCompleted = 0;
         let dayEstimatedMinutes = 0;
 
         const formattedTasks: StudyTaskDto[] = day.tasks.map((task: any) => {
           totalPlanTasks++;
-          const taskEstMin = task.estimatedMinutes || 0;
+          const taskEstMin = task.estimatedMinutes || 20;
           dayEstimatedMinutes += taskEstMin;
           totalPlanMinutes += taskEstMin;
 
-          let isCompleted = task.status === "completed";
-          let userProg = task.itemId ? userProgressMap.get(task.itemId) : undefined;
-
-          if (userProg && (userProg.status === "completed" || userProg.solveCount > 0)) {
-            isCompleted = true;
-          }
+          // STRICT USER ISOLATION: A task is ONLY completed if the current user has completed it.
+          const userProg = task.itemId ? userProgressMap.get(task.itemId) : undefined;
+          const isCompleted = Boolean(
+            userProg &&
+              (userProg.status === "completed" ||
+                (userProg.solveCount > 0 && userProg.lastScore !== false))
+          );
 
           if (isCompleted) {
             dayTasksCompleted++;
             completedPlanTasks++;
             completedPlanMinutes += taskEstMin;
-            sprintActualMinutes += task.actualMinutes || taskEstMin;
+            sprintActualMinutes += taskEstMin;
           }
+
+          const isRevision = Boolean(
+            userProg &&
+              (userProg.status === "needs_revision" ||
+                (userProg.nextRevisionAt && new Date(userProg.nextRevisionAt) <= now))
+          );
 
           const statusInfo = userProg
             ? formatRevisionStatus(userProg.nextRevisionAt, userProg.solveCount, now)
@@ -82,10 +93,10 @@ export class StudyPlanService {
             taskOrder: task.taskOrder,
             status: isCompleted ? "completed" : "not_started",
             estimatedMinutes: taskEstMin,
-            actualMinutes: task.actualMinutes || 0,
+            actualMinutes: isCompleted ? taskEstMin : 0,
             isCarriedForward: task.isCarriedForward || false,
             isBacklog: task.isBacklog || false,
-            isRevision: task.isRevision || Boolean(userProg && userProg.status === "needs_revision"),
+            isRevision,
             item: task.item
               ? {
                   id: task.item.id,
@@ -93,9 +104,9 @@ export class StudyPlanService {
                   slug: task.item.slug,
                   type: task.item.type,
                   difficulty: task.item.difficulty,
-                  subjectSlug: task.item.subject.slug,
-                  subjectName: task.item.subject.name,
-                  topicName: task.item.topic.name,
+                  subjectSlug: task.item.subject?.slug || "",
+                  subjectName: task.item.subject?.name || "",
+                  topicName: task.item.topic?.name || "",
                   subtopicName: task.item.subtopic?.name ?? null,
                   progress: userProg
                     ? {
@@ -137,8 +148,8 @@ export class StudyPlanService {
           sprintDayNo: day.sprintDayNo,
           calendarDate: day.calendarDate ? day.calendarDate.toISOString() : null,
           status: dayStatus,
-          estimatedMinutes: dayEstimatedMinutes || day.estimatedMinutes || 0,
-          actualMinutes: day.actualMinutes || 0,
+          estimatedMinutes: dayEstimatedMinutes,
+          actualMinutes: isDayComplete ? dayEstimatedMinutes : 0,
           tasksTotal: dayTasksTotal,
           tasksCompleted: dayTasksCompleted,
           isCatchUpDay: day.isCatchUpDay || false,
@@ -147,7 +158,7 @@ export class StudyPlanService {
       });
 
       const isSprintComplete = sprintDaysTotal > 0 && sprintDaysCompleted >= sprintDaysTotal;
-      const anySprintTaskDone = formattedDays.some((d: StudyDayDto) => d.tasksCompleted > 0);
+      const anySprintTaskDone = formattedDays.some((d: StudyDayDto) => (d.tasksCompleted || 0) > 0);
       const sprintStatus = isSprintComplete
         ? "completed"
         : anySprintTaskDone
@@ -163,18 +174,22 @@ export class StudyPlanService {
         plannedEndDate: sprint.plannedEndDate ? sprint.plannedEndDate.toISOString() : null,
         initialDaysAssigned: sprint.initialDaysAssigned || sprint.days.length,
         actualDaysTaken: sprint.actualDaysTaken || 0,
-        totalEstimatedMinutes: sprintEstimatedMinutes || sprint.totalEstimatedMinutes || 0,
+        totalEstimatedMinutes: sprintEstimatedMinutes,
         totalActualMinutes: sprintActualMinutes,
         days: formattedDays,
       };
     });
 
-    const completedSprintsCount = formattedSprints.filter((s: StudySprintDto) => s.status === "completed").length;
-    const progressPercent = totalPlanTasks > 0 ? Math.round((completedPlanTasks / totalPlanTasks) * 100) : 0;
+    const completedSprintsCount = formattedSprints.filter(
+      (s: StudySprintDto) => s.status === "completed"
+    ).length;
+    const progressPercent =
+      totalPlanTasks > 0 ? Math.round((completedPlanTasks / totalPlanTasks) * 100) : 0;
 
     const firstSprint = formattedSprints[0];
     const lastSprint = formattedSprints[formattedSprints.length - 1];
-    const startDate = firstSprint?.plannedStartDate || (plan.createdAt ? plan.createdAt.toISOString() : null);
+    const startDate =
+      firstSprint?.plannedStartDate || (plan.createdAt ? plan.createdAt.toISOString() : null);
     const targetDate = lastSprint?.plannedEndDate || null;
 
     let isOnSchedule = true;
@@ -182,7 +197,10 @@ export class StudyPlanService {
 
     if (startDate) {
       const start = new Date(startDate);
-      const elapsedDays = Math.max(0, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+      const elapsedDays = Math.max(
+        0,
+        Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+      );
       if (elapsedDays > 0 && totalPlanDays > 0) {
         const expectedCompletedDays = Math.min(totalPlanDays, elapsedDays);
         if (completedPlanDays < expectedCompletedDays - 1) {
@@ -215,23 +233,30 @@ export class StudyPlanService {
     };
   }
 
+  /**
+   * Update task status for the currently authenticated user.
+   * Modifies UserItemProgress strictly without mutating shared curriculum tables.
+   */
   static async updateStudyTask(taskId: bigint, updates: UpdateTaskDto, userId?: string) {
-    const updateData: Record<string, unknown> = {};
-    if (updates.status !== undefined) updateData.status = updates.status;
-    if (updates.isRevision !== undefined) updateData.isRevision = updates.isRevision;
-    if (updates.actualMinutes !== undefined) updateData.actualMinutes = updates.actualMinutes;
+    if (!userId) {
+      throw new UnauthorizedError("Authentication required to update study tasks");
+    }
 
-    const updatedTask = await StudyPlanRepository.updateTask(taskId, updateData);
+    const task = await StudyPlanRepository.findTaskById(taskId);
+    if (!task) {
+      throw new NotFoundError(`Task #${taskId} not found`);
+    }
 
-    if (userId && updatedTask.itemId) {
-      if (updates.status === "completed") {
-        const existingProgress = await StudyPlanRepository.findUserProgress(userId, updatedTask.itemId);
+    const isCompleted = updates.status === "completed";
 
+    if (task.itemId) {
+      if (isCompleted) {
+        const existingProgress = await StudyPlanRepository.findUserProgress(userId, task.itemId);
         const currentSolveCount = existingProgress?.solveCount ?? 0;
         const now = new Date();
         const calculation = calculateNextRevision(currentSolveCount, true, now);
 
-        await StudyPlanRepository.upsertUserProgress(userId, updatedTask.itemId, {
+        await StudyPlanRepository.upsertUserProgress(userId, task.itemId, {
           status: calculation.status,
           solveCount: calculation.solveCount,
           lastSolvedAt: calculation.lastSolvedAt,
@@ -239,9 +264,8 @@ export class StudyPlanService {
           lastScore: calculation.lastScore,
           completedAt: now,
         });
-      } else if (updates.status === "not_started") {
-        const existingProgress = await StudyPlanRepository.findUserProgress(userId, updatedTask.itemId);
-
+      } else {
+        const existingProgress = await StudyPlanRepository.findUserProgress(userId, task.itemId);
         if (existingProgress) {
           await StudyPlanRepository.resetUserProgress(
             existingProgress.id,
@@ -251,62 +275,37 @@ export class StudyPlanService {
       }
     }
 
-    if (updates.status !== undefined) {
-      const completedCount = await StudyPlanRepository.countCompletedTasksInDay(updatedTask.dayId);
-      const totalCount = await StudyPlanRepository.countTotalTasksInDay(updatedTask.dayId);
-
-      const dayStatus = completedCount >= totalCount && totalCount > 0
-        ? "completed"
-        : completedCount > 0
-        ? "in_progress"
-        : "upcoming";
-
-      await StudyPlanRepository.updateDayProgress(updatedTask.dayId, completedCount, dayStatus);
-
-      const allSprintDays = await StudyPlanRepository.findSprintDays(updatedTask.sprintId);
-      const allDaysCompleted = allSprintDays.every((d: any) =>
-        d.dayId === updatedTask.dayId ? dayStatus === "completed" : d.status === "completed"
-      );
-      const anyDayInProgress = allSprintDays.some((d: any) =>
-        d.dayId === updatedTask.dayId ? completedCount > 0 : (d.tasksCompleted || 0) > 0
-      );
-      const sprintStatus = allDaysCompleted
-        ? "completed"
-        : anyDayInProgress
-        ? "in_progress"
-        : "upcoming";
-
-      await StudyPlanRepository.updateSprintStatus(updatedTask.sprintId, sprintStatus);
-    }
-
     return {
-      taskId: updatedTask.taskId.toString(),
-      dayId: updatedTask.dayId.toString(),
-      sprintId: updatedTask.sprintId.toString(),
-      itemId: updatedTask.itemId,
-      taskOrder: updatedTask.taskOrder,
-      status: updatedTask.status,
-      estimatedMinutes: updatedTask.estimatedMinutes,
-      actualMinutes: updatedTask.actualMinutes,
-      isCarriedForward: updatedTask.isCarriedForward,
-      isBacklog: updatedTask.isBacklog,
-      isRevision: updatedTask.isRevision,
-      item: updatedTask.item
+      taskId: task.taskId.toString(),
+      dayId: task.dayId.toString(),
+      sprintId: task.sprintId.toString(),
+      itemId: task.itemId,
+      taskOrder: task.taskOrder,
+      status: isCompleted ? "completed" : "not_started",
+      estimatedMinutes: task.estimatedMinutes || 20,
+      actualMinutes: isCompleted ? task.estimatedMinutes || 20 : 0,
+      isCarriedForward: task.isCarriedForward || false,
+      isBacklog: task.isBacklog || false,
+      isRevision: Boolean(updates.isRevision),
+      item: task.item
         ? {
-            id: updatedTask.item.id,
-            title: updatedTask.item.title,
-            slug: updatedTask.item.slug,
-            type: updatedTask.item.type,
-            difficulty: updatedTask.item.difficulty,
-            subjectSlug: updatedTask.item.subject.slug,
-            subjectName: updatedTask.item.subject.name,
-            topicName: updatedTask.item.topic.name,
-            subtopicName: updatedTask.item.subtopic?.name ?? null,
+            id: task.item.id,
+            title: task.item.title,
+            slug: task.item.slug,
+            type: task.item.type,
+            difficulty: task.item.difficulty,
+            subjectSlug: task.item.subject?.slug || "",
+            subjectName: task.item.subject?.name || "",
+            topicName: task.item.topic?.name || "",
+            subtopicName: task.item.subtopic?.name ?? null,
           }
         : null,
     };
   }
 
+  /**
+   * Update study plan parameters (schedule / start dates)
+   */
   static async updateStudyPlan(slug: string, updates: UpdateStudyPlanDto) {
     const updatedPlan = await StudyPlanRepository.updateStudyPlan(slug, {
       ...(updates.name ? { name: updates.name } : {}),
@@ -341,20 +340,31 @@ export class StudyPlanService {
     };
   }
 
+  /**
+   * Fetch revision tasks for the authenticated user.
+   */
   static async getRevisionList(userId?: string) {
+    if (!userId) {
+      return [];
+    }
+
     const now = new Date();
     const tasks = await StudyPlanRepository.findRevisionTasks();
+    const userProgressRecords = await StudyPlanRepository.findUserProgressForUser(userId);
 
     const progressMap = new Map<number, any>();
-    if (userId) {
-      const userProgressRecords = await StudyPlanRepository.findUserProgressForUser(userId);
-      for (const p of userProgressRecords) {
-        progressMap.set(p.itemId, p);
-      }
+    for (const p of userProgressRecords) {
+      progressMap.set(p.itemId, p);
     }
 
     return tasks.map((task: any) => {
       const p = task.itemId ? progressMap.get(task.itemId) : undefined;
+      const isCompleted = Boolean(
+        p && (p.status === "completed" || (p.solveCount > 0 && p.lastScore !== false))
+      );
+      const isDue = Boolean(
+        p && (p.status === "needs_revision" || (p.nextRevisionAt && new Date(p.nextRevisionAt) <= now))
+      );
       const statusInfo = formatRevisionStatus(p?.nextRevisionAt ?? null, p?.solveCount ?? 0, now);
 
       return {
@@ -363,12 +373,12 @@ export class StudyPlanService {
         sprintId: task.sprintId.toString(),
         itemId: task.itemId,
         taskOrder: task.taskOrder,
-        status: task.status,
-        estimatedMinutes: task.estimatedMinutes,
-        actualMinutes: task.actualMinutes,
-        isCarriedForward: task.isCarriedForward,
-        isBacklog: task.isBacklog,
-        isRevision: task.isRevision,
+        status: isCompleted ? "completed" : "not_started",
+        estimatedMinutes: task.estimatedMinutes || 20,
+        actualMinutes: isCompleted ? task.estimatedMinutes || 20 : 0,
+        isCarriedForward: task.isCarriedForward || false,
+        isBacklog: task.isBacklog || false,
+        isRevision: isDue || task.isRevision,
         item: task.item
           ? {
               id: task.item.id,
@@ -376,9 +386,9 @@ export class StudyPlanService {
               slug: task.item.slug,
               type: task.item.type,
               difficulty: task.item.difficulty,
-              subjectSlug: task.item.subject.slug,
-              subjectName: task.item.subject.name,
-              topicName: task.item.topic.name,
+              subjectSlug: task.item.subject?.slug || "",
+              subjectName: task.item.subject?.name || "",
+              topicName: task.item.topic?.name || "",
               subtopicName: task.item.subtopic?.name ?? null,
               progress: p
                 ? {

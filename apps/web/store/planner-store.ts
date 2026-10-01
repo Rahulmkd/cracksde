@@ -11,6 +11,7 @@ export interface DailyTask {
 }
 
 interface PlannerState {
+  currentUserId: string | null;
   tasks: DailyTask[];
   points: number;
   streak: number;
@@ -22,6 +23,8 @@ interface PlannerState {
   clearTasks: () => void;
   addPoints: (pts: number) => void;
   checkInStreak: () => void;
+  resetStore: () => void;
+  syncUser: (userId: string | null) => void;
 }
 
 const getTodayDateString = () => {
@@ -32,35 +35,42 @@ const getTodayDateString = () => {
 export const usePlannerStore = create<PlannerState>()(
   persist(
     (set, get) => ({
-      tasks: [
-        {
-          id: "1",
-          title: "Two Sum & Pair with Target Sum",
-          duration: "15m",
-          completed: false,
-          category: "DSA",
-          createdAt: Date.now() - 3600000,
-        },
-        {
-          id: "2",
-          title: "Review DBMS Indexing & B-Trees",
-          duration: "25m",
-          completed: false,
-          category: "DBMS",
-          createdAt: Date.now() - 1800000,
-        },
-        {
-          id: "3",
-          title: "Process Synchronization & Mutex",
-          duration: "20m",
-          completed: false,
-          category: "OS",
-          createdAt: Date.now() - 900000,
-        },
-      ],
-      points: 315,
-      streak: 3,
-      lastActiveDate: getTodayDateString(),
+      currentUserId: null,
+      tasks: [],
+      points: 0,
+      streak: 0,
+      lastActiveDate: null,
+
+      syncUser: (userId: string | null) => {
+        const state = get();
+        if (state.currentUserId !== userId) {
+          // When switching users or on first user load, clear old user's planner data
+          set({
+            currentUserId: userId,
+            tasks: [],
+            points: 0,
+            streak: 0,
+            lastActiveDate: null,
+          });
+        }
+      },
+
+      resetStore: () => {
+        set({
+          currentUserId: null,
+          tasks: [],
+          points: 0,
+          streak: 0,
+          lastActiveDate: null,
+        });
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("cracksde-daily-planner-storage");
+            localStorage.removeItem("cracksde_planly_expanded_sprints");
+            localStorage.removeItem("cracksde_planly_expanded_days");
+          } catch {}
+        }
+      },
 
       addTask: (title: string, duration = "15m", category = "Custom") =>
         set((state) => ({

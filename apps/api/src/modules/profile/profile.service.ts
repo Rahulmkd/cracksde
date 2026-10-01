@@ -206,4 +206,20 @@ export class ProfileService {
       recentActivity: formattedRecentActivity,
     };
   }
+
+  /**
+   * Delete user account and cascade all associated data
+   */
+  static async deleteAccount(userId: string): Promise<{ success: boolean; message: string }> {
+    const user = await ProfileRepository.findUserWithProfile(userId);
+    if (!user) {
+      throw new NotFoundError("User account not found");
+    }
+
+    await ProfileRepository.deleteUserAccount(userId);
+    return {
+      success: true,
+      message: "Account and all associated progress data permanently deleted",
+    };
+  }
 }

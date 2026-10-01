@@ -20,7 +20,10 @@ import {
   Loader2,
   Image as ImageIcon,
   Check,
+  ShieldAlert,
+  Trash2,
 } from "lucide-react";
+import { DeleteAccountDialog } from "./delete-account-dialog";
 
 interface ProfileEditFormProps {
   profile: UserProfileDto;
@@ -105,6 +108,7 @@ export function ProfileEditForm({
   const [activeSection, setActiveSection] = useState<
     "basic" | "career" | "study" | "social" | "notifications"
   >("basic");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleChange = (
     field: keyof ProfileFormData,
@@ -709,6 +713,31 @@ export function ProfileEditForm({
                 </p>
               </div>
             </div>
+
+            {/* Danger Zone Section inside Preferences */}
+            <div className="mt-6 pt-5 border-t border-zinc-800/80">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-rose-950/60 bg-rose-950/10">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="h-4 w-4 text-rose-400" />
+                    <h4 className="text-xs font-semibold text-rose-400">Danger Zone</h4>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed max-w-md">
+                    Permanently delete your CrackSDE account, all solved questions, study points, and credentials.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  className="h-8 text-xs font-medium border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all flex-shrink-0 gap-1.5"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete Account
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -759,6 +788,12 @@ export function ProfileEditForm({
           </Button>
         </div>
       </CardFooter>
+
+      {/* Delete Account Confirmation Dialog Modal */}
+      <DeleteAccountDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
     </form>
   );
 }

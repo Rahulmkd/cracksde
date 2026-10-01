@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Calendar as CalendarIcon,
@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DailyPlanner } from "@/components/layout/daily-planner";
 import { useStudyPlan } from "@/hooks/use-study-plan";
+import { useAuth } from "@/hooks/use-auth";
 import { usePlannerStore } from "@/store/planner-store";
 import { useSmartCatchup } from "../hooks/use-smart-catchup";
 import { SprintMetricsPanel } from "./sprint-metrics-panel";
@@ -21,6 +22,9 @@ import { toast } from "sonner";
 import type { StudyTaskDto } from "@starter/shared";
 
 export function PlanlySprintPlanner() {
+  const { user } = useAuth();
+  const userId = user?.id ?? "anonymous";
+
   const {
     plan,
     isLoading,
@@ -36,26 +40,22 @@ export function PlanlySprintPlanner() {
   const { addPoints } = usePlannerStore();
   const catchupData = useSmartCatchup(plan);
 
-  // Independent expand/collapse states for sprints and days with localStorage persistence
-  const [expandedSprintIds, setExpandedSprintIds] = useState<Record<string, boolean>>(() => {
-    if (typeof window === "undefined") return {};
-    try {
-      const saved = localStorage.getItem("cracksde_planly_expanded_sprints");
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
+  // User-isolated expand/collapse states for sprints and days
+  const [expandedSprintIds, setExpandedSprintIds] = useState<Record<string, boolean>>({});
+  const [expandedDayIds, setExpandedDayIds] = useState<Record<string, boolean>>({});
 
-  const [expandedDayIds, setExpandedDayIds] = useState<Record<string, boolean>>(() => {
-    if (typeof window === "undefined") return {};
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     try {
-      const saved = localStorage.getItem("cracksde_planly_expanded_days");
-      return saved ? JSON.parse(saved) : {};
+      const savedSprints = localStorage.getItem(`cracksde_planly_expanded_sprints_${userId}`);
+      setExpandedSprintIds(savedSprints ? JSON.parse(savedSprints) : {});
+      const savedDays = localStorage.getItem(`cracksde_planly_expanded_days_${userId}`);
+      setExpandedDayIds(savedDays ? JSON.parse(savedDays) : {});
     } catch {
-      return {};
+      setExpandedSprintIds({});
+      setExpandedDayIds({});
     }
-  });
+  }, [userId]);
 
   const [isCatchupModalOpen, setIsCatchupModalOpen] = useState(false);
   const [isAdjustPlanModalOpen, setIsAdjustPlanModalOpen] = useState(false);
@@ -67,7 +67,7 @@ export function PlanlySprintPlanner() {
         [sprintId]: !prev[sprintId],
       };
       try {
-        localStorage.setItem("cracksde_planly_expanded_sprints", JSON.stringify(next));
+        localStorage.setItem(`cracksde_planly_expanded_sprints_${userId}`, JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -80,7 +80,7 @@ export function PlanlySprintPlanner() {
         [dayId]: !prev[dayId],
       };
       try {
-        localStorage.setItem("cracksde_planly_expanded_days", JSON.stringify(next));
+        localStorage.setItem(`cracksde_planly_expanded_days_${userId}`, JSON.stringify(next));
       } catch {}
       return next;
     });

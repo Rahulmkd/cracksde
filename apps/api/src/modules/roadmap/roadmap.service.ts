@@ -317,17 +317,6 @@ export class RoadmapService {
       completedAt: isCorrect ? now : existingProgress?.completedAt ?? null,
     });
 
-    if (isCorrect) {
-      const matchingTasks = await RoadmapRepository.findTasksByItemId(itemId);
-      if (matchingTasks.length > 0) {
-        await RoadmapRepository.completeMatchingStudyTasks(itemId);
-        const dayIds = Array.from<bigint>(new Set(matchingTasks.map((t: any) => t.dayId)));
-        for (const dayId of dayIds) {
-          await RoadmapRepository.recalculateDayProgress(dayId);
-        }
-      }
-    }
-
     const formattedRevision = formatRevisionStatus(
       updatedProgress.nextRevisionAt,
       updatedProgress.solveCount,

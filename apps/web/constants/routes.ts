@@ -9,6 +9,9 @@ export const ROUTES = {
   // Core App
   DASHBOARD: "/dashboard",
   PROFILE: "/profile",
+  NOTIFICATIONS: "/notifications",
+  ACCOUNT: "/account",
+  TROUBLESHOOTING: "/troubleshooting",
   PLANLY: "/planly",
   PREP_HUB: "/prep-hub",
   PRACTICE: "/practice",
@@ -28,6 +31,9 @@ export type AppRoute = typeof ROUTES[keyof typeof ROUTES];
 export const PROTECTED_ROUTES = [
   ROUTES.DASHBOARD,
   ROUTES.PROFILE,
+  ROUTES.NOTIFICATIONS,
+  ROUTES.ACCOUNT,
+  ROUTES.TROUBLESHOOTING,
   ROUTES.PLANLY,
   ROUTES.PREP_HUB,
   ROUTES.PRACTICE,

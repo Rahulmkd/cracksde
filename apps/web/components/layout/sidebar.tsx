@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useUIStore } from "@/store/ui-store";
 import { useAuth } from "@/hooks/use-auth";
+import { UserDropdown } from "./user-dropdown";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -48,7 +49,8 @@ export function Sidebar() {
     toggleExploreOpen,
     toggleSpacesOpen,
   } = useUIStore();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const [sidebarDropdownOpen, setSidebarDropdownOpen] = useState(false);
 
   const userInitials = user?.name
     ? user.name
@@ -58,12 +60,56 @@ export function Sidebar() {
         .toUpperCase()
         .substring(0, 2)
     : "ME";
-  const displayName = user?.name || "Developer";
+  const displayName = user?.name || (isAuthLoading ? "" : "Developer");
 
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-  // Close sidebar drawer on mobile/tablet when route changes
+  // Responsive breakpoint synchronization: collapse on smaller screens, expand on desktop
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mql = window.matchMedia("(min-width: 1024px)");
+
+    // Initial check on mount
+    if (mql.matches) {
+      setSidebarOpen(true);
+    } else {
+      setSidebarOpen(false);
+    }
+
+    const handleMediaChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        // Switched to desktop: keep sidebar visible
+        setSidebarOpen(true);
+        document.body.style.overflow = "";
+      } else {
+        // Switched to tablet/mobile: automatically collapse/hide sidebar
+        setSidebarOpen(false);
+        document.body.style.overflow = "";
+      }
+      setSidebarDropdownOpen(false);
+    };
+
+    if (mql.addEventListener) {
+      mql.addEventListener("change", handleMediaChange);
+    } else {
+      (mql as MediaQueryList).addListener(handleMediaChange);
+    }
+
+    return () => {
+      if (mql.removeEventListener) {
+        mql.removeEventListener("change", handleMediaChange);
+      } else {
+        (mql as MediaQueryList).removeListener(handleMediaChange);
+      }
+    };
+  }, [setSidebarOpen]);
+
+  // Close sidebar drawer and dropdown on mobile/tablet when route changes
+  useEffect(() => {
+    if (sidebarDropdownOpen) {
+      setSidebarDropdownOpen(false);
+    }
     if (typeof window !== "undefined" && window.innerWidth < 1024 && sidebarOpen) {
       setSidebarOpen(false);
     }
@@ -267,7 +313,7 @@ export function Sidebar() {
           "fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden transition-opacity duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
           sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
-        onClick={toggleSidebar}
+        onClick={() => setSidebarOpen(false)}
         aria-hidden="true"
       />
 
@@ -278,55 +324,96 @@ export function Sidebar() {
           "transition-[width,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width,transform]",
           sidebarOpen
             ? "w-72 lg:w-64 translate-x-0 shadow-2xl shadow-black/80 lg:shadow-none"
-            : "-translate-x-full lg:translate-x-0 lg:w-[68px]"
+            : "w-72 lg:w-[68px] -translate-x-full lg:translate-x-0 lg:shadow-none"
         )}
         aria-label="Application Sidebar"
       >
         {/* Brand Header */}
-        <div className="flex h-14 items-center justify-between px-3.5 border-b border-zinc-800/80 bg-zinc-950/90 shrink-0">
-          <Link
-            href="/dashboard"
-            onClick={handleLinkClick}
-            className="flex items-center gap-2 overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded-lg p-0.5"
-            aria-label="CrackSDE Home"
-          >
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-600 to-blue-500 text-white font-bold text-[13px] shadow-sm shadow-blue-600/30 group-hover:scale-105 transition-transform">
-              ⚡
-            </div>
-            <span
-              className={cn(
-                "font-semibold text-[14px] tracking-tight text-zinc-100 flex items-center overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-                sidebarOpen
-                  ? "max-w-[140px] opacity-100 translate-x-0 ml-1"
-                  : "max-w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-              )}
-            >
-              Crack<span className="text-blue-400 font-semibold ml-0.5">SDE</span>
-            </span>
-          </Link>
+        <div
+          className={cn(
+            "flex h-12 items-center border-b border-zinc-800/80 bg-zinc-950/90 shrink-0 transition-all duration-300",
+            sidebarOpen
+              ? "justify-between px-3.5"
+              : "justify-between px-3.5 lg:justify-center lg:px-2"
+          )}
+        >
+          {sidebarOpen ? (
+            <>
+              <Link
+                href="/dashboard"
+                onClick={handleLinkClick}
+                className="flex items-center gap-2 overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded-lg p-0.5"
+                aria-label="CrackSDE Home"
+              >
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-600 to-blue-500 text-white font-bold text-[13px] shadow-sm shadow-blue-600/30 group-hover:scale-105 transition-transform">
+                  ⚡
+                </div>
+                <span className="font-semibold text-[14px] tracking-tight text-zinc-100 flex items-center overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ml-1">
+                  Crack<span className="text-blue-400 font-semibold ml-0.5">SDE</span>
+                </span>
+              </Link>
 
-          {/* Desktop Toggle Button */}
-          <button
-            onClick={toggleSidebar}
-            className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800/80 hover:text-zinc-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
-            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-            title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-          >
-            {sidebarOpen ? (
-              <PanelLeftClose className="h-4 w-4" />
-            ) : (
-              <PanelLeft className="h-4 w-4" />
-            )}
-          </button>
+              {/* Desktop Toggle Button */}
+              <button
+                onClick={toggleSidebar}
+                className="hidden lg:flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800/80 hover:text-zinc-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
+                aria-label="Collapse sidebar"
+                title="Collapse sidebar"
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </button>
 
-          {/* Mobile & Tablet Close Button */}
-          <button
-            onClick={toggleSidebar}
-            className="flex lg:hidden h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors focus-visible:outline-none"
-            aria-label="Close sidebar"
-          >
-            <X className="h-4 w-4" />
-          </button>
+              {/* Mobile & Tablet Close Button */}
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="flex lg:hidden h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors focus-visible:outline-none"
+                aria-label="Close sidebar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Desktop Collapsed View Header Toggle Button */}
+              <div className="hidden lg:flex relative group/toggle items-center justify-center">
+                <button
+                  onClick={toggleSidebar}
+                  className="h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-800/80 hover:text-zinc-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 flex"
+                  aria-label="Expand sidebar"
+                  title="Expand sidebar"
+                >
+                  <PanelLeft className="h-4 w-4" />
+                </button>
+                {/* Desktop Collapsed Tooltip */}
+                <div
+                  className="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700/90 text-[11px] font-medium text-zinc-100 shadow-dialog opacity-0 -translate-x-1 group-hover/toggle:opacity-100 group-hover/toggle:translate-x-0 transition-all duration-150"
+                  role="tooltip"
+                >
+                  Expand sidebar
+                  <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-zinc-900 border-l border-b border-zinc-700/90" />
+                </div>
+              </div>
+
+              {/* Mobile/Tablet Fallback Header (Hidden offscreen when collapsed) */}
+              <div className="flex lg:hidden items-center justify-between w-full">
+                <Link
+                  href="/dashboard"
+                  onClick={handleLinkClick}
+                  className="flex items-center gap-2"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-600 to-blue-500 text-white font-bold text-[13px]">
+                    ⚡
+                  </div>
+                </Link>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Scrollable Nav Sections */}
@@ -362,41 +449,57 @@ export function Sidebar() {
             </div>
 
             {/* Profile Drawer */}
-            <div className="flex items-center justify-between rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-1.5">
-              <Link
-                href="/profile"
-                onClick={handleLinkClick}
-                className="flex items-center gap-2 overflow-hidden flex-1 group hover:opacity-90 transition-opacity"
-              >
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 overflow-hidden">
-                  {user?.image ? (
-                    <img
-                      src={user.image}
-                      alt={displayName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span>{userInitials}</span>
-                  )}
-                </div>
-                <div className="truncate">
-                  <div className="text-[12px] font-medium text-zinc-100 truncate group-hover:text-blue-400 transition-colors">
-                    {displayName}
+            <div className="relative">
+              <div className="flex items-center justify-between rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSidebarDropdownOpen((prev) => !prev)}
+                  className="flex items-center gap-2 overflow-hidden flex-1 group hover:opacity-90 transition-opacity text-left focus-visible:outline-none"
+                  aria-label="Toggle user account menu"
+                  aria-expanded={sidebarDropdownOpen}
+                >
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 overflow-hidden">
+                    {user?.image ? (
+                      <img
+                        src={user.image}
+                        alt={displayName}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span>{userInitials}</span>
+                    )}
                   </div>
-                  <div className="text-[11px] text-zinc-500 font-normal leading-none">Free Plan</div>
-                </div>
-              </Link>
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                className="h-5 px-1.5 text-[10px] font-medium border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:scale-95 transition-transform shrink-0"
-              >
-                <Link href="/unlock" onClick={handleLinkClick}>
-                  <Sparkles className="h-2.5 w-2.5 mr-1 text-amber-400" />
-                  Upgrade
-                </Link>
-              </Button>
+                  <div className="truncate">
+                    {isAuthLoading && !user ? (
+                      <div className="h-3 w-16 bg-zinc-800 rounded animate-pulse my-0.5" />
+                    ) : (
+                      <div className="text-[12px] font-medium text-zinc-100 truncate group-hover:text-blue-400 transition-colors">
+                        {displayName || "Developer"}
+                      </div>
+                    )}
+                    <div className="text-[11px] text-zinc-500 font-normal leading-none">Free Plan</div>
+                  </div>
+                </button>
+                <Button
+                  asChild
+                  size="sm"
+                  variant="outline"
+                  className="h-5 px-1.5 text-[10px] font-medium border-amber-500/30 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:scale-95 transition-transform shrink-0"
+                >
+                  <Link href="/unlock" onClick={handleLinkClick}>
+                    <Sparkles className="h-2.5 w-2.5 mr-1 text-amber-400" />
+                    Upgrade
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Sidebar Expanded User Dropdown */}
+              <UserDropdown
+                isOpen={sidebarDropdownOpen}
+                onClose={() => setSidebarDropdownOpen(false)}
+                placement="top-left"
+                className="bottom-full mb-2 left-0 w-full"
+              />
             </div>
           </div>
 
@@ -412,25 +515,29 @@ export function Sidebar() {
               className="relative group/notif cursor-pointer"
               title="4 updates available"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 transition-colors">
+              <Link
+                href="/notifications"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 transition-colors"
+              >
                 <BellRing className="h-4 w-4" />
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-500 ring-2 ring-zinc-950 animate-pulse" />
-              </div>
+              </Link>
 
               {/* Tooltip */}
               <div className="hidden lg:block absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700/90 text-[11px] font-medium text-zinc-100 shadow-dialog opacity-0 -translate-x-1 group-hover/notif:opacity-100 group-hover/notif:translate-x-0 transition-all duration-150">
-                4 new roadmap updates
+                4 new notifications
                 <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-zinc-900 border-l border-b border-zinc-700/90" />
               </div>
             </div>
 
-            {/* Profile Avatar */}
+            {/* Profile Avatar Trigger in Collapsed Sidebar */}
             <div className="relative group/prof">
-              <Link
-                href="/profile"
-                onClick={handleLinkClick}
+              <button
+                type="button"
+                onClick={() => setSidebarDropdownOpen((prev) => !prev)}
                 className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600/20 text-[11px] font-semibold text-blue-400 border border-blue-500/30 cursor-pointer hover:scale-105 hover:border-blue-400 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 overflow-hidden"
-                aria-label={`${displayName} profile`}
+                aria-label={`${displayName} menu`}
+                aria-expanded={sidebarDropdownOpen}
               >
                 {user?.image ? (
                   <img
@@ -441,12 +548,20 @@ export function Sidebar() {
                 ) : (
                   <span>{userInitials}</span>
                 )}
-              </Link>
+              </button>
               {/* Tooltip */}
               <div className="hidden lg:block absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700/90 text-[11px] font-medium text-zinc-100 shadow-dialog opacity-0 -translate-x-1 group-hover/prof:opacity-100 group-hover/prof:translate-x-0 transition-all duration-150">
-                {displayName} (My Profile)
+                {displayName} (Account Menu)
                 <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-zinc-900 border-l border-b border-zinc-700/90" />
               </div>
+
+              {/* Sidebar Collapsed User Dropdown */}
+              <UserDropdown
+                isOpen={sidebarDropdownOpen}
+                onClose={() => setSidebarDropdownOpen(false)}
+                placement="top-left"
+                className="bottom-0 left-12 w-56"
+              />
             </div>
           </div>
         </div>

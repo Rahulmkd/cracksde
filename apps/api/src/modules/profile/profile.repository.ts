@@ -156,4 +156,17 @@ export class ProfileRepository {
       recentActivity,
     };
   }
+
+  /**
+   * Permanently delete user and all associated records across domains
+   */
+  static async deleteUserAccount(userId: string) {
+    return prisma.$transaction([
+      prisma.userProfile.deleteMany({ where: { userId } }),
+      prisma.userItemProgress.deleteMany({ where: { userId } }),
+      prisma.session.deleteMany({ where: { userId } }),
+      prisma.account.deleteMany({ where: { userId } }),
+      prisma.user.delete({ where: { id: userId } }),
+    ]);
+  }
 }

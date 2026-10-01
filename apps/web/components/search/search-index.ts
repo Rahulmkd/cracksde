@@ -16,14 +16,40 @@ import {
   Sparkles,
   Compass,
   User,
+  CheckCircle2,
+  Bookmark,
+  FileCode,
+  LayoutDashboard,
+  Users,
 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 
-export type SearchCategory = "Subjects" | "Topics" | "Spaces" | "Actions" | "Tools & Guides";
+export type SearchTab =
+  | "All"
+  | "Problems"
+  | "Editorials"
+  | "Notes"
+  | "Lists"
+  | "Blogs"
+  | "Pages";
+
+export type SearchCategory =
+  | "Problems"
+  | "Editorials"
+  | "Notes"
+  | "Lists"
+  | "Blogs"
+  | "Pages"
+  | "Subjects"
+  | "Topics"
+  | "Spaces"
+  | "Actions"
+  | "Tools & Guides";
 
 export interface SearchEntry {
   title: string;
   category: SearchCategory;
+  tab: SearchTab | SearchTab[];
   href: string;
   description?: string;
   icon: React.ElementType;
@@ -32,210 +58,512 @@ export interface SearchEntry {
 }
 
 export const allSearchEntries: SearchEntry[] = [
-  // Core Subjects
+  // 1. Problems
   {
-    title: "Data Structures & Algorithms (DSA)",
-    category: "Subjects",
+    title: "Two Sum — Optimal Hash Map Approach",
+    category: "Problems",
+    tab: "Problems",
+    href: `${ROUTES.PRACTICE}?problem=two-sum`,
+    description: "Array index pairing using one-pass hash map lookup",
+    icon: Code2,
+    badge: "Easy",
+    keywords: [
+      "two sum",
+      "arrays",
+      "hashmap",
+      "two pointers",
+      "problems",
+      "practice",
+    ],
+  },
+  {
+    title: "Trapping Rain Water — Two Pointer & Monotonic Stack",
+    category: "Problems",
+    tab: "Problems",
+    href: `${ROUTES.PRACTICE}?problem=trapping-rain-water`,
+    description: "Calculate trapped elevation units in O(N) time O(1) space",
+    icon: Code2,
+    badge: "Hard",
+    keywords: [
+      "trapping rain water",
+      "two pointer",
+      "stack",
+      "arrays",
+      "problems",
+    ],
+  },
+  {
+    title: "LRU Cache — Double Linked List + Hash Map",
+    category: "Problems",
+    tab: "Problems",
+    href: `${ROUTES.PRACTICE}?problem=lru-cache`,
+    description: "Design constant time O(1) get and put cache eviction policy",
+    icon: Code2,
+    badge: "Medium",
+    keywords: [
+      "lru cache",
+      "linked list",
+      "hash map",
+      "system design",
+      "problems",
+    ],
+  },
+  {
+    title: "Median of Two Sorted Arrays — Binary Search Partition",
+    category: "Problems",
+    tab: "Problems",
+    href: `${ROUTES.PRACTICE}?problem=median-sorted-arrays`,
+    description: "Find median in O(log(min(N,M))) logarithmic time",
+    icon: Code2,
+    badge: "Hard",
+    keywords: [
+      "median",
+      "binary search",
+      "sorted arrays",
+      "divide and conquer",
+      "problems",
+    ],
+  },
+  {
+    title: "Course Schedule II — Kahn's Topological Sort",
+    category: "Problems",
+    tab: "Problems",
+    href: `${ROUTES.PRACTICE}?problem=course-schedule`,
+    description: "Detect cycles and order DAG prerequisite courses",
+    icon: Code2,
+    badge: "Medium",
+    keywords: [
+      "course schedule",
+      "graph",
+      "topological sort",
+      "bfs",
+      "dfs",
+      "cycle detection",
+    ],
+  },
+  {
+    title: "Data Structures & Algorithms (DSA Practice Track)",
+    category: "Problems",
+    tab: "Problems",
     href: `${ROUTES.PRACTICE}?subject=dsa`,
     description: "Arrays, Trees, Graphs, DP, and pattern problem solving",
     icon: Code2,
     badge: "116h",
-    keywords: ["dsa", "algorithms", "data structures", "leetcode", "trees", "graphs", "dp"],
-  },
-  {
-    title: "Database Management Systems (DBMS)",
-    category: "Subjects",
-    href: `${ROUTES.PRACTICE}?subject=dbms`,
-    description: "SQL query optimization, ACID, B+ Trees, indexing",
-    icon: Database,
-    badge: "57h",
-    keywords: ["dbms", "sql", "database", "acid", "indexing", "transactions", "b+ trees"],
-  },
-  {
-    title: "Operating Systems (OS)",
-    category: "Subjects",
-    href: `${ROUTES.PRACTICE}?subject=operating-systems`,
-    description: "Processes, Threads, Virtual Memory, Deadlocks, Mutex",
-    icon: Cpu,
-    badge: "24h",
-    keywords: ["os", "operating systems", "threads", "processes", "deadlocks", "virtual memory", "paging"],
-  },
-  {
-    title: "Computer Networks (CN)",
-    category: "Subjects",
-    href: `${ROUTES.PRACTICE}?subject=computer-networks`,
-    description: "TCP/IP handshake, OSI Model, Sockets, HTTP/HTTPS",
-    icon: Network,
-    badge: "24h",
-    keywords: ["cn", "networking", "tcp", "ip", "osi", "http", "https", "dns", "sockets"],
-  },
-  {
-    title: "Low Level Design (LLD)",
-    category: "Subjects",
-    href: `${ROUTES.PRACTICE}?subject=system-design`,
-    description: "SOLID principles, Design patterns, UML diagrams",
-    icon: Layers,
-    badge: "31h",
-    keywords: ["lld", "system design", "solid", "design patterns", "uml", "rate limiter", "lru cache"],
-  },
-  {
-    title: "Object-Oriented Programming (OOPS)",
-    category: "Subjects",
-    href: ROUTES.PREP_HUB,
-    description: "Encapsulation, Polymorphism, Inheritance, C++/Java",
-    icon: BookOpen,
-    badge: "18h",
-    keywords: ["oops", "oop", "polymorphism", "inheritance", "encapsulation", "classes", "abstraction"],
+    keywords: [
+      "dsa",
+      "algorithms",
+      "data structures",
+      "leetcode",
+      "trees",
+      "graphs",
+      "dp",
+    ],
   },
 
-  // Popular Topics
+  // 2. Editorials
   {
-    title: "Dynamic Programming Patterns",
-    category: "Topics",
+    title: "DP on Trees & Subtree Aggregations (Editorial)",
+    category: "Editorials",
+    tab: "Editorials",
     href: `${ROUTES.PRACTICE}?subject=dsa&topic=Dynamic-Programming`,
-    description: "0/1 Knapsack, Subsequences, Grid DP, Interval transitions",
-    icon: Code2,
-    keywords: ["dp", "knapsack", "subsequence", "grid dp", "memoization"],
+    description:
+      "Detailed step-by-step state transitions for tree diameter and max path sum",
+    icon: BookOpen,
+    badge: "Editorial",
+    keywords: [
+      "dp on trees",
+      "tree dp",
+      "editorial",
+      "solution",
+      "explanation",
+      "analysis",
+    ],
   },
   {
-    title: "Binary Trees & Graph BFS/DFS",
-    category: "Topics",
-    href: `${ROUTES.PRACTICE}?subject=dsa&topic=Trees-Graphs`,
-    description: "Traversals, Dijkstra, Topological Sort, Disjoint Sets",
-    icon: Code2,
-    keywords: ["trees", "graphs", "bfs", "dfs", "dijkstra", "bst", "traversal"],
+    title: "Monotonic Stack Pattern & Range Queries (Editorial)",
+    category: "Editorials",
+    tab: "Editorials",
+    href: `${ROUTES.PRACTICE}?subject=dsa&topic=Stacks`,
+    description:
+      "Next Greater Element, Largest Rectangle in Histogram, and sliding windows",
+    icon: BookOpen,
+    badge: "Editorial",
+    keywords: [
+      "monotonic stack",
+      "editorial",
+      "histogram",
+      "stack",
+      "solution",
+    ],
   },
   {
-    title: "B+ Tree Indexing & Transaction Isolation",
-    category: "Topics",
+    title: "B+ Tree Indexing & Transaction Isolation (Editorial)",
+    category: "Editorials",
+    tab: "Editorials",
     href: `${ROUTES.PRACTICE}?subject=dbms`,
-    description: "Clustered index scans, 2PL, MVCC, and deadlocks",
+    description:
+      "Clustered index scans, 2PL, MVCC, and deadlocks in relational databases",
     icon: Database,
-    keywords: ["indexing", "isolation", "acid", "mvcc", "2pl", "locking"],
+    badge: "Editorial",
+    keywords: [
+      "dbms",
+      "b+ tree",
+      "editorial",
+      "indexing",
+      "isolation",
+      "acid",
+      "mvcc",
+    ],
   },
   {
-    title: "Virtual Memory Paging & TLB Misses",
-    category: "Topics",
+    title: "TCP 3-Way Handshake & Congestion Control (Editorial)",
+    category: "Editorials",
+    tab: "Editorials",
+    href: `${ROUTES.PRACTICE}?subject=computer-networks`,
+    description: "SYN/ACK mechanics, TCP Reno, AIMD, and slow start phases",
+    icon: Network,
+    badge: "Editorial",
+    keywords: [
+      "tcp",
+      "handshake",
+      "networking",
+      "editorial",
+      "congestion control",
+      "osi",
+    ],
+  },
+  {
+    title: "Virtual Memory Paging & TLB Misses (Editorial)",
+    category: "Editorials",
+    tab: "Editorials",
     href: `${ROUTES.PRACTICE}?subject=operating-systems`,
-    description: "Page replacement algorithms, segmentation, page faults",
+    description:
+      "Page replacement algorithms, segmentation, page faults, and multi-level tables",
     icon: Cpu,
-    keywords: ["paging", "tlb", "virtual memory", "page faults", "segmentation"],
+    badge: "Editorial",
+    keywords: [
+      "paging",
+      "tlb",
+      "virtual memory",
+      "editorial",
+      "os",
+      "page faults",
+    ],
   },
 
-  // My Spaces
+  // 3. Notes
   {
-    title: "NoteSpace — Tech Cheatsheets & Notes",
-    category: "Spaces",
+    title: "NoteSpace — Tech Cheatsheets & Personal Notes",
+    category: "Notes",
+    tab: "Notes",
     href: ROUTES.NOTES,
-    description: "Rich text summaries, interview notes, and code snippets",
+    description:
+      "Rich text summaries, interview notes, formulas, and code snippets",
     icon: FileText,
-    keywords: ["notes", "cheatsheets", "notespace", "editor", "summary"],
-  },
-  {
-    title: "CodeSpace — Multi-Language Scratchpad",
-    category: "Spaces",
-    href: ROUTES.CODESPACE,
-    description: "Instant sandbox execution for C++, Java, Python, JS",
-    icon: FolderCode,
-    keywords: ["codespace", "sandbox", "compiler", "scratchpad", "runner", "code"],
-  },
-  {
-    title: "Quiz Log — Curriculum & Question Manager",
-    category: "Spaces",
-    href: ROUTES.QUIZ_LOG,
-    description: "Add new coding problems and log quiz challenges",
-    icon: HelpCircle,
-    keywords: ["quiz log", "questions", "custom question", "inventory"],
-  },
-  {
-    title: "All Problem Sheets & Curated Lists",
-    category: "Spaces",
-    href: ROUTES.LISTS,
-    description: "Blind 75, Striver 190, Core CS 100 sheets",
-    icon: ListTodo,
-    keywords: ["lists", "blind 75", "striver", "sheets", "problem sets"],
-  },
-
-  // Actions
-  {
-    title: "My Profile & Career Settings",
-    category: "Actions",
-    href: ROUTES.PROFILE,
-    description: "Manage your developer profile, target role, bio, and study stats",
-    icon: User,
-    keywords: ["profile", "account", "settings", "bio", "headline", "target role", "experience", "stats", "streak"],
-  },
-  {
-    title: "Solve Problem of the Day (+20 pts)",
-    category: "Actions",
-    href: ROUTES.PRACTICE,
-    description: "Daily challenge for algorithmic consistency",
-    icon: Play,
-    badge: "+20 pts",
-    keywords: ["potd", "problem of the day", "daily challenge", "points"],
-  },
-  {
-    title: "Planly — View Study Sprint Schedule",
-    category: "Actions",
-    href: ROUTES.PLANLY,
-    description: "Review your 9-sprint roadmap and daily tasks",
-    icon: GitBranch,
-    keywords: ["planly", "sprints", "roadmap", "schedule", "planner", "tasks"],
-  },
-  {
-    title: "Build / Personalize My Study Plan",
-    category: "Actions",
-    href: ROUTES.ONBOARDING,
-    description: "Configure target role, pacing, and starting levels",
-    icon: Sparkles,
-    keywords: ["onboarding", "study plan", "create plan", "wizard", "personalize"],
-  },
-
-  // Tools & Guides
-  {
-    title: "Bitwise Operations Visualizer",
-    category: "Tools & Guides",
-    href: ROUTES.TOOLS,
-    description: "Interactive bit arithmetic and binary converter",
-    icon: Wrench,
-    keywords: ["bitwise", "binary", "bits", "xor", "and", "or", "shift"],
+    badge: "Cheatsheet",
+    keywords: [
+      "notes",
+      "cheatsheets",
+      "notespace",
+      "editor",
+      "summary",
+      "quick revision",
+    ],
   },
   {
     title: "Big-O Time & Space Complexity Cheatsheet",
-    category: "Tools & Guides",
+    category: "Notes",
+    tab: "Notes",
     href: ROUTES.TOOLS,
-    description: "Quick complexity references for data structures",
+    description:
+      "Quick complexity references for data structures, sorts, and graph traversals",
     icon: Wrench,
-    keywords: ["big-o", "complexity", "time complexity", "space complexity"],
+    badge: "Reference",
+    keywords: [
+      "big-o",
+      "complexity",
+      "time complexity",
+      "space complexity",
+      "notes",
+    ],
   },
+  {
+    title: "OS Concurrency, Deadlocks & Semaphores Notes",
+    category: "Notes",
+    tab: "Notes",
+    href: `${ROUTES.PRACTICE}?subject=operating-systems`,
+    description:
+      "Mutex, condition variables, Peterson's algorithm, Banker's safety check",
+    icon: Cpu,
+    badge: "Core CS",
+    keywords: ["concurrency", "mutex", "deadlock", "semaphores", "notes", "os"],
+  },
+  {
+    title: "SQL Query Optimization & Indexing Guide",
+    category: "Notes",
+    tab: "Notes",
+    href: `${ROUTES.PRACTICE}?subject=dbms`,
+    description:
+      "EXPLAIN ANALYZE, composite indices, query planning, and sharding",
+    icon: Database,
+    badge: "Database",
+    keywords: ["sql", "indexing", "query optimization", "dbms", "notes"],
+  },
+
+  {
+    title: "Blind 75 Must-Do LeetCode Problems",
+    category: "Lists",
+    tab: "Lists",
+    href: ROUTES.LISTS,
+    description:
+      "Essential 75 questions covering recurring coding interview patterns",
+    icon: ListTodo,
+    badge: "Curated",
+    keywords: [
+      "blind 75",
+      "leetcode 75",
+      "lists",
+      "essential",
+      "interview sheet",
+    ],
+  },
+  {
+    title: "Core CS 100 Engineering Interview Sheet",
+    category: "Lists",
+    tab: "Lists",
+    href: ROUTES.LISTS,
+    description:
+      "High-frequency OS, DBMS, Networks, and LLD interview questions",
+    icon: ListTodo,
+    badge: "Core 100",
+    keywords: [
+      "core cs",
+      "cs 100",
+      "os",
+      "dbms",
+      "cn",
+      "lists",
+      "interview questions",
+    ],
+  },
+  {
+    title: "Top 100 Liked SDE Interview Questions",
+    category: "Lists",
+    tab: "Lists",
+    href: ROUTES.LISTS,
+    description:
+      "Most requested problem sets across FAANG and top product firms",
+    icon: ListTodo,
+    badge: "Top 100",
+    keywords: ["top 100", "faang", "google", "amazon", "meta", "lists"],
+  },
+
+  // 4. Blogs
   {
     title: "Engineering Masterclasses & Tech Blogs",
-    category: "Tools & Guides",
+    category: "Blogs",
+    tab: "Blogs",
     href: ROUTES.BLOGS,
-    description: "Deep architecture guides and algorithmic breakdowns",
+    description:
+      "Deep architecture guides, distributed systems, and algorithmic breakdowns",
     icon: BookOpen,
-    keywords: ["blogs", "articles", "masterclasses", "system design blogs"],
+    badge: "Articles",
+    keywords: [
+      "blogs",
+      "articles",
+      "masterclasses",
+      "system design blogs",
+      "read",
+    ],
   },
   {
-    title: "Candidate Discussions & Network",
-    category: "Tools & Guides",
-    href: ROUTES.COMMUNITY,
-    description: "Recent company interview experiences and loops",
+    title: "Designing High-Throughput Distributed Rate Limiters",
+    category: "Blogs",
+    tab: "Blogs",
+    href: ROUTES.BLOGS,
+    description: "Token Bucket vs Leaky Bucket vs Sliding Window Logs in Redis",
+    icon: Layers,
+    badge: "System Design",
+    keywords: [
+      "rate limiter",
+      "redis",
+      "token bucket",
+      "blogs",
+      "system design",
+      "articles",
+    ],
+  },
+  {
+    title: "How PostgreSQL Handles Multi-Version Concurrency (MVCC)",
+    category: "Blogs",
+    tab: "Blogs",
+    href: ROUTES.BLOGS,
+    description:
+      "Tuple visibility, VACUUM daemon, WAL logs, and transaction snapshots",
+    icon: Database,
+    badge: "Deep Dive",
+    keywords: ["postgres", "mvcc", "database", "vacuum", "wal", "blogs"],
+  },
+
+  // 5. Pages
+  {
+    title: "Planly — Sprint Planner & Roadmap",
+    category: "Pages",
+    tab: "Pages",
+    href: ROUTES.PLANLY,
+    description:
+      "Review your study sprint schedule, milestones, and daily problem goals",
+    icon: GitBranch,
+    badge: "Planner",
+    keywords: [
+      "planly",
+      "sprints",
+      "roadmap",
+      "schedule",
+      "planner",
+      "tasks",
+      "pages",
+    ],
+  },
+  {
+    title: "Prep Hub — Subject Mastery & Tracks",
+    category: "Pages",
+    tab: "Pages",
+    href: ROUTES.PREP_HUB,
+    description:
+      "Structured curriculum for DSA, DBMS, OS, CN, and System Design",
     icon: Compass,
-    keywords: ["community", "discussions", "interview experiences", "google", "amazon", "meta"],
+    badge: "Curriculum",
+    keywords: ["prep hub", "curriculum", "tracks", "subjects", "pages"],
+  },
+  {
+    title: "Practice Arena — Coding Environment",
+    category: "Pages",
+    tab: "Pages",
+    href: ROUTES.PRACTICE,
+    description:
+      "Live interactive coding sandbox and problem test case evaluation",
+    icon: Code2,
+    badge: "Arena",
+    keywords: ["practice", "coding", "sandbox", "arena", "problems", "pages"],
+  },
+  {
+    title: "CodeSpace — Multi-Language Scratchpad",
+    category: "Pages",
+    tab: "Pages",
+    href: ROUTES.CODESPACE,
+    description:
+      "Instant sandbox execution for C++, Java, Python, and JavaScript",
+    icon: FolderCode,
+    badge: "Editor",
+    keywords: [
+      "codespace",
+      "sandbox",
+      "compiler",
+      "scratchpad",
+      "runner",
+      "code",
+      "pages",
+    ],
+  },
+  {
+    title: "Quiz Log — Curriculum & Question Manager",
+    category: "Pages",
+    tab: "Pages",
+    href: ROUTES.QUIZ_LOG,
+    description: "Log quiz challenges and manage custom practice questions",
+    icon: HelpCircle,
+    badge: "Manager",
+    keywords: [
+      "quiz log",
+      "questions",
+      "custom question",
+      "inventory",
+      "pages",
+    ],
+  },
+  {
+    title: "Developer Tools — Bitwise & Cheatsheets",
+    category: "Pages",
+    tab: "Pages",
+    href: ROUTES.TOOLS,
+    description: "Bitwise visualizers, Big-O tables, and developer utilities",
+    icon: Wrench,
+    badge: "Tools",
+    keywords: ["tools", "developer tools", "bitwise", "utilities", "pages"],
+  },
+  {
+    title: "Candidate Community & Discussions",
+    category: "Pages",
+    tab: "Pages",
+    href: ROUTES.COMMUNITY,
+    description:
+      "Recent company interview loops and candidate peer discussions",
+    icon: Users,
+    badge: "Community",
+    keywords: ["community", "discussions", "interview experiences", "pages"],
+  },
+  {
+    title: "My Profile & Career Settings",
+    category: "Pages",
+    tab: "Pages",
+    href: ROUTES.PROFILE,
+    description:
+      "Manage your developer profile, target role, bio, and study stats",
+    icon: User,
+    badge: "Profile",
+    keywords: [
+      "profile",
+      "account",
+      "settings",
+      "bio",
+      "headline",
+      "stats",
+      "pages",
+    ],
+  },
+  {
+    title: "Account & Preference Settings",
+    category: "Pages",
+    tab: "Pages",
+    href: ROUTES.ACCOUNT,
+    description: "Manage security, active sessions, and workspace preferences",
+    icon: User,
+    badge: "Settings",
+    keywords: ["account", "security", "preferences", "settings", "pages"],
   },
 ];
 
-export function searchCatalog(query: string, entries: SearchEntry[] = allSearchEntries): SearchEntry[] {
-  if (!query || !query.trim()) {
-    return entries;
+export function searchCatalog(
+  query: string,
+  tab: SearchTab = "All",
+  entries: SearchEntry[] = allSearchEntries,
+): SearchEntry[] {
+  let filtered = entries;
+
+  // Filter by Tab
+  if (tab !== "All") {
+    filtered = filtered.filter((item) => {
+      if (Array.isArray(item.tab)) {
+        return item.tab.includes(tab);
+      }
+      return item.tab === tab;
+    });
   }
+
+  // Filter by Query
+  if (!query || !query.trim()) {
+    return filtered;
+  }
+
   const q = query.trim().toLowerCase();
-  return entries.filter((item) => {
+  return filtered.filter((item) => {
     if (item.title.toLowerCase().includes(q)) return true;
     if (item.category.toLowerCase().includes(q)) return true;
-    if (item.description && item.description.toLowerCase().includes(q)) return true;
-    if (item.keywords && item.keywords.some((k) => k.toLowerCase().includes(q))) return true;
+    if (item.description && item.description.toLowerCase().includes(q))
+      return true;
+    if (item.keywords && item.keywords.some((k) => k.toLowerCase().includes(q)))
+      return true;
     return false;
   });
 }

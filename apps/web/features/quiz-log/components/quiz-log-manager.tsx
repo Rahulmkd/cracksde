@@ -73,7 +73,7 @@ export function QuizLogManager() {
             onClick={() => setIsAddModalOpen(true)}
             className="h-8 px-3 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
           >
-            <Plus className="h-3.5 w-3.5 mr-1" /> Add New Question
+            <Plus className="h-3.5 w-3.5 mr-1" /> Add Question
           </Button>
         </div>
       </div>

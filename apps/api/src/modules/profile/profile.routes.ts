@@ -8,6 +8,8 @@ const router = Router();
 router.get("/profile", ProfileController.getProfile);
 router.patch("/profile", validateBody(updateProfileSchema), ProfileController.updateProfile);
 router.put("/profile", validateBody(updateProfileSchema), ProfileController.updateProfile);
+router.delete("/profile/account", ProfileController.deleteAccount);
+router.delete("/profile", ProfileController.deleteAccount);
 router.get("/profile/stats", ProfileController.getStats);
 
 export default router;
