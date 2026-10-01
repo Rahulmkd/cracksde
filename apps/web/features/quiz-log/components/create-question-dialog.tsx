@@ -11,7 +11,10 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { useRoadmapSubjectDetail, useCreateRoadmapItem } from "@/hooks/use-roadmap";
+import {
+  useRoadmapSubjectDetail,
+  useCreateRoadmapItem,
+} from "@/hooks/use-roadmap";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { RoadmapSubjectSummaryDto } from "@starter/shared";
@@ -34,12 +37,15 @@ export function CreateQuestionDialog({
   const [formSubjectSlug, setFormSubjectSlug] = useState<string>("");
   const [formTopicId, setFormTopicId] = useState<number | "">("");
   const [formSubtopicId, setFormSubtopicId] = useState<number | "">("");
-  const [formDifficulty, setFormDifficulty] = useState<"Easy" | "Medium" | "Hard">("Medium");
+  const [formDifficulty, setFormDifficulty] = useState<
+    "Easy" | "Medium" | "Hard"
+  >("Medium");
   const [formEstimatedMinutes, setFormEstimatedMinutes] = useState<number>(15);
   const [formType, setFormType] = useState<string>("Problem");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  const { data: subjectDetail, isLoading: isTopicsLoading } = useRoadmapSubjectDetail(formSubjectSlug);
+  const { data: subjectDetail, isLoading: isTopicsLoading } =
+    useRoadmapSubjectDetail(formSubjectSlug);
   const createQuestionMutation = useCreateRoadmapItem();
 
   const availableTopics = useMemo(() => {
@@ -49,7 +55,9 @@ export function CreateQuestionDialog({
 
   const availableSubtopics = useMemo(() => {
     if (!formTopicId || !availableTopics.length) return [];
-    const matchedTopic = availableTopics.find((t) => t.id === Number(formTopicId));
+    const matchedTopic = availableTopics.find(
+      (t) => t.id === Number(formTopicId),
+    );
     return matchedTopic?.subtopics || [];
   }, [formTopicId, availableTopics]);
 
@@ -129,7 +137,9 @@ export function CreateQuestionDialog({
       handleResetForm();
       onOpenChange(false);
     } catch (err: any) {
-      toast.error(err.message || "Failed to create question. Please try again.");
+      toast.error(
+        err.message || "Failed to create question. Please try again.",
+      );
     }
   };
 
@@ -145,17 +155,23 @@ export function CreateQuestionDialog({
             Add New Question
           </DialogTitle>
           <DialogDescription className="text-[12px] text-zinc-400 leading-normal">
-            Persist a new problem or quiz question to the database. It will immediately appear in Practice Problems.
+            Persist a new problem or quiz question to the database. It will
+            immediately appear in Practice Problems.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleCreateQuestion} className="flex flex-col flex-1 min-h-0">
+        <form
+          onSubmit={handleCreateQuestion}
+          className="flex flex-col flex-1 min-h-0"
+        >
           <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
             {/* Field 1: Question Title */}
             <div className="space-y-1.5">
               <label className="text-[12px] font-medium text-zinc-200 flex items-center justify-between">
                 <span>Question Title *</span>
-                <span className="text-[10px] text-zinc-500 font-mono">e.g. Invert Binary Tree</span>
+                <span className="text-[10px] text-zinc-500 font-mono">
+                  e.g. Invert Binary Tree
+                </span>
               </label>
               <input
                 type="text"
@@ -163,13 +179,14 @@ export function CreateQuestionDialog({
                 value={formTitle}
                 onChange={(e) => {
                   setFormTitle(e.target.value);
-                  if (formErrors.title) setFormErrors((prev) => ({ ...prev, title: "" }));
+                  if (formErrors.title)
+                    setFormErrors((prev) => ({ ...prev, title: "" }));
                 }}
                 className={cn(
                   "w-full rounded-lg border bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 placeholder:text-zinc-500 focus:outline-none font-normal transition-colors",
                   formErrors.title
                     ? "border-red-500/80 focus:border-red-500"
-                    : "border-zinc-800 focus:border-blue-500"
+                    : "border-zinc-800 focus:border-blue-500",
                 )}
               />
               {formErrors.title && (
@@ -193,7 +210,7 @@ export function CreateQuestionDialog({
                     "w-full rounded-lg border bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none font-normal transition-colors",
                     formErrors.subjectId
                       ? "border-red-500/80 focus:border-red-500"
-                      : "border-zinc-800 focus:border-blue-500"
+                      : "border-zinc-800 focus:border-blue-500",
                   )}
                 >
                   <option value="" disabled>
@@ -225,15 +242,15 @@ export function CreateQuestionDialog({
                     "w-full rounded-lg border bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none font-normal transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
                     formErrors.topicId
                       ? "border-red-500/80 focus:border-red-500"
-                      : "border-zinc-800 focus:border-blue-500"
+                      : "border-zinc-800 focus:border-blue-500",
                   )}
                 >
                   <option value="" disabled>
                     {!formSubjectId
                       ? "Select track first"
                       : isTopicsLoading
-                      ? "Loading topics..."
-                      : "Select Topic / Pattern"}
+                        ? "Loading topics..."
+                        : "Select Topic / Pattern"}
                   </option>
                   {availableTopics.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -254,11 +271,17 @@ export function CreateQuestionDialog({
               <div className="space-y-1.5">
                 <label className="text-[12px] font-medium text-zinc-200 flex items-center justify-between">
                   <span>Subtopic / Category (Optional)</span>
-                  <span className="text-[10px] text-zinc-500 font-mono">Found {availableSubtopics.length} subtopics</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">
+                    Found {availableSubtopics.length} subtopics
+                  </span>
                 </label>
                 <select
                   value={formSubtopicId}
-                  onChange={(e) => setFormSubtopicId(e.target.value ? Number(e.target.value) : "")}
+                  onChange={(e) =>
+                    setFormSubtopicId(
+                      e.target.value ? Number(e.target.value) : "",
+                    )
+                  }
                   className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-normal"
                 >
                   <option value="">None / Default</option>
@@ -290,9 +313,9 @@ export function CreateQuestionDialog({
                           ? diff === "Easy"
                             ? "bg-emerald-950/60 border-emerald-500/60 text-emerald-300 shadow-sm"
                             : diff === "Medium"
-                            ? "bg-amber-950/60 border-amber-500/60 text-amber-300 shadow-sm"
-                            : "bg-rose-950/60 border-rose-500/60 text-rose-300 shadow-sm"
-                          : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+                              ? "bg-amber-950/60 border-amber-500/60 text-amber-300 shadow-sm"
+                              : "bg-rose-950/60 border-rose-500/60 text-rose-300 shadow-sm"
+                          : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700",
                       )}
                     >
                       {diff}
@@ -305,17 +328,11 @@ export function CreateQuestionDialog({
               <div className="space-y-1.5">
                 <label className="text-[12px] font-medium text-zinc-200 flex items-center justify-between">
                   <span>Estimated Time *</span>
-                  <span className="text-[10px] text-zinc-500 font-mono">{formEstimatedMinutes} mins</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">
+                    {formEstimatedMinutes} mins
+                  </span>
                 </label>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min={1}
-                    max={300}
-                    value={formEstimatedMinutes}
-                    onChange={(e) => setFormEstimatedMinutes(Number(e.target.value))}
-                    className="w-20 rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-[12px] text-zinc-100 focus:outline-none focus:border-blue-500 font-mono text-center"
-                  />
                   <div className="flex items-center gap-1 flex-1">
                     {[15, 30, 45, 60].map((mins) => (
                       <button
@@ -326,7 +343,7 @@ export function CreateQuestionDialog({
                           "flex-1 rounded py-1 text-[10px] font-mono transition-colors",
                           formEstimatedMinutes === mins
                             ? "bg-blue-600/30 border border-blue-500/40 text-blue-300"
-                            : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200"
+                            : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200",
                         )}
                       >
                         {mins}m
@@ -356,7 +373,7 @@ export function CreateQuestionDialog({
                       "rounded-lg py-1 px-2 text-[11px] font-medium border text-center transition-all",
                       formType === t.value
                         ? "bg-blue-600/20 border-blue-500/40 text-blue-400 shadow-sm"
-                        : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+                        : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700",
                     )}
                   >
                     {t.label}
