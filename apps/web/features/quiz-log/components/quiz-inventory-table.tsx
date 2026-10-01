@@ -18,7 +18,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { PracticeProblemDto, RoadmapSubjectSummaryDto } from "@starter/shared";
+import type {
+  PracticeProblemDto,
+  RoadmapSubjectSummaryDto,
+} from "@starter/shared";
 
 interface QuizInventoryTableProps {
   stats: {
@@ -75,7 +78,8 @@ export function QuizInventoryTable({
 
         <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 space-y-1">
           <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Solved Questions
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Solved
+            Questions
           </span>
           <div className="text-[20px] font-bold text-emerald-400 font-mono">
             {stats.totalSolved}
@@ -117,14 +121,16 @@ export function QuizInventoryTable({
         <div className="flex flex-wrap items-center justify-between gap-2.5 pt-0.5 text-[12px]">
           {/* Track Filters */}
           <div className="flex flex-wrap items-center gap-1">
-            <span className="text-zinc-500 text-[11px] font-medium mr-1">Track:</span>
+            <span className="text-zinc-500 text-[11px] font-medium mr-1">
+              Track:
+            </span>
             <button
               onClick={() => setSelectedSubject("all")}
               className={cn(
                 "rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors select-none",
                 selectedSubject === "all"
                   ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
-                  : "border border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200"
+                  : "border border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200",
               )}
             >
               All
@@ -137,18 +143,18 @@ export function QuizInventoryTable({
                   "rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors select-none",
                   selectedSubject === s.slug
                     ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
-                    : "border border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200"
+                    : "border border-zinc-800 bg-zinc-950/60 text-zinc-400 hover:text-zinc-200",
                 )}
               >
                 {s.slug === "dsa"
                   ? "DSA"
                   : s.slug === "dbms"
-                  ? "DBMS"
-                  : s.slug === "operating-systems"
-                  ? "OS"
-                  : s.slug === "computer-networks"
-                  ? "CN"
-                  : s.name}
+                    ? "DBMS"
+                    : s.slug === "operating-systems"
+                      ? "OS"
+                      : s.slug === "computer-networks"
+                        ? "CN"
+                        : s.name}
               </button>
             ))}
           </div>
@@ -175,15 +181,18 @@ export function QuizInventoryTable({
         {isLoading ? (
           <div className="p-12 text-center space-y-3">
             <div className="w-6 h-6 border-2 border-zinc-700 border-t-blue-500 rounded-full animate-spin mx-auto" />
-            <p className="text-[12px] text-zinc-400">Loading questions from database...</p>
+            <p className="text-[12px] text-zinc-400">Loading...</p>
           </div>
         ) : problems.length === 0 ? (
           <div className="p-12 text-center space-y-3">
             <HelpCircle className="h-8 w-8 text-zinc-600 mx-auto" />
             <div className="space-y-1">
-              <h3 className="text-[14px] font-semibold text-zinc-200">No questions found</h3>
+              <h3 className="text-[14px] font-semibold text-zinc-200">
+                No questions found
+              </h3>
               <p className="text-[12px] text-zinc-500 max-w-sm mx-auto">
-                No questions match your filter criteria. Try changing your search or add a new question.
+                No questions match your filter criteria. Try changing your
+                search or add a new question.
               </p>
             </div>
             <Button
@@ -202,8 +211,8 @@ export function QuizInventoryTable({
                 problem.difficulty === "Easy"
                   ? "success"
                   : problem.difficulty === "Medium"
-                  ? "warning"
-                  : "destructive";
+                    ? "warning"
+                    : "destructive";
 
               return (
                 <div
@@ -245,7 +254,10 @@ export function QuizInventoryTable({
                       <span>{problem.estimatedMinutes}m</span>
                     </div>
 
-                    <Badge variant={diffColor} className="text-[10px] font-medium py-0 px-1.5">
+                    <Badge
+                      variant={diffColor}
+                      className="text-[10px] font-medium py-0 px-1.5"
+                    >
                       {problem.difficulty}
                     </Badge>
 
@@ -280,7 +292,8 @@ export function QuizInventoryTable({
         {pagination.totalPages > 1 && (
           <div className="p-3 border-t border-zinc-800/80 bg-zinc-950/60 flex items-center justify-between text-[12px] text-zinc-400">
             <span>
-              Page {pagination.page} of {pagination.totalPages} ({pagination.total} total)
+              Page {pagination.page} of {pagination.totalPages} (
+              {pagination.total} total)
             </span>
 
             <div className="flex items-center gap-1">
@@ -297,7 +310,11 @@ export function QuizInventoryTable({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onPageChange(Math.min(pagination.totalPages, pagination.page + 1))}
+                onClick={() =>
+                  onPageChange(
+                    Math.min(pagination.totalPages, pagination.page + 1),
+                  )
+                }
                 disabled={pagination.page >= pagination.totalPages}
                 className="h-7 px-2 text-[11px]"
               >

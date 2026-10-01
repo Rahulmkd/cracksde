@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,37 +21,55 @@ export function Dialog({
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
 }) {
+  const [mounted, setMounted] = React.useState(false);
+
   React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && open) {
+      if (e.key === "Escape") {
+        e.preventDefault();
         onOpenChange(false);
       }
     };
-    if (open) {
-      document.body.style.overflow = "hidden";
-      window.addEventListener("keydown", handleKeyDown);
-    }
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = originalOverflow || "unset";
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [open, onOpenChange]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  return createPortal(
     <DialogContext.Provider value={{ open, onOpenChange }}>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in-0 duration-150">
+      <div
+        className="fixed inset-0 z-50 flex min-h-full items-center justify-center p-4 sm:p-6 overflow-y-auto pointer-events-none"
+        role="dialog"
+        aria-modal="true"
+      >
+        {/* Full-screen Backdrop Overlay */}
         <div
-          className="fixed inset-0"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in-0 duration-150 pointer-events-auto"
           onClick={() => onOpenChange(false)}
           aria-hidden="true"
         />
-        <div className="relative z-50 w-full max-w-lg animate-in zoom-in-95 fade-in-0 duration-150">
+
+        {/* Centered Modal Container */}
+        <div className="relative z-10 w-full flex items-center justify-center my-auto pointer-events-auto animate-in zoom-in-95 fade-in-0 duration-150">
           {children}
         </div>
       </div>
-    </DialogContext.Provider>
+    </DialogContext.Provider>,
+    document.body
   );
 }
 
@@ -71,8 +90,9 @@ export function DialogContent({
       {...props}
     >
       <button
+        type="button"
         onClick={() => context?.onOpenChange(false)}
-        className="absolute right-4 top-4 rounded-md p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors focus:outline-none"
+        className="absolute right-4 top-4 rounded-md p-1.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors focus:outline-none z-10"
         aria-label="Close dialog"
       >
         <X className="h-4 w-4" />

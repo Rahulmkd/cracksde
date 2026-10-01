@@ -28,8 +28,15 @@ interface UIState {
   setActiveNavHref: (href: string | null) => void;
 }
 
+const getInitialSidebarState = (): boolean => {
+  if (typeof window !== "undefined") {
+    return window.innerWidth >= 1024;
+  }
+  return true;
+};
+
 export const useUIStore = create<UIState>((set) => ({
-  sidebarOpen: true,
+  sidebarOpen: getInitialSidebarState(),
   mobileMenuOpen: false,
   prepOpen: true,
   exploreOpen: true,
