@@ -3,7 +3,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { studyPlanService } from "@/services/study-plan-service";
 import { useAuth } from "@/hooks/use-auth";
-import type { StudyPlanDto } from "@starter/shared";
+import { useOnboardingStore } from "@/features/onboarding/store/onboarding-store";
+import type { StudyPlanDto } from "@cracksde/shared";
 import { toast } from "sonner";
 
 export function useStudyPlan(slug: string = "crack-sde") {
@@ -130,6 +131,36 @@ export function useStudyPlan(slug: string = "crack-sde") {
     },
   });
 
+  const deletePlanMutation = useMutation({
+    mutationFn: () => studyPlanService.deletePlan(slug),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["study-plan"] });
+      queryClient.invalidateQueries({ queryKey: ["revision-list"] });
+      queryClient.invalidateQueries({ queryKey: ["user-revisions"] });
+      queryClient.invalidateQueries({ queryKey: ["topic-questions"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["roadmap-subject"] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["practice-problems"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem(`cracksde_planly_expanded_sprints_${userId}`);
+          localStorage.removeItem(`cracksde_planly_expanded_days_${userId}`);
+          localStorage.removeItem("cracksde_planly_expanded_sprints");
+          localStorage.removeItem("cracksde_planly_expanded_days");
+        } catch {}
+      }
+
+      useOnboardingStore.getState().resetOnboarding();
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to delete study plan");
+    },
+  });
+
   return {
     plan: planQuery.data,
     isLoading: planQuery.isLoading,
@@ -140,5 +171,7 @@ export function useStudyPlan(slug: string = "crack-sde") {
     isUpdatingTask: updateTaskMutation.isPending,
     updatePlan: updatePlanMutation.mutate,
     isUpdatingPlan: updatePlanMutation.isPending,
+    deletePlan: deletePlanMutation.mutateAsync,
+    isDeletingPlan: deletePlanMutation.isPending,
   };
 }

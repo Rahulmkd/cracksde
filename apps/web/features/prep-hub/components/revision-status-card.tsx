@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { useUserRevisions } from "@/features/prep-hub/hooks/use-roadmap";
 import { useAuth } from "@/features/auth/hooks/use-auth-session";
 import { cn } from "@/lib/utils";
-import type { RoadmapItemDto } from "@starter/shared";
+import type { RoadmapItemDto } from "@cracksde/shared";
 
 export interface RevisionStatusCardProps {
   onSelectQuestion?: (item: RoadmapItemDto) => void;

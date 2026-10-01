@@ -5,7 +5,7 @@ import type {
   UpdateProfileRequestDto,
   SubjectProgressBreakdown,
   RecentActivityItem,
-} from "@starter/shared";
+} from "@cracksde/shared";
 
 export type {
   UserProfileDto,

@@ -1,5 +1,5 @@
 import { api } from "./api-client";
-import type { ApiResponse, StudyPlanDto, StudyTaskDto } from "@starter/shared";
+import type { ApiResponse, StudyPlanDto, StudyTaskDto } from "@cracksde/shared";
 
 export interface UpdateTaskPayload {
   status?: string;
@@ -51,6 +51,19 @@ export const studyPlanService = {
       throw new Error(res.error || "Failed to update study plan");
     }
     return res.data;
+  },
+
+  /**
+   * Safely delete the authenticated user's study plan progress
+   */
+  async deletePlan(slug: string = "crack-sde"): Promise<{ deleted: boolean; slug: string }> {
+    const res = await api.delete<ApiResponse<{ deleted: boolean; slug: string }>>(
+      `/api/study-plans/${slug}`
+    );
+    if (!res.success) {
+      throw new Error(res.error || "Failed to delete study plan");
+    }
+    return res.data || { deleted: true, slug };
   },
 
   /**

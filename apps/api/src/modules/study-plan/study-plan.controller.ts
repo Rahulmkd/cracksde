@@ -79,4 +79,25 @@ export class StudyPlanController {
       next(error);
     }
   }
+
+  /**
+   * DELETE /api/study-plans or DELETE /api/study-plans/:slug
+   * Safely resets/deletes current user's study plan progress
+   */
+  static async deleteStudyPlan(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const user = await getAuthenticatedUser(req);
+      if (!user) {
+        throw new UnauthorizedError("Authentication required to delete study plan");
+      }
+
+      const rawSlug = req.params.slug || "crack-sde";
+      const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
+
+      const data = await StudyPlanService.deleteUserStudyPlan(slug, user.id);
+      sendSuccess(res, data, 200, "Study plan and progress deleted successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 }

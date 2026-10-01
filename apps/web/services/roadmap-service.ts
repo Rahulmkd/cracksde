@@ -9,7 +9,7 @@ import type {
   PracticeProblemsResponseDto,
   CreateRoadmapItemRequest,
   CreateRoadmapItemResponse,
-} from "@starter/shared";
+} from "@cracksde/shared";
 
 export interface PracticeProblemsFilterParams {
   page?: number;

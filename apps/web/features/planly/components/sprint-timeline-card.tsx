@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMinutes } from "@/lib/formatters";
 import { DayTaskDrawer } from "./day-task-drawer";
-import type { StudySprintDto, StudyTaskDto } from "@starter/shared";
+import type { StudySprintDto, StudyTaskDto } from "@cracksde/shared";
 
 interface SprintTimelineCardProps {
   sprint: StudySprintDto;

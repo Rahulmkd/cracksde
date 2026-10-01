@@ -1,5 +1,5 @@
 import { api } from "./api-client";
-import type { ApiResponse } from "@starter/shared";
+import type { ApiResponse } from "@cracksde/shared";
 
 export interface CommunityComment {
   id: string;

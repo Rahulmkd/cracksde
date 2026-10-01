@@ -1,4 +1,4 @@
-import type { PracticeProblemDto, UserItemProgressDto } from "@starter/shared";
+import type { PracticeProblemDto, UserItemProgressDto } from "@cracksde/shared";
 
 export type { PracticeProblemDto, UserItemProgressDto };
 

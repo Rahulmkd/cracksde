@@ -228,4 +228,16 @@ export class StudyPlanRepository {
       orderBy: { taskOrder: "asc" },
     });
   }
+
+  static async findUserProfile(userId: string) {
+    return prisma.userProfile.findUnique({
+      where: { userId },
+    });
+  }
+
+  static async deleteUserProgressForUser(userId: string) {
+    return prisma.userItemProgress.deleteMany({
+      where: { userId },
+    });
+  }
 }

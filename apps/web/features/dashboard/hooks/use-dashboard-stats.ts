@@ -5,7 +5,7 @@ import { useStudyPlan } from "@/features/planly/hooks/use-study-plan";
 import { useRoadmapSubjects } from "@/features/prep-hub/hooks/use-roadmap";
 import { useProfileStats } from "@/features/profile/hooks/use-profile";
 import { usePlannerStore } from "@/store/planner-store";
-import type { RoadmapSubjectSummaryDto, StudySprintDto, StudyTaskDto } from "@starter/shared";
+import type { RoadmapSubjectSummaryDto, StudySprintDto, StudyTaskDto } from "@cracksde/shared";
 
 export interface DashboardStats {
   activeSprint: {

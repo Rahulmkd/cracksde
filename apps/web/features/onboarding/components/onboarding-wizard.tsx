@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnboardingStore } from "@/features/onboarding/store/onboarding-store";
 import { TOTAL_ROADMAP_HOURS } from "@/constants/onboarding-options";
 import { studyPlanService } from "@/services/study-plan-service";
+import { profileService } from "@/services/profile-service";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { OnboardingStepper } from "./onboarding-stepper";
 import { StepSubjects } from "./step-subjects";
@@ -16,8 +19,29 @@ import { StepFinalize } from "./step-finalize";
 
 export function OnboardingWizard() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const store = useOnboardingStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Prepopulate role & experience from user profile if available
+  const { data: profileData } = useQuery({
+    queryKey: ["profile"],
+    queryFn: () => profileService.getProfile(),
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  useEffect(() => {
+    if (profileData?.profile) {
+      if (profileData.profile.targetRole && store.targetRole === "Software Engineer") {
+        store.setTargetRole(profileData.profile.targetRole);
+      }
+      if (profileData.profile.experience && store.experience === "0 - 2 years") {
+        store.setExperience(profileData.profile.experience);
+      }
+    }
+  }, [profileData]);
 
   const totalWeeklyHours = store.getTotalWeeklyHours();
   const estimatedDays = Math.round((TOTAL_ROADMAP_HOURS / Math.max(1, totalWeeklyHours)) * 7);
@@ -49,18 +73,49 @@ export function OnboardingWizard() {
 
       setIsSubmitting(true);
       try {
+        const dailyHours = Math.max(1, Math.round(totalWeeklyHours / 7));
+        const dailyGoalMinutes = Math.max(15, Math.round((totalWeeklyHours * 60) / 7));
+
+        let startDateStr = store.customStartDate;
+        if (store.startDateOption === "today") {
+          startDateStr = new Date().toISOString().split("T")[0];
+        } else if (store.startDateOption === "tomorrow") {
+          startDateStr = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+        }
+
+        // Update authenticated user's profile if signed in
+        if (user) {
+          try {
+            await profileService.updateProfile({
+              targetRole: store.targetRole,
+              experience: store.experience,
+              dailyGoalMinutes,
+            });
+          } catch (profileErr) {
+            console.warn("Could not save profile during onboarding:", profileErr);
+          }
+        }
+
+        // Update Study Plan schedule
         await studyPlanService.updatePlan("crack-sde", {
           name: store.planName.trim(),
-          dailyHours: Math.max(1, Math.round(totalWeeklyHours / 7)),
+          startDate: startDateStr,
+          dailyHours,
         });
-      } catch {
-        // Proceed even if update fails or server offline
+
+        // Invalidate caches across the app
+        queryClient.invalidateQueries({ queryKey: ["study-plan"] });
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+        queryClient.invalidateQueries({ queryKey: ["user-profile-stats"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+
+        toast.success("🚀 Study Plan created and activated!");
+        router.push("/planly");
+      } catch (err: any) {
+        toast.error(err.message || "Failed to finalize study plan");
       } finally {
         setIsSubmitting(false);
       }
-
-      toast.success("🚀 Study Plan created and activated!");
-      router.push("/planly");
       return;
     }
 

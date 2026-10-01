@@ -5,7 +5,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMinutes } from "@/lib/formatters";
 import { TaskItemRow } from "./task-item-row";
-import type { StudyDayDto, StudyTaskDto } from "@starter/shared";
+import type { StudyDayDto, StudyTaskDto } from "@cracksde/shared";
 
 interface DayTaskDrawerProps {
   day: StudyDayDto;

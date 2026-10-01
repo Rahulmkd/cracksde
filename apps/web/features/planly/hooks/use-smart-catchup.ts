@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { StudyPlanDto } from "@starter/shared";
+import type { StudyPlanDto } from "@cracksde/shared";
 import type { SmartCatchupResult } from "../types";
 
 export function useSmartCatchup(plan?: StudyPlanDto): SmartCatchupResult {

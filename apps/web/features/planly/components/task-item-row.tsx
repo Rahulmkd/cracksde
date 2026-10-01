@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { CheckCircle2, Circle, Star, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { StudyTaskDto } from "@starter/shared";
+import type { StudyTaskDto } from "@cracksde/shared";
 
 interface TaskItemRowProps {
   task: StudyTaskDto;

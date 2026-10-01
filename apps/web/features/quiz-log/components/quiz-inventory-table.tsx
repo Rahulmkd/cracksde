@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import type {
   PracticeProblemDto,
   RoadmapSubjectSummaryDto,
-} from "@starter/shared";
+} from "@cracksde/shared";
 
 interface QuizInventoryTableProps {
   stats: {

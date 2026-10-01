@@ -4,7 +4,7 @@ import type {
   UserProfileResponseDto,
   ProfileStatsDto,
   UpdateProfileRequestDto,
-} from "@starter/shared";
+} from "@cracksde/shared";
 
 export const profileService = {
   /**

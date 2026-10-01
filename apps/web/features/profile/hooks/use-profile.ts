@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { profileService } from "@/services/profile-service";
 import { useAuth } from "@/hooks/use-auth";
 import { usePlannerStore } from "@/store/planner-store";
-import type { UpdateProfileRequestDto } from "@starter/shared";
+import type { UpdateProfileRequestDto } from "@cracksde/shared";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 

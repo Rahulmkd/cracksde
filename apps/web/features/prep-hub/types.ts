@@ -5,7 +5,7 @@ import type {
   RoadmapItemDto,
   UserItemProgressDto,
   TopicQuestionsResponseDto,
-} from "@starter/shared";
+} from "@cracksde/shared";
 
 export type {
   RoadmapSubjectSummaryDto,

@@ -50,6 +50,12 @@
       "@/types/*": [
         "./types/*"
       ],
+      "@cracksde/shared": [
+        "../../packages/shared/src/index.ts"
+      ],
+      "@cracksde/shared/*": [
+        "../../packages/shared/src/*"
+      ],
       "@starter/shared": [
         "../../packages/shared/src/index.ts"
       ],

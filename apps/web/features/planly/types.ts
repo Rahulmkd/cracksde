@@ -1,4 +1,4 @@
-import type { StudySprintDto, StudyDayDto, StudyTaskDto, StudyPlanDto } from "@starter/shared";
+import type { StudySprintDto, StudyDayDto, StudyTaskDto, StudyPlanDto } from "@cracksde/shared";
 
 export type PlanlyTab = "active" | "completed";
 export type PlanlyViewMode = "tree" | "calendar";

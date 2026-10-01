@@ -17,7 +17,7 @@ import {
 } from "@/hooks/use-roadmap";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import type { RoadmapSubjectSummaryDto } from "@starter/shared";
+import type { RoadmapSubjectSummaryDto } from "@cracksde/shared";
 
 interface CreateQuestionDialogProps {
   isOpen: boolean;

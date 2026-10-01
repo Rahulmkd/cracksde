@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { roadmapService, type PracticeProblemsFilterParams } from "@/services/roadmap-service";
 import { useAuth } from "@/hooks/use-auth";
-import type { CreateRoadmapItemRequest } from "@starter/shared";
+import type { CreateRoadmapItemRequest } from "@cracksde/shared";
 
 export function useRoadmapSubjects() {
   const { user, isLoading: isAuthLoading } = useAuth();

@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Calendar as CalendarIcon,
   SquarePen,
   AlertTriangle,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DailyPlanner } from "@/components/layout/daily-planner";
@@ -18,10 +20,12 @@ import { SprintMetricsPanel } from "./sprint-metrics-panel";
 import { SprintTimelineCard } from "./sprint-timeline-card";
 import { SmartCatchupModal } from "./smart-catchup-modal";
 import { SprintEditDialog } from "./sprint-edit-dialog";
+import { DeletePlanDialog } from "./delete-plan-dialog";
 import { toast } from "sonner";
-import type { StudyTaskDto } from "@starter/shared";
+import type { StudyTaskDto } from "@cracksde/shared";
 
 export function PlanlySprintPlanner() {
+  const router = useRouter();
   const { user } = useAuth();
   const userId = user?.id ?? "anonymous";
 
@@ -35,6 +39,8 @@ export function PlanlySprintPlanner() {
     isUpdatingTask,
     updatePlan,
     isUpdatingPlan,
+    deletePlan,
+    isDeletingPlan,
   } = useStudyPlan("crack-sde");
 
   const { addPoints } = usePlannerStore();
@@ -59,6 +65,18 @@ export function PlanlySprintPlanner() {
 
   const [isCatchupModalOpen, setIsCatchupModalOpen] = useState(false);
   const [isAdjustPlanModalOpen, setIsAdjustPlanModalOpen] = useState(false);
+  const [isDeletePlanModalOpen, setIsDeletePlanModalOpen] = useState(false);
+
+  const handleConfirmDeletePlan = async () => {
+    try {
+      await deletePlan();
+      setIsDeletePlanModalOpen(false);
+      toast.success("Study plan deleted and reset successfully");
+      router.push("/onboarding");
+    } catch {
+      // Handled by mutation toast
+    }
+  };
 
   const handleToggleSprintExpand = (sprintId: string) => {
     setExpandedSprintIds((prev) => {
@@ -212,8 +230,8 @@ export function PlanlySprintPlanner() {
               </div>
             </div>
 
-            {/* Adjust Plan Action Button */}
-            <div className="shrink-0">
+            {/* Plan Action Buttons */}
+            <div className="flex items-center gap-2 shrink-0">
               <Button
                 size="sm"
                 variant="outline"
@@ -221,6 +239,17 @@ export function PlanlySprintPlanner() {
                 className="h-8 px-3 text-[12px] font-medium border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 hover:text-white text-zinc-200 rounded-lg shadow-subtle transition-all"
               >
                 Adjust plan
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsDeletePlanModalOpen(true)}
+                className="h-8 px-2.5 text-[12px] font-medium border-rose-900/40 bg-rose-950/20 hover:bg-rose-950/50 text-rose-400 hover:text-rose-300 rounded-lg transition-all"
+                title="Delete study plan"
+                aria-label="Delete study plan"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1 text-rose-400" />
+                <span>Delete plan</span>
               </Button>
             </div>
           </div>
@@ -286,6 +315,13 @@ export function PlanlySprintPlanner() {
         initialStartDate={plan?.startDate || "2026-10-01"}
         onSave={handleSavePlan}
         isSaving={isUpdatingPlan}
+      />
+
+      <DeletePlanDialog
+        open={isDeletePlanModalOpen}
+        onOpenChange={setIsDeletePlanModalOpen}
+        onConfirmDelete={handleConfirmDeletePlan}
+        isDeleting={isDeletingPlan}
       />
     </div>
   );

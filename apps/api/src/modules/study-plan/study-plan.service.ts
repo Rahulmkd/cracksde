@@ -25,11 +25,13 @@ export class StudyPlanService {
     }
 
     const userProgressMap = new Map<number, any>();
+    let userProfile: any = null;
     if (userId) {
       const userProgressRecords = await StudyPlanRepository.findUserProgressForUser(userId);
       for (const p of userProgressRecords) {
         userProgressMap.set(p.itemId, p);
       }
+      userProfile = await StudyPlanRepository.findUserProfile(userId);
     }
 
     const now = new Date();
@@ -210,13 +212,18 @@ export class StudyPlanService {
       }
     }
 
+    const userRole = userProfile?.targetRole || "Software Engineer";
+    const userDailyHours = userProfile?.dailyGoalMinutes
+      ? Math.max(1, Math.round(userProfile.dailyGoalMinutes / 60))
+      : 4;
+
     return {
       id: plan.id,
       slug: plan.slug,
       name: plan.name,
       sourceUrl: plan.sourceUrl,
-      role: "Software Engineer",
-      dailyHours: 4,
+      role: userRole,
+      dailyHours: userDailyHours,
       startDate,
       targetDate,
       totalDays: totalPlanDays,
@@ -406,5 +413,22 @@ export class StudyPlanService {
           : null,
       };
     });
+  }
+
+  /**
+   * Safely delete all study plan progress for the authenticated user
+   */
+  static async deleteUserStudyPlan(slug: string = "crack-sde", userId?: string) {
+    if (!userId) {
+      throw new UnauthorizedError("Authentication required to delete study plan");
+    }
+
+    await StudyPlanRepository.deleteUserProgressForUser(userId);
+
+    return {
+      deleted: true,
+      slug,
+      userId,
+    };
   }
 }

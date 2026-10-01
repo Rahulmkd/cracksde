@@ -3,7 +3,7 @@
 import React from "react";
 import { TrendingUp, Clock, Layers, Calendar } from "lucide-react";
 import { formatMinutes } from "@/lib/formatters";
-import type { StudyPlanDto } from "@starter/shared";
+import type { StudyPlanDto } from "@cracksde/shared";
 
 interface SprintMetricsPanelProps {
   plan?: StudyPlanDto;

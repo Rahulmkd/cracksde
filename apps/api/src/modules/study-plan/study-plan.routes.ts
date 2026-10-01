@@ -13,5 +13,7 @@ router.get("/study-plans/revision-list", StudyPlanController.getRevisionList);
 router.get("/study-plans/:slug", StudyPlanController.getStudyPlan);
 router.patch("/study-plans/:slug", validateBody(updateStudyPlanSchema), StudyPlanController.updateStudyPlan);
 router.patch("/study-plans/tasks/:taskId", validateBody(updateStudyTaskSchema), StudyPlanController.updateStudyTask);
+router.delete("/study-plans", StudyPlanController.deleteStudyPlan);
+router.delete("/study-plans/:slug", StudyPlanController.deleteStudyPlan);
 
 export default router;
