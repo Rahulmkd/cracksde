@@ -14,9 +14,9 @@ interface DailyStatsRibbonProps {
 }
 
 export function DailyStatsRibbon({
-  streak,
-  points,
-  userName = "Rahul",
+  streak = 0,
+  points = 0,
+  userName = "Developer",
   sprintNumber = 1,
   sprintFocus = "Data Structures & OOPS Foundations.",
 }: DailyStatsRibbonProps) {
