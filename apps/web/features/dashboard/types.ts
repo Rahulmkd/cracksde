@@ -4,9 +4,13 @@ export interface CategoryProgress {
   name: string;
   count: string;
   percent: number;
-  icon: React.ElementType;
-  color: string;
+  icon?: React.ElementType;
+  color?: string;
   barColor?: string;
+  strokeColor?: string;
+  slug?: string;
+  solved?: number;
+  total?: number;
 }
 
 export interface PopularTopicItem {

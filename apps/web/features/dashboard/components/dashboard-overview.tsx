@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Code2, Layers, Cpu, Database, Sparkles, BookOpen } from "lucide-react";
+import { Code2 } from "lucide-react";
 import { useStudyPlan } from "@/hooks/use-study-plan";
 import { useProfileStats } from "@/features/profile/hooks/use-profile";
-import { useRoadmapSubjects } from "@/features/prep-hub/hooks/use-roadmap";
+import { useRoadmapSubjects, useRoadmapSubjectDetail } from "@/features/prep-hub/hooks/use-roadmap";
 import { usePlannerStore } from "@/store/planner-store";
 import { useAuth } from "@/hooks/use-auth";
 import { DailyPlanner } from "@/components/layout/daily-planner";
@@ -71,9 +71,10 @@ export function DashboardOverview() {
   const userName = user?.name ? user.name.split(" ")[0] : "Developer";
 
   // Dynamic remote data hooks with user-isolated queries
-  const { plan, isLoading: isPlanLoading } = useStudyPlan("crack-sde");
-  const { data: profileStatsData, isLoading: isProfileLoading } = useProfileStats();
-  const { data: subjectsData, isLoading: isSubjectsLoading } = useRoadmapSubjects();
+  const { plan } = useStudyPlan("crack-sde");
+  const { data: profileStatsData } = useProfileStats();
+  const { data: subjectsData } = useRoadmapSubjects();
+  const { data: dsaSubjectDetail } = useRoadmapSubjectDetail("dsa");
   const { points: storePoints, streak: storeStreak } = usePlannerStore();
 
   const sprints = plan?.sprints || [];
@@ -85,149 +86,227 @@ export function DashboardOverview() {
   const points = profileStatsData?.studyPoints ?? storePoints ?? 0;
   const streak = profileStatsData?.streakDays ?? storeStreak ?? 0;
 
-  // Real curriculum totals & completion counts
-  const totalTasks =
-    plan?.totalTasks || profileStatsData?.totalCurriculumItems || (allTasks.length > 0 ? allTasks.length : 847);
-  const completedTasks =
-    profileStatsData?.totalSolved ?? allTasks.filter((t) => t.status === "completed").length;
-  const progressPercent =
-    profileStatsData?.overallPercentage ??
-    (totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0);
+  // Extract DSA specific items and calculate real dynamic breakdown
+  const dsaItems = useMemo(() => {
+    if (!dsaSubjectDetail?.topics) return [];
+    return dsaSubjectDetail.topics.flatMap((t) => [
+      ...(t.items || []),
+      ...(t.subtopics?.flatMap((s) => s.items || []) || []),
+    ]);
+  }, [dsaSubjectDetail]);
 
-  // Difficulty level breakdowns (Basic, Core, Pro)
-  const basicTotal =
-    allTasks.filter(
-      (t) => (t.item?.difficulty || "").toLowerCase() === "easy" || (t.item?.difficulty || "").toLowerCase() === "basic"
-    ).length || 214;
-  const basicCompleted = allTasks.filter(
-    (t) =>
-      t.status === "completed" &&
-      ((t.item?.difficulty || "").toLowerCase() === "easy" || (t.item?.difficulty || "").toLowerCase() === "basic")
-  ).length;
+  const {
+    dsaBasicTotal,
+    dsaBasicCompleted,
+    dsaCoreTotal,
+    dsaCoreCompleted,
+    dsaProTotal,
+    dsaProCompleted,
+    dsaTotalCount,
+    dsaCompletedCount,
+  } = useMemo(() => {
+    if (dsaItems.length > 0) {
+      const isItemSolved = (item: any) =>
+        item.progress?.status === "completed" ||
+        (item.progress?.solveCount && item.progress.solveCount > 0) ||
+        Boolean(item.solved);
 
-  const coreTotal =
-    allTasks.filter(
-      (t) => (t.item?.difficulty || "").toLowerCase() === "medium" || (t.item?.difficulty || "").toLowerCase() === "core"
-    ).length || 412;
-  const coreCompleted = allTasks.filter(
-    (t) =>
-      t.status === "completed" &&
-      ((t.item?.difficulty || "").toLowerCase() === "medium" || (t.item?.difficulty || "").toLowerCase() === "core")
-  ).length;
+      const basicItems = dsaItems.filter(
+        (t) =>
+          (t.difficulty || "").toLowerCase() === "easy" ||
+          (t.difficulty || "").toLowerCase() === "basic"
+      );
+      const coreItems = dsaItems.filter(
+        (t) =>
+          (t.difficulty || "").toLowerCase() === "medium" ||
+          (t.difficulty || "").toLowerCase() === "core"
+      );
+      const proItems = dsaItems.filter(
+        (t) =>
+          (t.difficulty || "").toLowerCase() === "hard" ||
+          (t.difficulty || "").toLowerCase() === "pro"
+      );
 
-  const proTotal =
-    allTasks.filter(
-      (t) => (t.item?.difficulty || "").toLowerCase() === "hard" || (t.item?.difficulty || "").toLowerCase() === "pro"
-    ).length || 221;
-  const proCompleted = allTasks.filter(
-    (t) =>
-      t.status === "completed" &&
-      ((t.item?.difficulty || "").toLowerCase() === "hard" || (t.item?.difficulty || "").toLowerCase() === "pro")
-  ).length;
+      const bTotal = basicItems.length || 214;
+      const bSolved = basicItems.filter(isItemSolved).length;
+
+      const cTotal = coreItems.length || 843;
+      const cSolved = coreItems.filter(isItemSolved).length;
+
+      const pTotal = proItems.length || 312;
+      const pSolved = proItems.filter(isItemSolved).length;
+
+      return {
+        dsaBasicTotal: bTotal,
+        dsaBasicCompleted: bSolved,
+        dsaCoreTotal: cTotal,
+        dsaCoreCompleted: cSolved,
+        dsaProTotal: pTotal,
+        dsaProCompleted: pSolved,
+        dsaTotalCount: bTotal + cTotal + pTotal,
+        dsaCompletedCount: bSolved + cSolved + pSolved,
+      };
+    }
+
+    // Fallback based on plan tasks
+    const dsaTasks = allTasks.filter((t) =>
+      (t.item?.subjectSlug || "").toLowerCase().includes("dsa")
+    );
+    const isTaskSolved = (t: any) => t.status === "completed";
+
+    const bTasks = dsaTasks.filter(
+      (t) =>
+        (t.item?.difficulty || "").toLowerCase() === "easy" ||
+        (t.item?.difficulty || "").toLowerCase() === "basic"
+    );
+    const cTasks = dsaTasks.filter(
+      (t) =>
+        (t.item?.difficulty || "").toLowerCase() === "medium" ||
+        (t.item?.difficulty || "").toLowerCase() === "core"
+    );
+    const pTasks = dsaTasks.filter(
+      (t) =>
+        (t.item?.difficulty || "").toLowerCase() === "hard" ||
+        (t.item?.difficulty || "").toLowerCase() === "pro"
+    );
+
+    const bTotal = bTasks.length || 214;
+    const bSolved = bTasks.filter(isTaskSolved).length;
+
+    const cTotal = cTasks.length || 843;
+    const cSolved = cTasks.filter(isTaskSolved).length;
+
+    const pTotal = pTasks.length || 312;
+    const pSolved = pTasks.filter(isTaskSolved).length;
+
+    return {
+      dsaBasicTotal: bTotal,
+      dsaBasicCompleted: bSolved,
+      dsaCoreTotal: cTotal,
+      dsaCoreCompleted: cSolved,
+      dsaProTotal: pTotal,
+      dsaProCompleted: pSolved,
+      dsaTotalCount: bTotal + cTotal + pTotal,
+      dsaCompletedCount: bSolved + cSolved + pSolved,
+    };
+  }, [dsaItems, allTasks]);
 
   // Real Category-wise Progress from live database subjects
   const categories: CategoryProgress[] = useMemo(() => {
     if (subjectsData && subjectsData.length > 0) {
       return subjectsData.map((sub) => {
         const slug = sub.slug.toLowerCase();
-        let icon = Code2;
-        let color = "text-cyan-400 bg-cyan-500/10 border-cyan-500/20";
+        let color = "text-cyan-400 bg-cyan-950/40 border-cyan-500/20";
+        let strokeColor = "#22d3ee";
         let barColor = "bg-cyan-400";
 
-        if (slug.includes("system") || slug.includes("lld") || slug.includes("design")) {
-          icon = Layers;
-          color = "text-amber-400 bg-amber-500/10 border-amber-500/20";
+        if (
+          slug.includes("system") ||
+          slug.includes("lld") ||
+          slug.includes("design") ||
+          slug.includes("hld")
+        ) {
+          color = "text-amber-400 bg-amber-950/40 border-amber-500/20";
+          strokeColor = "#fbbf24";
           barColor = "bg-amber-400";
-        } else if (slug.includes("os") || slug.includes("operat") || slug.includes("netw")) {
-          icon = Cpu;
-          color = "text-purple-400 bg-purple-500/10 border-purple-500/20";
+        } else if (
+          slug.includes("core") ||
+          slug.includes("os") ||
+          slug.includes("operat") ||
+          slug.includes("netw") ||
+          slug.includes("subject")
+        ) {
+          color = "text-purple-400 bg-purple-950/40 border-purple-500/20";
+          strokeColor = "#c084fc";
           barColor = "bg-purple-400";
-        } else if (slug.includes("dbms") || slug.includes("sql") || slug.includes("data")) {
-          icon = Database;
-          color = "text-blue-400 bg-blue-500/10 border-blue-500/20";
+        } else if (
+          slug.includes("data") ||
+          slug.includes("dbms") ||
+          slug.includes("sql") ||
+          slug.includes("engine")
+        ) {
+          color = "text-blue-400 bg-blue-950/40 border-blue-500/20";
+          strokeColor = "#60a5fa";
           barColor = "bg-blue-400";
         }
 
-        const solved = sub.totalSolved || 0;
+        let displayName = sub.name;
+        if (slug === "dsa" || slug.includes("algorithm")) displayName = "DSA";
+        else if (slug.includes("system") || slug.includes("design")) displayName = "System Design";
+        else if (slug.includes("core") || slug.includes("cs-fundamentals")) displayName = "Core Subjects";
+        else if (slug.includes("data") || slug.includes("analytics")) displayName = "Data Engineering";
+
+        const solved = sub.totalSolved ?? 0;
         const total = sub.totalItems || 1;
-        const percent = Math.round((solved / Math.max(1, total)) * 100);
+        const percent = total > 0 ? Math.round((solved / total) * 100) : 0;
 
         return {
-          name: sub.name,
-          count: `${solved} / ${total}`,
+          name: displayName,
+          count: `${solved}/${total}`,
           percent,
-          icon,
+          icon: Code2,
           color,
           barColor,
+          strokeColor,
+          slug: sub.slug,
+          solved,
+          total,
         };
       });
     }
 
-    // Fallback based on tasks
-    const dsaTasks = allTasks.filter((t) => (t.item?.subjectSlug || "").toLowerCase().includes("dsa"));
-    const dsaTotal = dsaTasks.length || 354;
-    const dsaDoneCount = dsaTasks.filter((t) => t.status === "completed").length;
-    const dsaPercent = Math.round((dsaDoneCount / dsaTotal) * 100);
-
-    const sysDesignTasks = allTasks.filter(
-      (t) =>
-        (t.item?.subjectSlug || "").toLowerCase().includes("system") ||
-        (t.item?.subjectSlug || "").toLowerCase().includes("lld")
-    );
-    const sysDesignTotal = sysDesignTasks.length || 137;
-    const sysDesignDoneCount = sysDesignTasks.filter((t) => t.status === "completed").length;
-    const sysDesignPercent = Math.round((sysDesignDoneCount / sysDesignTotal) * 100);
-
-    const coreTasks = allTasks.filter(
-      (t) =>
-        (t.item?.subjectSlug || "").toLowerCase().includes("os") ||
-        (t.item?.subjectSlug || "").toLowerCase().includes("operat") ||
-        (t.item?.subjectSlug || "").toLowerCase().includes("netw")
-    );
-    const coreTotalCount = coreTasks.length || 178;
-    const coreDoneCount = coreTasks.filter((t) => t.status === "completed").length;
-    const corePercent = Math.round((coreDoneCount / coreTotalCount) * 100);
-
-    const dbmsTasks = allTasks.filter((t) => (t.item?.subjectSlug || "").toLowerCase().includes("dbms"));
-    const dbmsTotalCount = dbmsTasks.length || 210;
-    const dbmsDoneCount = dbmsTasks.filter((t) => t.status === "completed").length;
-    const dbmsPercent = Math.round((dbmsDoneCount / dbmsTotalCount) * 100);
-
+    // Fallback based on reference curriculum
     return [
       {
-        name: "Data Structures & Algorithms",
-        count: `${dsaDoneCount} / ${dsaTotal}`,
-        percent: dsaPercent,
+        name: "DSA",
+        count: "0/1007",
+        percent: 0,
         icon: Code2,
-        color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+        color: "text-cyan-400 bg-cyan-950/40 border-cyan-500/20",
         barColor: "bg-cyan-400",
+        strokeColor: "#22d3ee",
+        slug: "dsa",
+        solved: 0,
+        total: 1007,
       },
       {
-        name: "System Design & Architecture",
-        count: `${sysDesignDoneCount} / ${sysDesignTotal}`,
-        percent: sysDesignPercent,
-        icon: Layers,
-        color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+        name: "System Design",
+        count: "0/104",
+        percent: 0,
+        icon: Code2,
+        color: "text-amber-400 bg-amber-950/40 border-amber-500/20",
         barColor: "bg-amber-400",
+        strokeColor: "#fbbf24",
+        slug: "system-design",
+        solved: 0,
+        total: 104,
       },
       {
-        name: "Operating Systems & Networks",
-        count: `${coreDoneCount} / ${coreTotalCount}`,
-        percent: corePercent,
-        icon: Cpu,
-        color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+        name: "Core Subjects",
+        count: "0/944",
+        percent: 0,
+        icon: Code2,
+        color: "text-purple-400 bg-purple-950/40 border-purple-500/20",
         barColor: "bg-purple-400",
+        strokeColor: "#c084fc",
+        slug: "core-subjects",
+        solved: 0,
+        total: 944,
       },
       {
-        name: "Database Management & SQL",
-        count: `${dbmsDoneCount} / ${dbmsTotalCount}`,
-        percent: dbmsPercent,
-        icon: Database,
-        color: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+        name: "Data Engineering",
+        count: "0/324",
+        percent: 0,
+        icon: Code2,
+        color: "text-blue-400 bg-blue-950/40 border-blue-500/20",
         barColor: "bg-blue-400",
+        strokeColor: "#60a5fa",
+        slug: "data-engineering",
+        solved: 0,
+        total: 324,
       },
     ];
-  }, [subjectsData, allTasks]);
+  }, [subjectsData]);
 
   const sprintNumber = activeSprint?.sprintNo || 1;
   const sprintFocus =
@@ -262,25 +341,27 @@ export function DashboardOverview() {
           />
 
           {/* "Your Progress" Section */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-[16px] font-bold tracking-tight text-white">
-              <span className="text-blue-400 text-sm">✦</span>
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2 text-[16px] sm:text-[17px] font-bold tracking-tight text-white">
               <h2>Your Progress</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 items-stretch">
               <ProgressDonut
-                completedTasks={completedTasks}
-                totalTasks={totalTasks}
-                progressPercent={progressPercent}
-                basicCompleted={basicCompleted}
-                basicTotal={basicTotal}
-                coreCompleted={coreCompleted}
-                coreTotal={coreTotal}
-                proCompleted={proCompleted}
-                proTotal={proTotal}
+                title="DSA Progress"
+                completedTasks={dsaCompletedCount}
+                totalTasks={dsaTotalCount}
+                basicCompleted={dsaBasicCompleted}
+                basicTotal={dsaBasicTotal}
+                coreCompleted={dsaCoreCompleted}
+                coreTotal={dsaCoreTotal}
+                proCompleted={dsaProCompleted}
+                proTotal={dsaProTotal}
               />
-              <SubjectProgressBar categories={categories} />
+              <SubjectProgressBar
+                title="Category-wise Progress"
+                categories={categories}
+              />
             </div>
           </div>
 
