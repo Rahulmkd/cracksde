@@ -105,9 +105,9 @@ export function ProgressDonut({
   }, [basicTotal, coreTotal, proTotal, basicCompleted, coreCompleted, proCompleted, totalCount, totalAvailableDegrees, radius]);
 
   return (
-    <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 space-y-4 hover:border-zinc-700/80 transition-all duration-200 shadow-subtle flex flex-col justify-between select-none">
+    <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 h-full flex flex-col justify-between hover:border-zinc-700/80 transition-all duration-200 shadow-subtle select-none">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between shrink-0 mb-3 sm:mb-2">
         <span className="text-[15px] font-semibold text-zinc-100">{title}</span>
         <div
           className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
@@ -117,113 +117,115 @@ export function ProgressDonut({
         </div>
       </div>
 
-      {/* Main Stats Body */}
-      <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-2 sm:py-3">
-        {/* Multi-Segment Circular Gauge Chart */}
-        <div className="relative flex h-36 w-36 sm:h-40 sm:w-40 items-center justify-center shrink-0">
-          <svg className="h-full w-full" viewBox="0 0 100 100">
-            {/* Background Segment Tracks */}
-            <path
-              d={basicArc.trackPath}
-              stroke="#1b3c2d"
-              strokeWidth="7"
-              strokeLinecap="round"
-              fill="none"
-              className="transition-colors duration-300"
-            />
-            <path
-              d={coreArc.trackPath}
-              stroke="#3b321a"
-              strokeWidth="7"
-              strokeLinecap="round"
-              fill="none"
-              className="transition-colors duration-300"
-            />
-            <path
-              d={proArc.trackPath}
-              stroke="#3d1d25"
-              strokeWidth="7"
-              strokeLinecap="round"
-              fill="none"
-              className="transition-colors duration-300"
-            />
-
-            {/* Active Solved Overlay Paths */}
-            {basicArc.solvedPath && (
+      {/* Main Stats Body - Vertically Centered */}
+      <div className="flex-1 flex items-center justify-center my-auto">
+        <div className="flex flex-row items-center justify-around w-full gap-4 sm:gap-6 py-1">
+          {/* Multi-Segment Circular Gauge Chart */}
+          <div className="relative flex h-32 w-32 sm:h-36 sm:w-36 items-center justify-center shrink-0">
+            <svg className="h-full w-full" viewBox="0 0 100 100">
+              {/* Background Segment Tracks */}
               <path
-                d={basicArc.solvedPath}
-                stroke="#22c55e"
+                d={basicArc.trackPath}
+                stroke="#1b3c2d"
                 strokeWidth="7"
                 strokeLinecap="round"
                 fill="none"
-                className="transition-all duration-700 ease-out"
+                className="transition-colors duration-300"
               />
-            )}
-            {coreArc.solvedPath && (
               <path
-                d={coreArc.solvedPath}
-                stroke="#eab308"
+                d={coreArc.trackPath}
+                stroke="#3b321a"
                 strokeWidth="7"
                 strokeLinecap="round"
                 fill="none"
-                className="transition-all duration-700 ease-out"
+                className="transition-colors duration-300"
               />
-            )}
-            {proArc.solvedPath && (
               <path
-                d={proArc.solvedPath}
-                stroke="#f43f5e"
+                d={proArc.trackPath}
+                stroke="#3d1d25"
                 strokeWidth="7"
                 strokeLinecap="round"
                 fill="none"
-                className="transition-all duration-700 ease-out"
+                className="transition-colors duration-300"
               />
-            )}
-          </svg>
 
-          {/* Center Solved / Total Counts */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
-            <span className="text-[28px] sm:text-[32px] font-bold text-white tracking-tight leading-none font-mono">
-              {totalSolved}
-            </span>
-            <span className="text-[12px] sm:text-[13px] text-zinc-400 mt-1 font-mono">
-              / {totalCount}
-            </span>
+              {/* Active Solved Overlay Paths */}
+              {basicArc.solvedPath && (
+                <path
+                  d={basicArc.solvedPath}
+                  stroke="#22c55e"
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                  fill="none"
+                  className="transition-all duration-700 ease-out"
+                />
+              )}
+              {coreArc.solvedPath && (
+                <path
+                  d={coreArc.solvedPath}
+                  stroke="#eab308"
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                  fill="none"
+                  className="transition-all duration-700 ease-out"
+                />
+              )}
+              {proArc.solvedPath && (
+                <path
+                  d={proArc.solvedPath}
+                  stroke="#f43f5e"
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                  fill="none"
+                  className="transition-all duration-700 ease-out"
+                />
+              )}
+            </svg>
+
+            {/* Center Solved / Total Counts */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
+              <span className="text-[26px] sm:text-[28px] font-bold text-white tracking-tight leading-none font-mono">
+                {totalSolved}
+              </span>
+              <span className="text-[11px] sm:text-[12px] text-zinc-400 mt-1 font-mono">
+                / {totalCount}
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* Difficulty Breakdown Indicators */}
-        <div className="space-y-4 min-w-[130px] w-full sm:w-auto">
-          {/* Basic */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-[3px] bg-emerald-400 shrink-0" />
-              <span className="text-[14px] font-semibold text-zinc-100">Basic</span>
+          {/* Difficulty Breakdown Indicators */}
+          <div className="space-y-3 sm:space-y-3.5 min-w-[110px] sm:min-w-[120px]">
+            {/* Basic */}
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-[2px] bg-emerald-400 shrink-0" />
+                <span className="text-[13px] sm:text-[14px] font-semibold text-zinc-100">Basic</span>
+              </div>
+              <div className="pl-4.5 text-[12px] sm:text-[13px] text-zinc-400 font-mono">
+                <span className="font-bold text-white">{basicCompleted}</span> / {basicTotal}
+              </div>
             </div>
-            <div className="pl-4.5 text-[13px] text-zinc-400 font-mono">
-              <span className="font-bold text-white">{basicCompleted}</span> / {basicTotal}
-            </div>
-          </div>
 
-          {/* Core */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-[3px] bg-amber-400 shrink-0" />
-              <span className="text-[14px] font-semibold text-zinc-100">Core</span>
+            {/* Core */}
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-[2px] bg-amber-400 shrink-0" />
+                <span className="text-[13px] sm:text-[14px] font-semibold text-zinc-100">Core</span>
+              </div>
+              <div className="pl-4.5 text-[12px] sm:text-[13px] text-zinc-400 font-mono">
+                <span className="font-bold text-white">{coreCompleted}</span> / {coreTotal}
+              </div>
             </div>
-            <div className="pl-4.5 text-[13px] text-zinc-400 font-mono">
-              <span className="font-bold text-white">{coreCompleted}</span> / {coreTotal}
-            </div>
-          </div>
 
-          {/* Pro */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-[3px] bg-rose-500 shrink-0" />
-              <span className="text-[14px] font-semibold text-zinc-100">Pro</span>
-            </div>
-            <div className="pl-4.5 text-[13px] text-zinc-400 font-mono">
-              <span className="font-bold text-white">{proCompleted}</span> / {proTotal}
+            {/* Pro */}
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-[2px] bg-rose-500 shrink-0" />
+                <span className="text-[13px] sm:text-[14px] font-semibold text-zinc-100">Pro</span>
+              </div>
+              <div className="pl-4.5 text-[12px] sm:text-[13px] text-zinc-400 font-mono">
+                <span className="font-bold text-white">{proCompleted}</span> / {proTotal}
+              </div>
             </div>
           </div>
         </div>

@@ -13,7 +13,7 @@ interface SubjectProgressBarProps {
 
 function CircularPercentIndicator({
   percent = 0,
-  size = 36,
+  size = 34,
   strokeWidth = 2.5,
   strokeColor = "#38bdf8",
 }: {
@@ -71,14 +71,14 @@ export function SubjectProgressBar({
   title = "Category-wise Progress",
 }: SubjectProgressBarProps) {
   return (
-    <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 space-y-4 hover:border-zinc-700/80 transition-all duration-200 shadow-subtle flex flex-col justify-between select-none">
+    <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 h-full flex flex-col justify-between hover:border-zinc-700/80 transition-all duration-200 shadow-subtle select-none">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between shrink-0 mb-3 sm:mb-2">
         <span className="text-[15px] font-semibold text-zinc-100">{title}</span>
       </div>
 
-      {/* Category List */}
-      <div className="space-y-3.5 pt-0.5 flex-1 flex flex-col justify-around">
+      {/* Category List - Evenly distributed within card height */}
+      <div className="flex-1 flex flex-col justify-between py-1 gap-1.5 sm:gap-2">
         {categories.map((cat) => {
           const Icon = cat.icon || Code2;
           const href = cat.slug ? `/practice?subject=${cat.slug}` : "/practice";
@@ -93,17 +93,17 @@ export function SubjectProgressBar({
               <div className="flex items-center gap-3 min-w-0 overflow-hidden">
                 <div
                   className={cn(
-                    "flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border shrink-0 transition-transform group-hover:scale-105 duration-200",
+                    "flex h-9 w-9 sm:h-9.5 sm:w-9.5 items-center justify-center rounded-xl border shrink-0 transition-transform group-hover:scale-105 duration-200",
                     cat.color || "text-cyan-400 bg-cyan-950/40 border-cyan-500/20"
                   )}
                 >
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="flex flex-col truncate">
-                  <span className="text-[14px] sm:text-[15px] font-semibold text-zinc-100 truncate group-hover:text-white transition-colors">
+                  <span className="text-[13px] sm:text-[14px] font-semibold text-zinc-100 truncate group-hover:text-white transition-colors">
                     {cat.name}
                   </span>
-                  <span className="text-[12px] text-zinc-400 font-mono">
+                  <span className="text-[11px] sm:text-[12px] text-zinc-400 font-mono">
                     {cat.count}
                   </span>
                 </div>

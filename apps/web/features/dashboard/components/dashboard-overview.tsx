@@ -191,119 +191,115 @@ export function DashboardOverview() {
     };
   }, [dsaItems, allTasks]);
 
-  // Real Category-wise Progress from live database subjects
+  // Real Category-wise Progress from live database subjects (Strictly 4 subjects)
   const categories: CategoryProgress[] = useMemo(() => {
-    if (subjectsData && subjectsData.length > 0) {
-      return subjectsData.map((sub) => {
-        const slug = sub.slug.toLowerCase();
-        let color = "text-cyan-400 bg-cyan-950/40 border-cyan-500/20";
-        let strokeColor = "#22d3ee";
-        let barColor = "bg-cyan-400";
+    const subjects = subjectsData || [];
 
-        if (
-          slug.includes("system") ||
-          slug.includes("lld") ||
-          slug.includes("design") ||
-          slug.includes("hld")
-        ) {
-          color = "text-amber-400 bg-amber-950/40 border-amber-500/20";
-          strokeColor = "#fbbf24";
-          barColor = "bg-amber-400";
-        } else if (
-          slug.includes("core") ||
-          slug.includes("os") ||
-          slug.includes("operat") ||
-          slug.includes("netw") ||
-          slug.includes("subject")
-        ) {
-          color = "text-purple-400 bg-purple-950/40 border-purple-500/20";
-          strokeColor = "#c084fc";
-          barColor = "bg-purple-400";
-        } else if (
-          slug.includes("data") ||
-          slug.includes("dbms") ||
-          slug.includes("sql") ||
-          slug.includes("engine")
-        ) {
-          color = "text-blue-400 bg-blue-950/40 border-blue-500/20";
-          strokeColor = "#60a5fa";
-          barColor = "bg-blue-400";
-        }
+    // 1. DSA
+    const dsaSub = subjects.filter((s) => {
+      const slug = (s.slug || "").toLowerCase();
+      const name = (s.name || "").toLowerCase();
+      return slug === "dsa" || slug.includes("algorithm") || name.includes("data structures");
+    });
+    const dsaSolved = dsaSub.reduce((acc, s) => acc + (s.totalSolved || 0), 0);
+    const dsaTotal = dsaSub.reduce((acc, s) => acc + (s.totalItems || 0), 0) || 1007;
 
-        let displayName = sub.name;
-        if (slug === "dsa" || slug.includes("algorithm")) displayName = "DSA";
-        else if (slug.includes("system") || slug.includes("design")) displayName = "System Design";
-        else if (slug.includes("core") || slug.includes("cs-fundamentals")) displayName = "Core Subjects";
-        else if (slug.includes("data") || slug.includes("analytics")) displayName = "Data Engineering";
+    // 2. System Design
+    const sysSub = subjects.filter((s) => {
+      const slug = (s.slug || "").toLowerCase();
+      const name = (s.name || "").toLowerCase();
+      return (
+        slug.includes("system") ||
+        slug.includes("lld") ||
+        slug.includes("hld") ||
+        slug.includes("design") ||
+        name.includes("system")
+      );
+    });
+    const sysSolved = sysSub.reduce((acc, s) => acc + (s.totalSolved || 0), 0);
+    const sysTotal = sysSub.reduce((acc, s) => acc + (s.totalItems || 0), 0) || 104;
 
-        const solved = sub.totalSolved ?? 0;
-        const total = sub.totalItems || 1;
-        const percent = total > 0 ? Math.round((solved / total) * 100) : 0;
+    // 3. Core Subjects
+    const coreSub = subjects.filter((s) => {
+      const slug = (s.slug || "").toLowerCase();
+      const name = (s.name || "").toLowerCase();
+      return (
+        slug.includes("core") ||
+        slug.includes("os") ||
+        slug.includes("operat") ||
+        slug.includes("netw") ||
+        slug.includes("oops") ||
+        name.includes("operating") ||
+        name.includes("network")
+      );
+    });
+    const coreSolved = coreSub.reduce((acc, s) => acc + (s.totalSolved || 0), 0);
+    const coreTotal = coreSub.reduce((acc, s) => acc + (s.totalItems || 0), 0) || 944;
 
-        return {
-          name: displayName,
-          count: `${solved}/${total}`,
-          percent,
-          icon: Code2,
-          color,
-          barColor,
-          strokeColor,
-          slug: sub.slug,
-          solved,
-          total,
-        };
-      });
-    }
+    // 4. Data Engineering
+    const dataSub = subjects.filter((s) => {
+      const slug = (s.slug || "").toLowerCase();
+      const name = (s.name || "").toLowerCase();
+      return (
+        slug.includes("data-eng") ||
+        slug.includes("dbms") ||
+        slug.includes("sql") ||
+        slug.includes("database") ||
+        name.includes("data") ||
+        name.includes("database")
+      );
+    });
+    const dataSolved = dataSub.reduce((acc, s) => acc + (s.totalSolved || 0), 0);
+    const dataTotal = dataSub.reduce((acc, s) => acc + (s.totalItems || 0), 0) || 324;
 
-    // Fallback based on reference curriculum
     return [
       {
         name: "DSA",
-        count: "0/1007",
-        percent: 0,
+        count: `${dsaSolved}/${dsaTotal}`,
+        percent: dsaTotal > 0 ? Math.round((dsaSolved / dsaTotal) * 100) : 0,
         icon: Code2,
         color: "text-cyan-400 bg-cyan-950/40 border-cyan-500/20",
         barColor: "bg-cyan-400",
         strokeColor: "#22d3ee",
         slug: "dsa",
-        solved: 0,
-        total: 1007,
+        solved: dsaSolved,
+        total: dsaTotal,
       },
       {
         name: "System Design",
-        count: "0/104",
-        percent: 0,
+        count: `${sysSolved}/${sysTotal}`,
+        percent: sysTotal > 0 ? Math.round((sysSolved / sysTotal) * 100) : 0,
         icon: Code2,
         color: "text-amber-400 bg-amber-950/40 border-amber-500/20",
         barColor: "bg-amber-400",
         strokeColor: "#fbbf24",
         slug: "system-design",
-        solved: 0,
-        total: 104,
+        solved: sysSolved,
+        total: sysTotal,
       },
       {
         name: "Core Subjects",
-        count: "0/944",
-        percent: 0,
+        count: `${coreSolved}/${coreTotal}`,
+        percent: coreTotal > 0 ? Math.round((coreSolved / coreTotal) * 100) : 0,
         icon: Code2,
         color: "text-purple-400 bg-purple-950/40 border-purple-500/20",
         barColor: "bg-purple-400",
         strokeColor: "#c084fc",
         slug: "core-subjects",
-        solved: 0,
-        total: 944,
+        solved: coreSolved,
+        total: coreTotal,
       },
       {
         name: "Data Engineering",
-        count: "0/324",
-        percent: 0,
+        count: `${dataSolved}/${dataTotal}`,
+        percent: dataTotal > 0 ? Math.round((dataSolved / dataTotal) * 100) : 0,
         icon: Code2,
         color: "text-blue-400 bg-blue-950/40 border-blue-500/20",
         barColor: "bg-blue-400",
         strokeColor: "#60a5fa",
         slug: "data-engineering",
-        solved: 0,
-        total: 324,
+        solved: dataSolved,
+        total: dataTotal,
       },
     ];
   }, [subjectsData]);
