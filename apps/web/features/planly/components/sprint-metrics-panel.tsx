@@ -45,15 +45,19 @@ export function SprintMetricsPanel({ plan }: SprintMetricsPanelProps) {
     plan?.completedSprints ?? sprints.filter((s) => s.status === "completed").length;
 
   // Est. Completion Date calculation
-  const baseStartDate = plan?.startDate ? new Date(plan.startDate) : new Date(2026, 9, 1);
+  const baseStartDate = plan?.startDate ? new Date(plan.startDate) : null;
   const estEndDate = plan?.targetDate
     ? new Date(plan.targetDate)
-    : new Date(baseStartDate.getTime() + totalDays * 24 * 60 * 60 * 1000);
+    : baseStartDate && !isNaN(baseStartDate.getTime())
+    ? new Date(baseStartDate.getTime() + totalDays * 24 * 60 * 60 * 1000)
+    : null;
 
-  const estDayMonth = !isNaN(estEndDate.getTime())
+  const estDayMonth = estEndDate && !isNaN(estEndDate.getTime())
     ? estEndDate.toLocaleDateString("en-US", { day: "numeric", month: "short" })
-    : "30 Nov";
-  const estYear = !isNaN(estEndDate.getTime()) ? estEndDate.getFullYear() : "2026";
+    : "—";
+  const estYear = estEndDate && !isNaN(estEndDate.getTime())
+    ? String(estEndDate.getFullYear())
+    : "";
 
   return (
     <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-3.5 shadow-subtle select-none">

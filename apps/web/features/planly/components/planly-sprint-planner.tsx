@@ -28,7 +28,7 @@ import type { StudyTaskDto } from "@cracksde/shared";
 
 export function PlanlySprintPlanner() {
   const router = useRouter();
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   const {
@@ -142,7 +142,7 @@ export function PlanlySprintPlanner() {
   };
 
   // Full-page polished skeleton while authentication, plan creation/deletion, or query loading is active
-  if (isLoading || isAuthLoading || isDeletingPlan) {
+  if (isLoading || isAuthLoading || isDeletingPlan || (isAuthenticated && plan === undefined && !isError)) {
     return <PlanlySkeleton />;
   }
 
@@ -185,14 +185,14 @@ export function PlanlySprintPlanner() {
 
   const sprints = plan?.sprints || [];
 
-  const baseStartDate = plan?.startDate ? new Date(plan.startDate) : new Date(2026, 9, 1);
-  const formattedScheduledDate = !isNaN(baseStartDate.getTime())
+  const baseStartDate = plan?.startDate ? new Date(plan.startDate) : null;
+  const formattedScheduledDate = baseStartDate && !isNaN(baseStartDate.getTime())
     ? baseStartDate.toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric",
       })
-    : "1 Oct 2026";
+    : "Not set";
 
   const planTitle = plan?.name || "Crack SDE";
 
@@ -336,7 +336,7 @@ export function PlanlySprintPlanner() {
         onOpenChange={setIsAdjustPlanModalOpen}
         initialName={plan?.name}
         initialHours={plan?.dailyHours}
-        initialStartDate={plan?.startDate || "2026-10-01"}
+        initialStartDate={plan?.startDate || ""}
         onSave={handleSavePlan}
         isSaving={isUpdatingPlan}
       />

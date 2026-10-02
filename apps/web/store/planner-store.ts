@@ -43,8 +43,12 @@ export const usePlannerStore = create<PlannerState>()(
 
       syncUser: (userId: string | null) => {
         const state = get();
+        if (state.currentUserId === null && userId !== null) {
+          set({ currentUserId: userId });
+          return;
+        }
         if (state.currentUserId !== userId) {
-          // When switching users or on first user load, clear old user's planner data
+          // When switching from one user to another or on explicit logout, clear old user's planner data
           set({
             currentUserId: userId,
             tasks: [],

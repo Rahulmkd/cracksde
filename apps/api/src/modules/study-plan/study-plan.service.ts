@@ -19,9 +19,30 @@ function matchesSubject(taskSubjectSlug: string | undefined | null, selectedSlug
   return selectedSlugs.some((selected) => {
     const s = selected.toLowerCase().trim();
     if (s === slug) return true;
-    if ((s === "os" || s === "operating-systems") && (slug === "os" || slug === "operating-systems")) return true;
-    if ((s === "cn" || s === "computer-networks") && (slug === "cn" || slug === "computer-networks")) return true;
-    if ((s === "lld" || s === "system-design") && (slug === "lld" || slug === "system-design")) return true;
+    if (
+      (s === "os" || s === "operating-systems") &&
+      (slug === "os" || slug === "operating-systems")
+    ) return true;
+    if (
+      (s === "cn" || s === "computer-networks") &&
+      (slug === "cn" || slug === "computer-networks")
+    ) return true;
+    if (
+      (s === "lld" || s === "system-design" || s === "low-level-design" || s === "hld") &&
+      (slug === "lld" || slug === "system-design" || slug === "low-level-design" || slug === "hld")
+    ) return true;
+    if (
+      (s === "dbms" || s === "database-management-systems" || s === "database" || s === "data-engineering") &&
+      (slug === "dbms" || slug === "database-management-systems" || slug === "database" || slug === "data-engineering")
+    ) return true;
+    if (
+      (s === "dsa" || s === "data-structures" || s === "algorithms" || s === "data-structures-and-algorithms") &&
+      (slug === "dsa" || slug === "data-structures" || slug === "algorithms" || slug === "data-structures-and-algorithms")
+    ) return true;
+    if (
+      (s === "oops" || s === "object-oriented-programming" || s === "oop") &&
+      (slug === "oops" || slug === "object-oriented-programming" || slug === "oop")
+    ) return true;
     return false;
   });
 }

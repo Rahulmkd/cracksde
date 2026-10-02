@@ -77,7 +77,7 @@ export function useDashboardStats(): DashboardStats {
       subjects.reduce((acc: number, s: RoadmapSubjectSummaryDto) => acc + (s.totalSolved || 0), 0);
     const totalItems =
       profileStatsData?.totalCurriculumItems ??
-      (subjects.reduce((acc: number, s: RoadmapSubjectSummaryDto) => acc + (s.totalItems || 0), 0) || 847);
+      subjects.reduce((acc: number, s: RoadmapSubjectSummaryDto) => acc + (s.totalItems || 0), 0);
     const overallPercentage =
       profileStatsData?.overallPercentage ??
       (totalItems > 0 ? Math.round((totalCompletedItems / totalItems) * 100) : 0);
@@ -90,8 +90,8 @@ export function useDashboardStats(): DashboardStats {
     return {
       activeSprint: {
         number: activeSprintData?.sprintNo || 1,
-        title: `Sprint ${activeSprintData?.sprintNo || 1}: DSA & Core Prep`,
-        focusTrack: "DSA (Arrays & Two Pointers)",
+        title: activeSprintData ? `Sprint ${activeSprintData.sprintNo}` : "Sprint 1",
+        focusTrack: "Curriculum Roadmap",
         completedTasks,
         totalTasks,
         progressPercentage,

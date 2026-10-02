@@ -13,16 +13,26 @@ export function useAuthSession() {
   const prevUserIdRef = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
+    // Only synchronize once auth check has resolved (!isPending)
+    if (isPending) return;
+
     if (prevUserIdRef.current === undefined) {
       prevUserIdRef.current = userId;
       usePlannerStore.getState().syncUser(userId);
       return;
     }
 
-    // Detect user ID transition (login, switch user, or logout)
+    // Detect actual user switch or logout (e.g. user_A -> user_B or user_A -> null)
     if (prevUserIdRef.current !== userId) {
+      const hadPreviousUser = Boolean(prevUserIdRef.current);
       prevUserIdRef.current = userId;
-      queryClient.clear();
+
+      if (hadPreviousUser) {
+        queryClient.clear();
+      } else {
+        queryClient.invalidateQueries();
+      }
+
       usePlannerStore.getState().syncUser(userId);
       if (typeof window !== "undefined") {
         try {
@@ -31,7 +41,7 @@ export function useAuthSession() {
         } catch {}
       }
     }
-  }, [userId, queryClient]);
+  }, [userId, isPending, queryClient]);
 
   const handleSignOut = async () => {
     queryClient.clear();

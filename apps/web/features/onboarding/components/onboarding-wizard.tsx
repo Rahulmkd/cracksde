@@ -14,6 +14,7 @@ import {
 } from "@/constants/onboarding-options";
 import { studyPlanService } from "@/services/study-plan-service";
 import { profileService } from "@/services/profile-service";
+import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { OnboardingStepper } from "./onboarding-stepper";
@@ -25,31 +26,33 @@ import { PlanlySkeleton } from "@/features/planly/components/planly-skeleton";
 export function OnboardingWizard() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
+  const userId = user?.id ?? "anonymous";
   const store = useOnboardingStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Prepopulate role & experience from user profile if available
-  const { data: profileData } = useQuery({
-    queryKey: ["profile"],
-    queryFn: () => profileService.getProfile(),
-    enabled: !!user,
-    staleTime: 1000 * 60 * 5,
-  });
+  const { data: profileData, isLoading: isProfileLoading } = useProfile();
 
   useEffect(() => {
+    if (isAuthLoading) return;
+    if (isAuthenticated && isProfileLoading) return;
+
     if (profileData?.profile) {
-      if (profileData.profile.targetRole && store.targetRole === "Software Engineer") {
-        store.setTargetRole(profileData.profile.targetRole);
-      }
-      if (profileData.profile.experience && store.experience === "0 - 2 years") {
-        store.setExperience(profileData.profile.experience);
-      }
-      if (profileData.profile.selectedSubjects && profileData.profile.selectedSubjects.length > 0) {
-        store.setSelectedSubjects(profileData.profile.selectedSubjects);
-      }
+      const p = profileData.profile;
+      store.resetOnboarding({
+        targetRole: p.targetRole || "Software Engineer",
+        experience: p.experience || "0 - 2 years",
+        selectedSubjects:
+          p.selectedSubjects && p.selectedSubjects.length > 0
+            ? p.selectedSubjects
+            : undefined,
+        planName: p.planName || "Crack SDE",
+      });
     }
-  }, [profileData]);
+    setIsInitialized(true);
+  }, [isAuthLoading, isAuthenticated, isProfileLoading, profileData]);
 
   const totalWeeklyHours = store.getTotalWeeklyHours();
   const selectedCurriculumHours = getSelectedSubjectsHours(store.selectedSubjects) || TOTAL_ROADMAP_HOURS;
@@ -119,12 +122,21 @@ export function OnboardingWizard() {
         });
 
         // Invalidate caches across the app
-        queryClient.invalidateQueries({ queryKey: ["study-plan"] });
-        queryClient.invalidateQueries({ queryKey: ["profile"] });
-        queryClient.invalidateQueries({ queryKey: ["user-profile-stats"] });
-        queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-        queryClient.invalidateQueries({ queryKey: ["revision-list"] });
-        queryClient.invalidateQueries({ queryKey: ["user-revisions"] });
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["study-plan"] }),
+          queryClient.invalidateQueries({ queryKey: ["user-profile"] }),
+          queryClient.invalidateQueries({ queryKey: ["user-profile-stats"] }),
+          queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] }),
+          queryClient.invalidateQueries({ queryKey: ["revision-list"] }),
+          queryClient.invalidateQueries({ queryKey: ["user-revisions"] }),
+          queryClient.invalidateQueries({ queryKey: ["roadmap-subjects"] }),
+          queryClient.invalidateQueries({ queryKey: ["roadmap-subject"] }),
+        ]);
+
+        // Refetch current user's study plan so Planly loads instantly without flash
+        await queryClient.refetchQueries({
+          queryKey: ["study-plan", "crack-sde", userId],
+        });
 
         toast.success("🚀 Study Plan created and activated!");
         router.push("/planly");
@@ -143,7 +155,8 @@ export function OnboardingWizard() {
     store.prevStep();
   };
 
-  if (isSubmitting) {
+  // Show full skeleton while auth/profile is loading or initializing
+  if (!isInitialized || isAuthLoading || (isAuthenticated && isProfileLoading) || isSubmitting) {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white select-none">
         <header className="flex h-14 items-center justify-between border-b border-zinc-800/80 px-4 sm:px-8 bg-zinc-950/85 backdrop-blur-md">
@@ -163,7 +176,7 @@ export function OnboardingWizard() {
           </div>
           <div className="text-[12px] text-blue-400 font-mono flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-            <span>Activating study plan...</span>
+            <span>{isSubmitting ? "Activating study plan..." : "Loading your preferences..."}</span>
           </div>
         </header>
 

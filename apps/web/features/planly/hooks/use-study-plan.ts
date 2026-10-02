@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 export function useStudyPlan(slug: string = "crack-sde") {
   const queryClient = useQueryClient();
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   const planQuery = useQuery({
@@ -105,7 +105,9 @@ export function useStudyPlan(slug: string = "crack-sde") {
       queryClient.invalidateQueries({ queryKey: ["roadmap-subjects"] });
       queryClient.invalidateQueries({ queryKey: ["roadmap-subject"] });
       queryClient.invalidateQueries({ queryKey: ["user-profile-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       queryClient.invalidateQueries({ queryKey: ["practice-problems"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to update task");
@@ -124,6 +126,10 @@ export function useStudyPlan(slug: string = "crack-sde") {
     }) => studyPlanService.updatePlan(slug, { name, startDate, dailyHours }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["study-plan"] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["revision-list"] });
       toast.success("Study plan updated successfully");
     },
     onError: (err: Error) => {
@@ -146,7 +152,7 @@ export function useStudyPlan(slug: string = "crack-sde") {
       queryClient.invalidateQueries({ queryKey: ["user-profile-stats"] });
       queryClient.invalidateQueries({ queryKey: ["practice-problems"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
 
       if (typeof window !== "undefined") {
         try {
@@ -169,6 +175,7 @@ export function useStudyPlan(slug: string = "crack-sde") {
     planQuery.isLoading ||
     (planQuery.isPending && !planQuery.isError) ||
     (planQuery.fetchStatus === "fetching" && planQuery.data === undefined) ||
+    (isAuthenticated && planQuery.data === undefined && !planQuery.isError) ||
     deletePlanMutation.isPending;
 
   return {

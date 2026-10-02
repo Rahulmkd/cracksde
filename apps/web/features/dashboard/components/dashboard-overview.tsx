@@ -133,13 +133,13 @@ export function DashboardOverview() {
           (t.difficulty || "").toLowerCase() === "pro"
       );
 
-      const bTotal = basicItems.length || 214;
+      const bTotal = basicItems.length;
       const bSolved = basicItems.filter(isItemSolved).length;
 
-      const cTotal = coreItems.length || 843;
+      const cTotal = coreItems.length;
       const cSolved = coreItems.filter(isItemSolved).length;
 
-      const pTotal = proItems.length || 312;
+      const pTotal = proItems.length;
       const pSolved = proItems.filter(isItemSolved).length;
 
       return {
@@ -176,13 +176,13 @@ export function DashboardOverview() {
         (t.item?.difficulty || "").toLowerCase() === "pro"
     );
 
-    const bTotal = bTasks.length || 214;
+    const bTotal = bTasks.length;
     const bSolved = bTasks.filter(isTaskSolved).length;
 
-    const cTotal = cTasks.length || 843;
+    const cTotal = cTasks.length;
     const cSolved = cTasks.filter(isTaskSolved).length;
 
-    const pTotal = pTasks.length || 312;
+    const pTotal = pTasks.length;
     const pSolved = pTasks.filter(isTaskSolved).length;
 
     return {
@@ -208,7 +208,7 @@ export function DashboardOverview() {
       return slug === "dsa" || slug.includes("algorithm") || name.includes("data structures");
     });
     const dsaSolved = dsaSub.reduce((acc, s) => acc + (s.totalSolved || 0), 0);
-    const dsaTotal = dsaSub.reduce((acc, s) => acc + (s.totalItems || 0), 0) || 1007;
+    const dsaTotal = dsaSub.reduce((acc, s) => acc + (s.totalItems || 0), 0);
 
     // 2. System Design
     const sysSub = subjects.filter((s) => {
@@ -223,7 +223,7 @@ export function DashboardOverview() {
       );
     });
     const sysSolved = sysSub.reduce((acc, s) => acc + (s.totalSolved || 0), 0);
-    const sysTotal = sysSub.reduce((acc, s) => acc + (s.totalItems || 0), 0) || 104;
+    const sysTotal = sysSub.reduce((acc, s) => acc + (s.totalItems || 0), 0);
 
     // 3. Core Subjects
     const coreSub = subjects.filter((s) => {
@@ -240,7 +240,7 @@ export function DashboardOverview() {
       );
     });
     const coreSolved = coreSub.reduce((acc, s) => acc + (s.totalSolved || 0), 0);
-    const coreTotal = coreSub.reduce((acc, s) => acc + (s.totalItems || 0), 0) || 944;
+    const coreTotal = coreSub.reduce((acc, s) => acc + (s.totalItems || 0), 0);
 
     // 4. Data Engineering
     const dataSub = subjects.filter((s) => {
@@ -256,7 +256,7 @@ export function DashboardOverview() {
       );
     });
     const dataSolved = dataSub.reduce((acc, s) => acc + (s.totalSolved || 0), 0);
-    const dataTotal = dataSub.reduce((acc, s) => acc + (s.totalItems || 0), 0) || 324;
+    const dataTotal = dataSub.reduce((acc, s) => acc + (s.totalItems || 0), 0);
 
     return [
       {

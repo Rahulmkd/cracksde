@@ -27,6 +27,9 @@ export function useQuestionSolver() {
       queryClient.invalidateQueries({ queryKey: ["roadmap-subjects"] });
       queryClient.invalidateQueries({ queryKey: ["study-plan"] });
       queryClient.invalidateQueries({ queryKey: ["revision-list"] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["user-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
       toast.success("Progress saved successfully");
     },
     onError: (err: Error) => {
