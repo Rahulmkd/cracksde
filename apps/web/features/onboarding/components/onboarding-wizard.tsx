@@ -40,6 +40,9 @@ export function OnboardingWizard() {
       if (profileData.profile.experience && store.experience === "0 - 2 years") {
         store.setExperience(profileData.profile.experience);
       }
+      if (profileData.profile.selectedSubjects && profileData.profile.selectedSubjects.length > 0) {
+        store.setSelectedSubjects(profileData.profile.selectedSubjects);
+      }
     }
   }, [profileData]);
 
@@ -93,17 +96,19 @@ export function OnboardingWizard() {
               hasActivePlan: true,
               planName: store.planName.trim(),
               planStartDate: startDateStr,
+              selectedSubjects: store.selectedSubjects,
             });
           } catch (profileErr) {
             console.warn("Could not save profile during onboarding:", profileErr);
           }
         }
 
-        // Update Study Plan schedule
+        // Update Study Plan schedule & selected subjects
         await studyPlanService.updatePlan("crack-sde", {
           name: store.planName.trim(),
           startDate: startDateStr,
           dailyHours,
+          selectedSubjects: store.selectedSubjects,
         });
 
         // Invalidate caches across the app
@@ -111,6 +116,8 @@ export function OnboardingWizard() {
         queryClient.invalidateQueries({ queryKey: ["profile"] });
         queryClient.invalidateQueries({ queryKey: ["user-profile-stats"] });
         queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+        queryClient.invalidateQueries({ queryKey: ["revision-list"] });
+        queryClient.invalidateQueries({ queryKey: ["user-revisions"] });
 
         toast.success("🚀 Study Plan created and activated!");
         router.push("/planly");

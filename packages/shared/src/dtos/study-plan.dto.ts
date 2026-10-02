@@ -64,6 +64,7 @@ export interface StudyPlanDto {
   isOnSchedule?: boolean;
   scheduleStatusText?: string;
   hasPlan?: boolean;
+  selectedSubjects?: string[];
   sprints?: StudySprintDto[];
 }
 
@@ -77,4 +78,5 @@ export interface UpdateStudyPlanDto {
   name?: string;
   startDate?: string;
   dailyHours?: number;
+  selectedSubjects?: string[];
 }

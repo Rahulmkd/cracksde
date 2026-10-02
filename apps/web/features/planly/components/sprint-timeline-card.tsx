@@ -32,15 +32,13 @@ export function SprintTimelineCard({
   const allTasks = days.flatMap((d) => d.tasks || []);
 
   const totalMinutes =
-    sprint.totalEstimatedMinutes ||
-    allTasks.reduce((acc, t) => acc + (t.estimatedMinutes || 20), 0) ||
-    2087; // ~34h 47m
+    sprint.totalEstimatedMinutes ??
+    allTasks.reduce((acc, t) => acc + (t.estimatedMinutes || 20), 0);
   const spentMinutes =
-    sprint.totalActualMinutes ||
+    sprint.totalActualMinutes ??
     allTasks
       .filter((t) => t.status === "completed")
-      .reduce((acc, t) => acc + (t.actualMinutes || t.estimatedMinutes || 20), 0) ||
-    0;
+      .reduce((acc, t) => acc + (t.actualMinutes || t.estimatedMinutes || 20), 0);
 
   const formattedSpent = spentMinutes > 0 ? formatMinutes(spentMinutes) : "0 sec";
   const formattedEst = formatMinutes(totalMinutes);

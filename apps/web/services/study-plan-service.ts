@@ -11,6 +11,7 @@ export interface UpdatePlanPayload {
   name?: string;
   startDate?: string;
   dailyHours?: number;
+  selectedSubjects?: string[];
 }
 
 export const studyPlanService = {

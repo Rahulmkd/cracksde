@@ -33,6 +33,7 @@ export interface OnboardingState {
   setTargetRole: (role: string) => void;
   setExperience: (exp: string) => void;
   toggleSubject: (slug: string) => void;
+  setSelectedSubjects: (subjects: string[]) => void;
   setDayAvailability: (day: keyof OnboardingState["availability"], hours: number) => void;
   setPlanName: (name: string) => void;
   setStartDateOption: (opt: "today" | "tomorrow" | "custom") => void;
@@ -79,6 +80,8 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
           : [...s.selectedSubjects, slug],
       };
     }),
+
+  setSelectedSubjects: (subjects) => set({ selectedSubjects: subjects }),
 
   setDayAvailability: (day, hours) =>
     set((s) => ({

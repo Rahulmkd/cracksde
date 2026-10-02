@@ -14,13 +14,13 @@ export function SprintMetricsPanel({ plan }: SprintMetricsPanelProps) {
   const allDays = sprints.flatMap((s) => s.days || []);
   const allTasks = allDays.flatMap((d) => d.tasks || []);
 
-  const totalTasks = plan?.totalTasks ?? (allTasks.length || 847);
+  const totalTasks = plan?.totalTasks ?? allTasks.length;
   const completedTasks =
     plan?.completedTasks ?? allTasks.filter((t) => t.status === "completed").length;
   const progressPercent =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const totalDays = plan?.totalDays ?? (allDays.length || 56);
+  const totalDays = plan?.totalDays ?? allDays.length;
   const completedDays =
     plan?.completedDays ??
     allDays.filter((d) => (d.tasksCompleted || 0) >= (d.tasksTotal || 1) && (d.tasksTotal || 0) > 0)
@@ -28,21 +28,19 @@ export function SprintMetricsPanel({ plan }: SprintMetricsPanelProps) {
 
   // Time calculations
   const totalMinutes =
-    plan?.totalEstimatedMinutes ||
-    allTasks.reduce((acc, t) => acc + (t.estimatedMinutes || 20), 0) ||
-    16253; // ~270h 53m
+    plan?.totalEstimatedMinutes ??
+    allTasks.reduce((acc, t) => acc + (t.estimatedMinutes || 20), 0);
   const completedMinutes =
-    plan?.completedEstimatedMinutes ||
+    plan?.completedEstimatedMinutes ??
     allTasks
       .filter((t) => t.status === "completed")
-      .reduce((acc, t) => acc + (t.actualMinutes || t.estimatedMinutes || 20), 0) ||
-    0;
+      .reduce((acc, t) => acc + (t.actualMinutes || t.estimatedMinutes || 20), 0);
 
   const timeSpentStr = formatMinutes(completedMinutes);
   const totalTimeStr = formatMinutes(totalMinutes);
 
   // Sprints calculation
-  const totalSprints = sprints.length || 9;
+  const totalSprints = sprints.length;
   const completedSprints =
     plan?.completedSprints ?? sprints.filter((s) => s.status === "completed").length;
 

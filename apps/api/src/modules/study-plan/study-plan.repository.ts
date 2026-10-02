@@ -243,6 +243,7 @@ export class StudyPlanRepository {
       dailyGoalMinutes?: number;
       targetRole?: string;
       experience?: string;
+      selectedSubjects?: string[];
     }
   ) {
     return prisma.userProfile.upsert({
@@ -254,6 +255,7 @@ export class StudyPlanRepository {
         ...(data.dailyGoalMinutes !== undefined ? { dailyGoalMinutes: data.dailyGoalMinutes } : {}),
         ...(data.targetRole !== undefined ? { targetRole: data.targetRole } : {}),
         ...(data.experience !== undefined ? { experience: data.experience } : {}),
+        ...(data.selectedSubjects !== undefined ? { selectedSubjects: data.selectedSubjects } : {}),
       },
       create: {
         userId,
@@ -263,6 +265,7 @@ export class StudyPlanRepository {
         dailyGoalMinutes: data.dailyGoalMinutes || 60,
         targetRole: data.targetRole || "Software Engineer",
         experience: data.experience || "0 - 2 years",
+        selectedSubjects: data.selectedSubjects ?? [],
       },
     });
   }
@@ -274,6 +277,7 @@ export class StudyPlanRepository {
         hasActivePlan: false,
         planName: null,
         planStartDate: null,
+        selectedSubjects: [],
       },
     });
   }

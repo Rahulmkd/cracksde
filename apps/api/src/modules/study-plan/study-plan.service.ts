@@ -13,9 +13,22 @@ import type {
   StudyDayDto,
 } from "@cracksde/shared";
 
+function matchesSubject(taskSubjectSlug: string | undefined | null, selectedSlugs: string[]): boolean {
+  if (!taskSubjectSlug) return false;
+  const slug = taskSubjectSlug.toLowerCase().trim();
+  return selectedSlugs.some((selected) => {
+    const s = selected.toLowerCase().trim();
+    if (s === slug) return true;
+    if ((s === "os" || s === "operating-systems") && (slug === "os" || slug === "operating-systems")) return true;
+    if ((s === "cn" || s === "computer-networks") && (slug === "cn" || slug === "computer-networks")) return true;
+    if ((s === "lld" || s === "system-design") && (slug === "lld" || slug === "system-design")) return true;
+    return false;
+  });
+}
+
 export class StudyPlanService {
   /**
-   * Fetch a study plan tailored strictly to the authenticated user's progress.
+   * Fetch a study plan tailored strictly to the authenticated user's selected subjects and progress.
    */
   static async getStudyPlan(slug: string = "crack-sde", userId?: string): Promise<StudyPlanDto | null> {
     if (!userId) {
@@ -32,6 +45,11 @@ export class StudyPlanService {
       throw new NotFoundError(`Study plan '${slug}' not found`);
     }
 
+    const selectedSlugs = (userProfile.selectedSubjects || [])
+      .map((s) => s.toLowerCase().trim())
+      .filter(Boolean);
+    const hasSubjectFilter = selectedSlugs.length > 0;
+
     const userProgressMap = new Map<number, any>();
     const userProgressRecords = await StudyPlanRepository.findUserProgressForUser(userId);
     for (const p of userProgressRecords) {
@@ -46,21 +64,34 @@ export class StudyPlanService {
     let totalPlanDays = 0;
     let completedPlanDays = 0;
 
-    const formattedSprints: StudySprintDto[] = plan.sprints.map((sprint: any) => {
+    const formattedSprints: StudySprintDto[] = [];
+
+    for (const sprint of plan.sprints) {
+      const formattedDays: StudyDayDto[] = [];
       let sprintEstimatedMinutes = 0;
       let sprintActualMinutes = 0;
       let sprintDaysTotal = 0;
       let sprintDaysCompleted = 0;
 
-      const formattedDays: StudyDayDto[] = sprint.days.map((day: any) => {
+      for (const day of sprint.days) {
+        // Filter tasks by user's selected subjects
+        const eligibleTasks = hasSubjectFilter
+          ? day.tasks.filter((t: any) => matchesSubject(t.item?.subject?.slug, selectedSlugs))
+          : day.tasks;
+
+        // If no tasks match the selected subjects on this day, omit the day
+        if (eligibleTasks.length === 0) {
+          continue;
+        }
+
         totalPlanDays++;
         sprintDaysTotal++;
 
-        const dayTasksTotal = day.tasks.length;
+        const dayTasksTotal = eligibleTasks.length;
         let dayTasksCompleted = 0;
         let dayEstimatedMinutes = 0;
 
-        const formattedTasks: StudyTaskDto[] = day.tasks.map((task: any) => {
+        const formattedTasks: StudyTaskDto[] = eligibleTasks.map((task: any) => {
           totalPlanTasks++;
           const taskEstMin = task.estimatedMinutes || 20;
           dayEstimatedMinutes += taskEstMin;
@@ -147,12 +178,12 @@ export class StudyPlanService {
 
         sprintEstimatedMinutes += dayEstimatedMinutes;
 
-        return {
+        formattedDays.push({
           dayId: day.dayId.toString(),
           sprintId: day.sprintId.toString(),
-          planDayNo: day.planDayNo,
-          sprintDayNo: day.sprintDayNo,
-          calendarDate: day.calendarDate ? day.calendarDate.toISOString() : null,
+          planDayNo: totalPlanDays,
+          sprintDayNo: sprintDaysTotal,
+          calendarDate: null,
           status: dayStatus,
           estimatedMinutes: dayEstimatedMinutes,
           actualMinutes: isDayComplete ? dayEstimatedMinutes : 0,
@@ -160,8 +191,13 @@ export class StudyPlanService {
           tasksCompleted: dayTasksCompleted,
           isCatchUpDay: day.isCatchUpDay || false,
           tasks: formattedTasks,
-        };
-      });
+        });
+      }
+
+      // If all days in this sprint had no matching tasks, omit the sprint
+      if (formattedDays.length === 0) {
+        continue;
+      }
 
       const isSprintComplete = sprintDaysTotal > 0 && sprintDaysCompleted >= sprintDaysTotal;
       const anySprintTaskDone = formattedDays.some((d: StudyDayDto) => (d.tasksCompleted || 0) > 0);
@@ -171,20 +207,20 @@ export class StudyPlanService {
         ? "in_progress"
         : "upcoming";
 
-      return {
+      formattedSprints.push({
         sprintId: sprint.sprintId.toString(),
         planId: sprint.planId,
-        sprintNo: sprint.sprintNo,
+        sprintNo: formattedSprints.length + 1,
         status: sprintStatus,
-        plannedStartDate: sprint.plannedStartDate ? sprint.plannedStartDate.toISOString() : null,
-        plannedEndDate: sprint.plannedEndDate ? sprint.plannedEndDate.toISOString() : null,
-        initialDaysAssigned: sprint.initialDaysAssigned || sprint.days.length,
+        plannedStartDate: null,
+        plannedEndDate: null,
+        initialDaysAssigned: formattedDays.length,
         actualDaysTaken: sprint.actualDaysTaken || 0,
         totalEstimatedMinutes: sprintEstimatedMinutes,
         totalActualMinutes: sprintActualMinutes,
         days: formattedDays,
-      };
-    });
+      });
+    }
 
     const completedSprintsCount = formattedSprints.filter(
       (s: StudySprintDto) => s.status === "completed"
@@ -198,20 +234,21 @@ export class StudyPlanService {
       : 4;
     const planTitle = userProfile?.planName || plan.name;
 
-    const firstSprint = formattedSprints[0];
     const baseStart = userProfile?.planStartDate
       ? new Date(userProfile.planStartDate)
-      : (firstSprint?.plannedStartDate ? new Date(firstSprint.plannedStartDate) : new Date());
+      : new Date();
     const startDate = !isNaN(baseStart.getTime()) ? baseStart.toISOString().split("T")[0] : null;
 
     if (startDate) {
       const start = new Date(startDate);
+      let dayCounter = 0;
       for (const sprint of formattedSprints) {
         if (sprint.days && sprint.days.length > 0) {
           for (const day of sprint.days) {
             const dayDate = new Date(start);
-            dayDate.setDate(start.getDate() + (day.planDayNo - 1));
+            dayDate.setDate(start.getDate() + dayCounter);
             day.calendarDate = dayDate.toISOString();
+            dayCounter++;
           }
           sprint.plannedStartDate = sprint.days[0].calendarDate;
           sprint.plannedEndDate = sprint.days[sprint.days.length - 1].calendarDate;
@@ -260,6 +297,7 @@ export class StudyPlanService {
       isOnSchedule,
       scheduleStatusText,
       hasPlan: true,
+      selectedSubjects: userProfile.selectedSubjects || [],
       sprints: formattedSprints,
     };
   }
@@ -335,41 +373,20 @@ export class StudyPlanService {
   }
 
   /**
-   * Update study plan parameters (schedule / start dates)
+   * Update study plan parameters (schedule / start dates / selected subjects)
    */
   static async updateStudyPlan(slug: string, updates: UpdateStudyPlanDto, userId?: string) {
     if (userId) {
       await StudyPlanRepository.activateUserPlan(userId, {
         planName: updates.name,
         planStartDate: updates.startDate ? new Date(updates.startDate) : undefined,
+        selectedSubjects: updates.selectedSubjects,
       });
     }
 
     const updatedPlan = await StudyPlanRepository.updateStudyPlan(slug, {
       ...(updates.name ? { name: updates.name } : {}),
     });
-
-    if (updates.startDate) {
-      const start = new Date(updates.startDate);
-      if (!isNaN(start.getTime())) {
-        const days = await StudyPlanRepository.findDaysForPlan(updatedPlan.id);
-
-        for (const day of days) {
-          const dayDate = new Date(start);
-          dayDate.setDate(start.getDate() + (day.planDayNo - 1));
-          await StudyPlanRepository.updateDayDate(day.dayId, dayDate);
-        }
-
-        for (const sprint of updatedPlan.sprints) {
-          const sprintDays = await StudyPlanRepository.findDaysForSprint(sprint.sprintId);
-          if (sprintDays.length > 0) {
-            const firstDate = sprintDays[0].calendarDate;
-            const lastDate = sprintDays[sprintDays.length - 1].calendarDate;
-            await StudyPlanRepository.updateSprintDates(sprint.sprintId, firstDate, lastDate);
-          }
-        }
-      }
-    }
 
     return {
       id: updatedPlan.id,
@@ -379,7 +396,7 @@ export class StudyPlanService {
   }
 
   /**
-   * Fetch revision tasks for the authenticated user.
+   * Fetch revision tasks for the authenticated user, strictly filtered by selected subjects.
    */
   static async getRevisionList(userId?: string) {
     if (!userId) {
@@ -391,8 +408,17 @@ export class StudyPlanService {
       return [];
     }
 
+    const selectedSlugs = (userProfile.selectedSubjects || [])
+      .map((s) => s.toLowerCase().trim())
+      .filter(Boolean);
+    const hasSubjectFilter = selectedSlugs.length > 0;
+
     const now = new Date();
-    const tasks = await StudyPlanRepository.findRevisionTasks();
+    let tasks = await StudyPlanRepository.findRevisionTasks();
+    if (hasSubjectFilter) {
+      tasks = tasks.filter((t: any) => matchesSubject(t.item?.subject?.slug, selectedSlugs));
+    }
+
     const userProgressRecords = await StudyPlanRepository.findUserProgressForUser(userId);
 
     const progressMap = new Map<number, any>();

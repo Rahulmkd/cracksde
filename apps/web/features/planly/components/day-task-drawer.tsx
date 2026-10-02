@@ -25,9 +25,8 @@ export function DayTaskDrawer({
   const dayNumber = day.planDayNo || day.sprintDayNo || 1;
   const tasks = day.tasks || [];
   const totalMinutes =
-    day.estimatedMinutes ||
-    tasks.reduce((acc, t) => acc + (t.estimatedMinutes || 20), 0) ||
-    233; // ~3h 53m
+    day.estimatedMinutes ??
+    tasks.reduce((acc, t) => acc + (t.estimatedMinutes || 20), 0);
 
   return (
     <div className="relative pl-5 space-y-1.5">

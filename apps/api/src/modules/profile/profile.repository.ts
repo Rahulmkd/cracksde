@@ -31,6 +31,7 @@ export class ProfileRepository {
       hasActivePlan?: boolean;
       planName?: string | null;
       planStartDate?: Date | null;
+      selectedSubjects?: string[];
       githubUrl?: string | null;
       linkedinUrl?: string | null;
       leetcodeUrl?: string | null;
@@ -54,6 +55,7 @@ export class ProfileRepository {
         hasActivePlan: data.hasActivePlan ?? false,
         planName: data.planName,
         planStartDate: data.planStartDate,
+        selectedSubjects: data.selectedSubjects ?? [],
         githubUrl: data.githubUrl,
         linkedinUrl: data.linkedinUrl,
         leetcodeUrl: data.leetcodeUrl,
@@ -73,6 +75,7 @@ export class ProfileRepository {
         ...(data.hasActivePlan !== undefined ? { hasActivePlan: data.hasActivePlan } : {}),
         ...(data.planName !== undefined ? { planName: data.planName } : {}),
         ...(data.planStartDate !== undefined ? { planStartDate: data.planStartDate } : {}),
+        ...(data.selectedSubjects !== undefined ? { selectedSubjects: data.selectedSubjects } : {}),
         ...(data.githubUrl !== undefined ? { githubUrl: data.githubUrl } : {}),
         ...(data.linkedinUrl !== undefined ? { linkedinUrl: data.linkedinUrl } : {}),
         ...(data.leetcodeUrl !== undefined ? { leetcodeUrl: data.leetcodeUrl } : {}),

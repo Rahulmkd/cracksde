@@ -16,6 +16,7 @@ export interface UserProfileDto {
   hasActivePlan?: boolean;
   planName?: string | null;
   planStartDate?: string | null;
+  selectedSubjects?: string[];
   githubUrl: string | null;
   linkedinUrl: string | null;
   leetcodeUrl: string | null;
@@ -82,6 +83,7 @@ export interface UpdateProfileRequestDto {
   hasActivePlan?: boolean;
   planName?: string | null;
   planStartDate?: string | null;
+  selectedSubjects?: string[];
   githubUrl?: string | null;
   linkedinUrl?: string | null;
   leetcodeUrl?: string | null;
