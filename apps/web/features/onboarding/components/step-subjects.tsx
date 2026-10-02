@@ -9,12 +9,16 @@ interface StepSubjectsProps {
   targetRole: string;
   selectedSubjects: string[];
   onToggleSubject: (slug: string) => void;
+  onSelectAll?: () => void;
+  onClearAll?: () => void;
 }
 
 export function StepSubjects({
   targetRole,
   selectedSubjects,
   onToggleSubject,
+  onSelectAll,
+  onClearAll,
 }: StepSubjectsProps) {
   return (
     <div className="space-y-7 animate-in fade-in-50 duration-200">
@@ -43,9 +47,30 @@ export function StepSubjects({
             </p>
           </div>
 
-          <span className="rounded-full border border-zinc-800 bg-zinc-900/70 px-2.5 py-1 text-[10px] font-medium text-zinc-400">
-            {selectedSubjects.length}/{CORE_SUBJECTS.length} selected
-          </span>
+          <div className="flex items-center gap-2">
+            {onSelectAll && onClearAll && (
+              <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 pr-1">
+                <button
+                  type="button"
+                  onClick={onSelectAll}
+                  className="hover:text-blue-400 transition-colors"
+                >
+                  Select all
+                </button>
+                <span className="text-zinc-600">&middot;</span>
+                <button
+                  type="button"
+                  onClick={onClearAll}
+                  className="hover:text-zinc-300 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+            <span className="rounded-full border border-zinc-800 bg-zinc-900/70 px-2.5 py-1 text-[10px] font-medium text-zinc-400">
+              {selectedSubjects.length}/{CORE_SUBJECTS.length} selected
+            </span>
+          </div>
         </div>
 
         {/* Subjects */}

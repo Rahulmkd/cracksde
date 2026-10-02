@@ -7,7 +7,11 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnboardingStore } from "@/features/onboarding/store/onboarding-store";
-import { TOTAL_ROADMAP_HOURS } from "@/constants/onboarding-options";
+import {
+  TOTAL_ROADMAP_HOURS,
+  getSelectedSubjectsHours,
+  getSelectedSubjectsSprints,
+} from "@/constants/onboarding-options";
 import { studyPlanService } from "@/services/study-plan-service";
 import { profileService } from "@/services/profile-service";
 import { useAuth } from "@/hooks/use-auth";
@@ -47,7 +51,9 @@ export function OnboardingWizard() {
   }, [profileData]);
 
   const totalWeeklyHours = store.getTotalWeeklyHours();
-  const estimatedDays = Math.round((TOTAL_ROADMAP_HOURS / Math.max(1, totalWeeklyHours)) * 7);
+  const selectedCurriculumHours = getSelectedSubjectsHours(store.selectedSubjects) || TOTAL_ROADMAP_HOURS;
+  const selectedSprintsCount = getSelectedSubjectsSprints(store.selectedSubjects) || 9;
+  const estimatedDays = Math.max(1, Math.round((selectedCurriculumHours / Math.max(1, totalWeeklyHours)) * 7));
 
   const handleNext = async () => {
     if (store.currentStep === 1) {
@@ -158,7 +164,13 @@ export function OnboardingWizard() {
         <div className="flex items-center gap-3 text-[12px] text-zinc-400">
           <button
             onClick={() => {
-              store.resetOnboarding();
+              store.resetOnboarding({
+                targetRole: profileData?.profile?.targetRole || "Software Engineer",
+                experience: profileData?.profile?.experience || "0 - 2 years",
+                selectedSubjects: profileData?.profile?.selectedSubjects?.length
+                  ? profileData.profile.selectedSubjects
+                  : undefined,
+              });
               toast.info("Plan draft reset");
             }}
             className="hover:text-zinc-200 transition-colors"
@@ -188,6 +200,8 @@ export function OnboardingWizard() {
             targetRole={store.targetRole}
             selectedSubjects={store.selectedSubjects}
             onToggleSubject={store.toggleSubject}
+            onSelectAll={store.selectAllSubjects}
+            onClearAll={store.clearAllSubjects}
           />
         )}
 
@@ -209,6 +223,8 @@ export function OnboardingWizard() {
             selectedSubjectsCount={store.selectedSubjects.length}
             totalWeeklyHours={totalWeeklyHours}
             estimatedDays={estimatedDays}
+            totalCurriculumHours={Math.round(selectedCurriculumHours)}
+            totalSprints={selectedSprintsCount}
           />
         )}
 

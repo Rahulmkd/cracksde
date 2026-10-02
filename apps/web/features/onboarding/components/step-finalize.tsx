@@ -11,6 +11,8 @@ interface StepFinalizeProps {
   selectedSubjectsCount: number;
   totalWeeklyHours: number;
   estimatedDays: number;
+  totalCurriculumHours?: number;
+  totalSprints?: number;
 }
 
 export function StepFinalize({
@@ -21,6 +23,8 @@ export function StepFinalize({
   selectedSubjectsCount,
   totalWeeklyHours,
   estimatedDays,
+  totalCurriculumHours = 271,
+  totalSprints = 9,
 }: StepFinalizeProps) {
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-200">
@@ -29,7 +33,7 @@ export function StepFinalize({
           Finalize &amp; Launch Study Plan
         </h1>
         <p className="text-[12px] font-normal leading-normal text-zinc-400">
-          Your customized 9-sprint roadmap is ready to activate.
+          Your customized {totalSprints}-sprint roadmap is ready to activate.
         </p>
       </div>
 
@@ -37,16 +41,18 @@ export function StepFinalize({
       <div className="rounded-xl border border-blue-500/30 bg-blue-950/20 p-5 space-y-4 shadow-card">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-blue-500/20">
           <div>
-            <span className="text-[11px] font-mono text-blue-400 font-medium">CUSTOM ROADMAP</span>
+            <span className="text-[11px] font-mono text-blue-400 font-medium">
+              CUSTOM ROADMAP
+            </span>
             <h3 className="text-[16px] font-semibold text-zinc-100 mt-0.5">
-              {planName || "Crack SDE Master Sprint"}
+              {planName || "Sprint"}
             </h3>
-            <p className="text-[12px] text-zinc-400 font-normal">
-              Target: {targetRole} &middot; {experience}
-            </p>
           </div>
           <div className="text-left sm:text-right">
-            <Badge variant="blue" className="text-[11px] font-medium py-0.5 px-2">
+            <Badge
+              variant="blue"
+              className="text-[11px] font-medium py-0.5 px-2"
+            >
               Ready to Start
             </Badge>
           </div>
@@ -56,7 +62,9 @@ export function StepFinalize({
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 rounded-lg bg-zinc-950/60 p-3 border border-zinc-800/80 font-mono text-[11px]">
           <div>
             <div className="text-zinc-500 font-sans">Sprints</div>
-            <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">9</div>
+            <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">
+              {totalSprints}
+            </div>
           </div>
           <div>
             <div className="text-zinc-500 font-sans">Subjects</div>
@@ -66,21 +74,29 @@ export function StepFinalize({
           </div>
           <div>
             <div className="text-zinc-500 font-sans">Curriculum</div>
-            <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">270h</div>
+            <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">
+              {totalCurriculumHours}h
+            </div>
           </div>
           <div>
             <div className="text-zinc-500 font-sans">Est. Days</div>
-            <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">{estimatedDays}d</div>
+            <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">
+              {estimatedDays}d
+            </div>
           </div>
           <div className="col-span-2 sm:col-span-1">
             <div className="text-zinc-500 font-sans">Weekly Goal</div>
-            <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">{totalWeeklyHours}h</div>
+            <div className="text-[15px] font-semibold text-zinc-200 mt-0.5">
+              {totalWeeklyHours}h
+            </div>
           </div>
         </div>
 
         {/* Plan Name Input */}
         <div className="space-y-1">
-          <label className="text-[12px] font-medium text-zinc-200">Plan Name</label>
+          <label className="text-[12px] font-medium text-zinc-200">
+            Plan Name
+          </label>
           <input
             type="text"
             maxLength={60}

@@ -1,4 +1,28 @@
 import { create } from "zustand";
+import {
+  DEFAULT_SELECTED_SUBJECTS,
+  getTodayDateString,
+} from "@/constants/onboarding-options";
+
+export interface OnboardingAvailability {
+  monday: number;
+  tuesday: number;
+  wednesday: number;
+  thursday: number;
+  friday: number;
+  saturday: number;
+  sunday: number;
+}
+
+export const DEFAULT_AVAILABILITY: OnboardingAvailability = {
+  monday: 4,
+  tuesday: 4,
+  wednesday: 4,
+  thursday: 4,
+  friday: 4,
+  saturday: 8,
+  sunday: 8,
+};
 
 export interface OnboardingState {
   currentStep: number;
@@ -11,15 +35,7 @@ export interface OnboardingState {
   selectedSubjects: string[];
 
   // Step 2: Weekly Availability
-  availability: {
-    monday: number;
-    tuesday: number;
-    wednesday: number;
-    thursday: number;
-    friday: number;
-    saturday: number;
-    sunday: number;
-  };
+  availability: OnboardingAvailability;
 
   // Step 3: Plan Details
   planName: string;
@@ -34,12 +50,15 @@ export interface OnboardingState {
   setExperience: (exp: string) => void;
   toggleSubject: (slug: string) => void;
   setSelectedSubjects: (subjects: string[]) => void;
-  setDayAvailability: (day: keyof OnboardingState["availability"], hours: number) => void;
+  selectAllSubjects: () => void;
+  clearAllSubjects: () => void;
+  setDayAvailability: (day: keyof OnboardingAvailability, hours: number) => void;
+  resetAvailability: () => void;
   setPlanName: (name: string) => void;
   setStartDateOption: (opt: "today" | "tomorrow" | "custom") => void;
   setCustomStartDate: (dateStr: string) => void;
   getTotalWeeklyHours: () => number;
-  resetOnboarding: () => void;
+  resetOnboarding: (initialValues?: Partial<OnboardingState>) => void;
 }
 
 export const useOnboardingStore = create<OnboardingState>((set, get) => ({
@@ -48,21 +67,13 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   targetRole: "Software Engineer",
   experience: "0 - 2 years",
 
-  selectedSubjects: ["dsa", "dbms", "operating-systems", "computer-networks", "oops", "lld"],
+  selectedSubjects: [...DEFAULT_SELECTED_SUBJECTS],
 
-  availability: {
-    monday: 4,
-    tuesday: 4,
-    wednesday: 4,
-    thursday: 4,
-    friday: 4,
-    saturday: 8,
-    sunday: 8,
-  },
+  availability: { ...DEFAULT_AVAILABILITY },
 
   planName: "Crack SDE",
-  startDateOption: "custom",
-  customStartDate: "2026-10-01",
+  startDateOption: "today",
+  customStartDate: getTodayDateString(),
 
   setStep: (step) => set({ currentStep: Math.max(1, Math.min(step, 3)) }),
   nextStep: () => set((s) => ({ currentStep: Math.min(s.currentStep + 1, 3) })),
@@ -81,12 +92,16 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
       };
     }),
 
-  setSelectedSubjects: (subjects) => set({ selectedSubjects: subjects }),
+  setSelectedSubjects: (subjects) => set({ selectedSubjects: [...subjects] }),
+  selectAllSubjects: () => set({ selectedSubjects: [...DEFAULT_SELECTED_SUBJECTS] }),
+  clearAllSubjects: () => set({ selectedSubjects: [] }),
 
   setDayAvailability: (day, hours) =>
     set((s) => ({
-      availability: { ...s.availability, [day]: hours },
+      availability: { ...s.availability, [day]: Math.max(0, Math.min(hours, 24)) },
     })),
+
+  resetAvailability: () => set({ availability: { ...DEFAULT_AVAILABILITY } }),
 
   setPlanName: (name) => set({ planName: name }),
   setStartDateOption: (opt) => set({ startDateOption: opt }),
@@ -94,26 +109,31 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
 
   getTotalWeeklyHours: () => {
     const a = get().availability;
-    return a.monday + a.tuesday + a.wednesday + a.thursday + a.friday + a.saturday + a.sunday;
+    return (
+      (a.monday || 0) +
+      (a.tuesday || 0) +
+      (a.wednesday || 0) +
+      (a.thursday || 0) +
+      (a.friday || 0) +
+      (a.saturday || 0) +
+      (a.sunday || 0)
+    );
   },
 
-  resetOnboarding: () =>
+  resetOnboarding: (initialValues?: Partial<OnboardingState>) =>
     set({
-      currentStep: 1,
-      targetRole: "Software Engineer",
-      experience: "0 - 2 years",
-      selectedSubjects: ["dsa", "dbms", "operating-systems", "computer-networks", "oops", "lld"],
-      availability: {
-        monday: 4,
-        tuesday: 4,
-        wednesday: 4,
-        thursday: 4,
-        friday: 4,
-        saturday: 8,
-        sunday: 8,
-      },
-      planName: "Crack SDE",
-      startDateOption: "custom",
-      customStartDate: "2026-10-01",
+      currentStep: initialValues?.currentStep ?? 1,
+      targetRole: initialValues?.targetRole ?? "Software Engineer",
+      experience: initialValues?.experience ?? "0 - 2 years",
+      selectedSubjects: initialValues?.selectedSubjects
+        ? [...initialValues.selectedSubjects]
+        : [...DEFAULT_SELECTED_SUBJECTS],
+      availability: initialValues?.availability
+        ? { ...initialValues.availability }
+        : { ...DEFAULT_AVAILABILITY },
+      planName: initialValues?.planName ?? "Crack SDE",
+      startDateOption: initialValues?.startDateOption ?? "today",
+      customStartDate: initialValues?.customStartDate ?? getTodayDateString(),
     }),
 }));
+
