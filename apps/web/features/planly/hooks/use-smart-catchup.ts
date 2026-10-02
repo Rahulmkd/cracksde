@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import type { StudyPlanDto } from "@cracksde/shared";
 import type { SmartCatchupResult } from "../types";
 
-export function useSmartCatchup(plan?: StudyPlanDto): SmartCatchupResult {
+export function useSmartCatchup(plan?: StudyPlanDto | null): SmartCatchupResult {
   return useMemo(() => {
     if (!plan || !plan.sprints) {
       return {

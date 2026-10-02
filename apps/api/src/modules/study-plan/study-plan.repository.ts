@@ -235,6 +235,49 @@ export class StudyPlanRepository {
     });
   }
 
+  static async activateUserPlan(
+    userId: string,
+    data: {
+      planName?: string;
+      planStartDate?: Date | null;
+      dailyGoalMinutes?: number;
+      targetRole?: string;
+      experience?: string;
+    }
+  ) {
+    return prisma.userProfile.upsert({
+      where: { userId },
+      update: {
+        hasActivePlan: true,
+        ...(data.planName !== undefined ? { planName: data.planName } : {}),
+        ...(data.planStartDate !== undefined ? { planStartDate: data.planStartDate } : {}),
+        ...(data.dailyGoalMinutes !== undefined ? { dailyGoalMinutes: data.dailyGoalMinutes } : {}),
+        ...(data.targetRole !== undefined ? { targetRole: data.targetRole } : {}),
+        ...(data.experience !== undefined ? { experience: data.experience } : {}),
+      },
+      create: {
+        userId,
+        hasActivePlan: true,
+        planName: data.planName || "Crack SDE",
+        planStartDate: data.planStartDate || new Date(),
+        dailyGoalMinutes: data.dailyGoalMinutes || 60,
+        targetRole: data.targetRole || "Software Engineer",
+        experience: data.experience || "0 - 2 years",
+      },
+    });
+  }
+
+  static async deactivateUserPlan(userId: string) {
+    return prisma.userProfile.updateMany({
+      where: { userId },
+      data: {
+        hasActivePlan: false,
+        planName: null,
+        planStartDate: null,
+      },
+    });
+  }
+
   static async deleteUserProgressForUser(userId: string) {
     return prisma.userItemProgress.deleteMany({
       where: { userId },

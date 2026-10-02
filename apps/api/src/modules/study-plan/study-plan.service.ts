@@ -16,22 +16,26 @@ import type {
 export class StudyPlanService {
   /**
    * Fetch a study plan tailored strictly to the authenticated user's progress.
-   * If userId is absent or user has no progress, all tasks default to uncompleted.
    */
-  static async getStudyPlan(slug: string = "crack-sde", userId?: string): Promise<StudyPlanDto> {
+  static async getStudyPlan(slug: string = "crack-sde", userId?: string): Promise<StudyPlanDto | null> {
+    if (!userId) {
+      return null;
+    }
+
+    const userProfile = await StudyPlanRepository.findUserProfile(userId);
+    if (!userProfile || !userProfile.hasActivePlan) {
+      return null;
+    }
+
     const plan = await StudyPlanRepository.findPlanBySlug(slug);
     if (!plan) {
       throw new NotFoundError(`Study plan '${slug}' not found`);
     }
 
     const userProgressMap = new Map<number, any>();
-    let userProfile: any = null;
-    if (userId) {
-      const userProgressRecords = await StudyPlanRepository.findUserProgressForUser(userId);
-      for (const p of userProgressRecords) {
-        userProgressMap.set(p.itemId, p);
-      }
-      userProfile = await StudyPlanRepository.findUserProfile(userId);
+    const userProgressRecords = await StudyPlanRepository.findUserProgressForUser(userId);
+    for (const p of userProgressRecords) {
+      userProgressMap.set(p.itemId, p);
     }
 
     const now = new Date();
@@ -188,11 +192,35 @@ export class StudyPlanService {
     const progressPercent =
       totalPlanTasks > 0 ? Math.round((completedPlanTasks / totalPlanTasks) * 100) : 0;
 
+    const userRole = userProfile?.targetRole || "Software Engineer";
+    const userDailyHours = userProfile?.dailyGoalMinutes
+      ? Math.max(1, Math.round(userProfile.dailyGoalMinutes / 60))
+      : 4;
+    const planTitle = userProfile?.planName || plan.name;
+
     const firstSprint = formattedSprints[0];
-    const lastSprint = formattedSprints[formattedSprints.length - 1];
-    const startDate =
-      firstSprint?.plannedStartDate || (plan.createdAt ? plan.createdAt.toISOString() : null);
-    const targetDate = lastSprint?.plannedEndDate || null;
+    const baseStart = userProfile?.planStartDate
+      ? new Date(userProfile.planStartDate)
+      : (firstSprint?.plannedStartDate ? new Date(firstSprint.plannedStartDate) : new Date());
+    const startDate = !isNaN(baseStart.getTime()) ? baseStart.toISOString().split("T")[0] : null;
+
+    if (startDate) {
+      const start = new Date(startDate);
+      for (const sprint of formattedSprints) {
+        if (sprint.days && sprint.days.length > 0) {
+          for (const day of sprint.days) {
+            const dayDate = new Date(start);
+            dayDate.setDate(start.getDate() + (day.planDayNo - 1));
+            day.calendarDate = dayDate.toISOString();
+          }
+          sprint.plannedStartDate = sprint.days[0].calendarDate;
+          sprint.plannedEndDate = sprint.days[sprint.days.length - 1].calendarDate;
+        }
+      }
+    }
+
+    const lastSprintUpdated = formattedSprints[formattedSprints.length - 1];
+    const targetDate = lastSprintUpdated?.plannedEndDate || null;
 
     let isOnSchedule = true;
     let scheduleStatusText = "On Schedule";
@@ -212,15 +240,10 @@ export class StudyPlanService {
       }
     }
 
-    const userRole = userProfile?.targetRole || "Software Engineer";
-    const userDailyHours = userProfile?.dailyGoalMinutes
-      ? Math.max(1, Math.round(userProfile.dailyGoalMinutes / 60))
-      : 4;
-
     return {
       id: plan.id,
       slug: plan.slug,
-      name: plan.name,
+      name: planTitle,
       sourceUrl: plan.sourceUrl,
       role: userRole,
       dailyHours: userDailyHours,
@@ -236,6 +259,7 @@ export class StudyPlanService {
       completedSprints: completedSprintsCount,
       isOnSchedule,
       scheduleStatusText,
+      hasPlan: true,
       sprints: formattedSprints,
     };
   }
@@ -313,7 +337,14 @@ export class StudyPlanService {
   /**
    * Update study plan parameters (schedule / start dates)
    */
-  static async updateStudyPlan(slug: string, updates: UpdateStudyPlanDto) {
+  static async updateStudyPlan(slug: string, updates: UpdateStudyPlanDto, userId?: string) {
+    if (userId) {
+      await StudyPlanRepository.activateUserPlan(userId, {
+        planName: updates.name,
+        planStartDate: updates.startDate ? new Date(updates.startDate) : undefined,
+      });
+    }
+
     const updatedPlan = await StudyPlanRepository.updateStudyPlan(slug, {
       ...(updates.name ? { name: updates.name } : {}),
     });
@@ -343,7 +374,7 @@ export class StudyPlanService {
     return {
       id: updatedPlan.id,
       slug: updatedPlan.slug,
-      name: updatedPlan.name,
+      name: updates.name || updatedPlan.name,
     };
   }
 
@@ -352,6 +383,11 @@ export class StudyPlanService {
    */
   static async getRevisionList(userId?: string) {
     if (!userId) {
+      return [];
+    }
+
+    const userProfile = await StudyPlanRepository.findUserProfile(userId);
+    if (!userProfile || !userProfile.hasActivePlan) {
       return [];
     }
 
@@ -423,6 +459,7 @@ export class StudyPlanService {
       throw new UnauthorizedError("Authentication required to delete study plan");
     }
 
+    await StudyPlanRepository.deactivateUserPlan(userId);
     await StudyPlanRepository.deleteUserProgressForUser(userId);
 
     return {

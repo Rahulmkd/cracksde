@@ -17,12 +17,12 @@ export const studyPlanService = {
   /**
    * Fetch a study plan by its slug identifier (e.g. "crack-sde")
    */
-  async getStudyPlan(slug: string = "crack-sde"): Promise<StudyPlanDto> {
-    const res = await api.get<ApiResponse<StudyPlanDto>>(`/api/study-plans/${slug}`);
-    if (!res.success || !res.data) {
+  async getStudyPlan(slug: string = "crack-sde"): Promise<StudyPlanDto | null> {
+    const res = await api.get<ApiResponse<StudyPlanDto | null>>(`/api/study-plans/${slug}`);
+    if (!res.success) {
       throw new Error(res.error || "Failed to load study plan");
     }
-    return res.data;
+    return res.data ?? null;
   },
 
   /**
@@ -71,9 +71,9 @@ export const studyPlanService = {
    */
   async getRevisionList(): Promise<StudyTaskDto[]> {
     const res = await api.get<ApiResponse<StudyTaskDto[]>>("/api/study-plans/revision-list");
-    if (!res.success || !res.data) {
+    if (!res.success) {
       throw new Error(res.error || "Failed to fetch revision list");
     }
-    return res.data;
+    return res.data ?? [];
   },
 };

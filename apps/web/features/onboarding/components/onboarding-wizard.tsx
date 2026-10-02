@@ -90,6 +90,9 @@ export function OnboardingWizard() {
               targetRole: store.targetRole,
               experience: store.experience,
               dailyGoalMinutes,
+              hasActivePlan: true,
+              planName: store.planName.trim(),
+              planStartDate: startDateStr,
             });
           } catch (profileErr) {
             console.warn("Could not save profile during onboarding:", profileErr);

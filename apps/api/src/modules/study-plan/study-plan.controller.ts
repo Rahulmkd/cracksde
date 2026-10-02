@@ -59,7 +59,7 @@ export class StudyPlanController {
       const rawSlug = req.params.slug || "crack-sde";
       const slug = Array.isArray(rawSlug) ? rawSlug[0] : rawSlug;
 
-      const data = await StudyPlanService.updateStudyPlan(slug, req.body);
+      const data = await StudyPlanService.updateStudyPlan(slug, req.body, user.id);
       sendSuccess(res, data, 200, "Study plan updated successfully");
     } catch (error) {
       next(error);

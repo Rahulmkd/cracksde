@@ -32,7 +32,7 @@ export function useStudyPlan(slug: string = "crack-sde") {
       actualMinutes?: number;
     }) => studyPlanService.updateTask(taskId, { status, isRevision, actualMinutes }),
     onSuccess: (updatedTask) => {
-      queryClient.setQueryData<StudyPlanDto>(["study-plan", slug, userId], (oldPlan) => {
+      queryClient.setQueryData<StudyPlanDto | null>(["study-plan", slug, userId], (oldPlan) => {
         if (!oldPlan || !oldPlan.sprints) return oldPlan;
 
         let totalCompletedTasks = 0;

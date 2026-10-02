@@ -28,6 +28,9 @@ export class ProfileRepository {
       targetRegion?: string;
       preferredLanguage?: string;
       dailyGoalMinutes?: number;
+      hasActivePlan?: boolean;
+      planName?: string | null;
+      planStartDate?: Date | null;
       githubUrl?: string | null;
       linkedinUrl?: string | null;
       leetcodeUrl?: string | null;
@@ -48,6 +51,9 @@ export class ProfileRepository {
         targetRegion: data.targetRegion ?? "India",
         preferredLanguage: data.preferredLanguage ?? "TypeScript",
         dailyGoalMinutes: data.dailyGoalMinutes ?? 60,
+        hasActivePlan: data.hasActivePlan ?? false,
+        planName: data.planName,
+        planStartDate: data.planStartDate,
         githubUrl: data.githubUrl,
         linkedinUrl: data.linkedinUrl,
         leetcodeUrl: data.leetcodeUrl,
@@ -64,6 +70,9 @@ export class ProfileRepository {
         ...(data.targetRegion !== undefined ? { targetRegion: data.targetRegion } : {}),
         ...(data.preferredLanguage !== undefined ? { preferredLanguage: data.preferredLanguage } : {}),
         ...(data.dailyGoalMinutes !== undefined ? { dailyGoalMinutes: data.dailyGoalMinutes } : {}),
+        ...(data.hasActivePlan !== undefined ? { hasActivePlan: data.hasActivePlan } : {}),
+        ...(data.planName !== undefined ? { planName: data.planName } : {}),
+        ...(data.planStartDate !== undefined ? { planStartDate: data.planStartDate } : {}),
         ...(data.githubUrl !== undefined ? { githubUrl: data.githubUrl } : {}),
         ...(data.linkedinUrl !== undefined ? { linkedinUrl: data.linkedinUrl } : {}),
         ...(data.leetcodeUrl !== undefined ? { leetcodeUrl: data.leetcodeUrl } : {}),

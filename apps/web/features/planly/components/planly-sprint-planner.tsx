@@ -21,6 +21,7 @@ import { SprintTimelineCard } from "./sprint-timeline-card";
 import { SmartCatchupModal } from "./smart-catchup-modal";
 import { SprintEditDialog } from "./sprint-edit-dialog";
 import { DeletePlanDialog } from "./delete-plan-dialog";
+import { NoPlanState } from "./no-plan-state";
 import { toast } from "sonner";
 import type { StudyTaskDto } from "@cracksde/shared";
 
@@ -72,7 +73,6 @@ export function PlanlySprintPlanner() {
       await deletePlan();
       setIsDeletePlanModalOpen(false);
       toast.success("Study plan deleted and reset successfully");
-      router.push("/onboarding");
     } catch {
       // Handled by mutation toast
     }
@@ -140,18 +140,33 @@ export function PlanlySprintPlanner() {
     toast.success("🚀 Smart Catch-Up applied! Tasks redistributed across upcoming sprint days.");
   };
 
-  const sprints = plan?.sprints || [];
-
-  const baseStartDate = plan?.startDate ? new Date(plan.startDate) : new Date(2026, 9, 1);
-  const formattedScheduledDate = !isNaN(baseStartDate.getTime())
-    ? baseStartDate.toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
-    : "1 Oct 2026";
-
-  const planTitle = plan?.name || "Crack SDE";
+  if (isLoading) {
+    return (
+      <div className="space-y-6 pb-12 select-none animate-in fade-in-50 duration-200">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8 xl:col-span-9 space-y-4">
+            <div className="space-y-2 pb-0.5">
+              <div className="h-4 w-32 bg-zinc-900 rounded animate-pulse" />
+              <div className="h-7 w-56 bg-zinc-900 rounded-lg animate-pulse" />
+              <div className="h-4 w-72 bg-zinc-900 rounded animate-pulse" />
+            </div>
+            <div className="h-28 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 animate-pulse" />
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-32 rounded-2xl border border-zinc-800/80 bg-zinc-900/30 animate-pulse"
+                />
+              ))}
+            </div>
+          </div>
+          <aside className="lg:col-span-4 xl:col-span-3 w-full">
+            <div className="h-80 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 animate-pulse" />
+          </aside>
+        </div>
+      </div>
+    );
+  }
 
   if (isError) {
     return (
@@ -171,6 +186,37 @@ export function PlanlySprintPlanner() {
       </div>
     );
   }
+
+  // "No Plan" Empty State: Render dedicated empty state when user has no active plan
+  if (!plan || !plan.hasPlan) {
+    return (
+      <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200 select-none">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8 xl:col-span-9">
+            <NoPlanState />
+          </div>
+          <aside className="lg:col-span-4 xl:col-span-3 w-full">
+            <div className="sticky top-20 space-y-6">
+              <DailyPlanner showProblemOfTheDay={false} />
+            </div>
+          </aside>
+        </div>
+      </div>
+    );
+  }
+
+  const sprints = plan?.sprints || [];
+
+  const baseStartDate = plan?.startDate ? new Date(plan.startDate) : new Date(2026, 9, 1);
+  const formattedScheduledDate = !isNaN(baseStartDate.getTime())
+    ? baseStartDate.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "1 Oct 2026";
+
+  const planTitle = plan?.name || "Crack SDE";
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200 select-none">

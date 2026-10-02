@@ -341,6 +341,7 @@ export function DashboardOverview() {
             sprintNumber={sprintNumber}
             targetDays={plan?.totalDays || 61}
             totalSprints={sprints.length || 9}
+            hasActivePlan={Boolean(plan?.hasPlan)}
           />
 
           {/* "Your Progress" Section */}

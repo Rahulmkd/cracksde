@@ -63,6 +63,7 @@ export interface StudyPlanDto {
   completedSprints?: number;
   isOnSchedule?: boolean;
   scheduleStatusText?: string;
+  hasPlan?: boolean;
   sprints?: StudySprintDto[];
 }
 

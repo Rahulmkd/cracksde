@@ -13,6 +13,9 @@ export interface UserProfileDto {
   targetRegion: string;
   preferredLanguage: string;
   dailyGoalMinutes: number;
+  hasActivePlan?: boolean;
+  planName?: string | null;
+  planStartDate?: string | null;
   githubUrl: string | null;
   linkedinUrl: string | null;
   leetcodeUrl: string | null;
@@ -76,6 +79,9 @@ export interface UpdateProfileRequestDto {
   targetRegion?: string;
   preferredLanguage?: string;
   dailyGoalMinutes?: number;
+  hasActivePlan?: boolean;
+  planName?: string | null;
+  planStartDate?: string | null;
   githubUrl?: string | null;
   linkedinUrl?: string | null;
   leetcodeUrl?: string | null;

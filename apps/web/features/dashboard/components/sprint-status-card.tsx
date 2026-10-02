@@ -9,12 +9,14 @@ interface SprintStatusCardProps {
   sprintNumber?: number;
   targetDays?: number;
   totalSprints?: number;
+  hasActivePlan?: boolean;
 }
 
 export function SprintStatusCard({
   sprintNumber = 1,
   targetDays = 61,
   totalSprints = 9,
+  hasActivePlan = true,
 }: SprintStatusCardProps) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 shadow-subtle hover:border-zinc-700/80 hover:bg-zinc-900/60 transition-all duration-200 select-none">
@@ -42,25 +44,51 @@ export function SprintStatusCard({
           </p>
 
           <div className="flex flex-wrap items-center gap-2.5 pt-2">
-            <Button
-              asChild
-              size="sm"
-              className="h-9 px-4 text-[13px] font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm rounded-xl transition-all active:scale-[0.98]"
-            >
-              <Link href="/planly" className="flex items-center gap-1.5">
-                <span>Resume Sprint {sprintNumber}</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
+            {hasActivePlan ? (
+              <>
+                <Button
+                  asChild
+                  size="sm"
+                  className="h-9 px-4 text-[13px] font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm rounded-xl transition-all active:scale-[0.98]"
+                >
+                  <Link href="/planly" className="flex items-center gap-1.5">
+                    <span>Resume Sprint {sprintNumber}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </Button>
 
-            <Button
-              asChild
-              size="sm"
-              variant="outline"
-              className="h-9 px-4 text-[13px] font-medium border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 hover:text-white text-zinc-300 rounded-xl transition-colors"
-            >
-              <Link href="/onboarding">Reconfigure Plan</Link>
-            </Button>
+                <Button
+                  asChild
+                  size="sm"
+                  variant="outline"
+                  className="h-9 px-4 text-[13px] font-medium border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 hover:text-white text-zinc-300 rounded-xl transition-colors"
+                >
+                  <Link href="/onboarding">Reconfigure Plan</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  asChild
+                  size="sm"
+                  className="h-9 px-4 text-[13px] font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm rounded-xl transition-all active:scale-[0.98]"
+                >
+                  <Link href="/onboarding" className="flex items-center gap-1.5">
+                    <span>Create Study Plan</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+
+                <Button
+                  asChild
+                  size="sm"
+                  variant="outline"
+                  className="h-9 px-4 text-[13px] font-medium border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 hover:text-white text-zinc-300 rounded-xl transition-colors"
+                >
+                  <Link href="/roadmap">Explore Curriculum</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
 

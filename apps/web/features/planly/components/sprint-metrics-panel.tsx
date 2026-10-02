@@ -6,7 +6,7 @@ import { formatMinutes } from "@/lib/formatters";
 import type { StudyPlanDto } from "@cracksde/shared";
 
 interface SprintMetricsPanelProps {
-  plan?: StudyPlanDto;
+  plan?: StudyPlanDto | null;
 }
 
 export function SprintMetricsPanel({ plan }: SprintMetricsPanelProps) {
