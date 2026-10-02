@@ -18,8 +18,6 @@ interface StepFinalizeProps {
 export function StepFinalize({
   planName,
   setPlanName,
-  targetRole,
-  experience,
   selectedSubjectsCount,
   totalWeeklyHours,
   estimatedDays,

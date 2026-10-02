@@ -134,6 +134,9 @@ export function useStudyPlan(slug: string = "crack-sde") {
   const deletePlanMutation = useMutation({
     mutationFn: () => studyPlanService.deletePlan(slug),
     onSuccess: () => {
+      // Immediately set cached plan to null to prevent stale plan flash
+      queryClient.setQueryData(["study-plan", slug, userId], null);
+
       queryClient.invalidateQueries({ queryKey: ["study-plan"] });
       queryClient.invalidateQueries({ queryKey: ["revision-list"] });
       queryClient.invalidateQueries({ queryKey: ["user-revisions"] });
@@ -161,10 +164,19 @@ export function useStudyPlan(slug: string = "crack-sde") {
     },
   });
 
+  const isActuallyLoading =
+    isAuthLoading ||
+    planQuery.isLoading ||
+    (planQuery.isPending && !planQuery.isError) ||
+    (planQuery.fetchStatus === "fetching" && planQuery.data === undefined) ||
+    deletePlanMutation.isPending;
+
   return {
     plan: planQuery.data,
-    isLoading: planQuery.isLoading,
-    isError: planQuery.isError,
+    isLoading: isActuallyLoading,
+    isAuthLoading,
+    isPlanLoading: planQuery.isLoading || planQuery.isPending,
+    isError: !isActuallyLoading && planQuery.isError,
     error: planQuery.error,
     refetch: planQuery.refetch,
     updateTask: updateTaskMutation.mutate,
@@ -175,3 +187,4 @@ export function useStudyPlan(slug: string = "crack-sde") {
     isDeletingPlan: deletePlanMutation.isPending,
   };
 }
+

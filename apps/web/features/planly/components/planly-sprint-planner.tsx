@@ -22,12 +22,13 @@ import { SmartCatchupModal } from "./smart-catchup-modal";
 import { SprintEditDialog } from "./sprint-edit-dialog";
 import { DeletePlanDialog } from "./delete-plan-dialog";
 import { NoPlanState } from "./no-plan-state";
+import { PlanlySkeleton } from "./planly-skeleton";
 import { toast } from "sonner";
 import type { StudyTaskDto } from "@cracksde/shared";
 
 export function PlanlySprintPlanner() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const userId = user?.id ?? "anonymous";
 
   const {
@@ -70,8 +71,8 @@ export function PlanlySprintPlanner() {
 
   const handleConfirmDeletePlan = async () => {
     try {
-      await deletePlan();
       setIsDeletePlanModalOpen(false);
+      await deletePlan();
       toast.success("Study plan deleted and reset successfully");
     } catch {
       // Handled by mutation toast
@@ -140,32 +141,9 @@ export function PlanlySprintPlanner() {
     toast.success("🚀 Smart Catch-Up applied! Tasks redistributed across upcoming sprint days.");
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6 pb-12 select-none animate-in fade-in-50 duration-200">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-8 xl:col-span-9 space-y-4">
-            <div className="space-y-2 pb-0.5">
-              <div className="h-4 w-32 bg-zinc-900 rounded animate-pulse" />
-              <div className="h-7 w-56 bg-zinc-900 rounded-lg animate-pulse" />
-              <div className="h-4 w-72 bg-zinc-900 rounded animate-pulse" />
-            </div>
-            <div className="h-28 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 animate-pulse" />
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-32 rounded-2xl border border-zinc-800/80 bg-zinc-900/30 animate-pulse"
-                />
-              ))}
-            </div>
-          </div>
-          <aside className="lg:col-span-4 xl:col-span-3 w-full">
-            <div className="h-80 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 animate-pulse" />
-          </aside>
-        </div>
-      </div>
-    );
+  // Full-page polished skeleton while authentication, plan creation/deletion, or query loading is active
+  if (isLoading || isAuthLoading || isDeletingPlan) {
+    return <PlanlySkeleton />;
   }
 
   if (isError) {

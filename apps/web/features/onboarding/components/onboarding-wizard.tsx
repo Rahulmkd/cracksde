@@ -20,6 +20,7 @@ import { OnboardingStepper } from "./onboarding-stepper";
 import { StepSubjects } from "./step-subjects";
 import { StepAvailability } from "./step-availability";
 import { StepFinalize } from "./step-finalize";
+import { PlanlySkeleton } from "@/features/planly/components/planly-skeleton";
 
 export function OnboardingWizard() {
   const router = useRouter();
@@ -141,6 +142,37 @@ export function OnboardingWizard() {
   const handlePrev = () => {
     store.prevStep();
   };
+
+  if (isSubmitting) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white select-none">
+        <header className="flex h-14 items-center justify-between border-b border-zinc-800/80 px-4 sm:px-8 bg-zinc-950/85 backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 text-[14px] font-semibold tracking-tight text-zinc-100"
+            >
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold text-[12px] shadow-sm shadow-blue-600/20">
+                ⚡
+              </span>
+              <span>
+                Planly <span className="text-zinc-500 font-normal text-[12px]">by</span>{" "}
+                <span className="text-zinc-100 font-semibold">Crack SDE</span>
+              </span>
+            </Link>
+          </div>
+          <div className="text-[12px] text-blue-400 font-mono flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+            <span>Activating study plan...</span>
+          </div>
+        </header>
+
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6">
+          <PlanlySkeleton />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white select-none">
