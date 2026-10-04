@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -51,17 +52,22 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-800/80 bg-zinc-950/85 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-        {/* Left: Crack SDE Logo */}
+        {/* Left: CracksDE Logo */}
         <div className="flex items-center gap-8">
           <Link
             href="/"
-            className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight text-zinc-100 hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md"
-            aria-label="Crack SDE Home"
+            className="flex items-center gap-2.5 hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md py-1"
+            aria-label="CracksDE Home"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 shadow-sm shadow-blue-600/20 text-white font-semibold text-[13px]">
-              ⚡
-            </div>
-            <span className="font-bold tracking-tight text-zinc-100">
+            <Image
+              src="/cracksde_logo.png"
+              alt="CracksDE Logo"
+              width={32}
+              height={32}
+              priority
+              className="h-8 w-auto object-contain"
+            />
+            <span className="font-bold tracking-tight text-[16px] text-zinc-100 flex items-center">
               Crack<span className="text-blue-500 ml-0.5">SDE</span>
             </span>
           </Link>

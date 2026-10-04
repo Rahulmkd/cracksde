@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -342,13 +343,20 @@ export function Sidebar() {
               <Link
                 href="/dashboard"
                 onClick={handleLinkClick}
-                className="flex items-center gap-2 overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded-lg p-0.5"
-                aria-label="CrackSDE Home"
+                className="flex items-center gap-2 overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded-lg p-0.5 hover:opacity-90 transition-opacity"
+                aria-label="CracksDE Home"
               >
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-600 to-blue-500 text-white font-bold text-[13px] shadow-sm shadow-blue-600/30 group-hover:scale-105 transition-transform">
-                  ⚡
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600/15 border border-blue-500/25 p-1 group-hover:scale-105 transition-transform">
+                  <Image
+                    src="/cracksde_logo.png"
+                    alt="CracksDE Logo"
+                    width={24}
+                    height={24}
+                    priority
+                    className="h-full w-full object-contain"
+                  />
                 </div>
-                <span className="font-semibold text-[14px] tracking-tight text-zinc-100 flex items-center overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ml-1">
+                <span className="font-semibold text-[14px] tracking-tight text-zinc-100 flex items-center overflow-hidden whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
                   Crack<span className="text-blue-400 font-semibold ml-0.5">SDE</span>
                 </span>
               </Link>
@@ -399,11 +407,21 @@ export function Sidebar() {
                 <Link
                   href="/dashboard"
                   onClick={handleLinkClick}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 hover:opacity-90 transition-opacity"
+                  aria-label="CracksDE Home"
                 >
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-600 to-blue-500 text-white font-bold text-[13px]">
-                    ⚡
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600/15 border border-blue-500/25 p-1">
+                    <Image
+                      src="/cracksde_logo.png"
+                      alt="CracksDE Logo"
+                      width={24}
+                      height={24}
+                      className="h-full w-full object-contain"
+                    />
                   </div>
+                  <span className="font-semibold text-[14px] tracking-tight text-zinc-100">
+                    Crack<span className="text-blue-400 font-semibold ml-0.5">SDE</span>
+                  </span>
                 </Link>
                 <button
                   onClick={() => setSidebarOpen(false)}

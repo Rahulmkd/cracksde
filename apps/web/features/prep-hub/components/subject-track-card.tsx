@@ -35,13 +35,13 @@ export function SubjectTrackCard({ subject, onSelect }: SubjectTrackCardProps) {
               <h3 className="text-[14px] font-semibold text-zinc-100 group-hover:text-blue-400 transition-colors">
                 {subject.name}
               </h3>
-              <span className="text-[11px] text-zinc-500 hidden sm:inline">
-                • {subject.estimatedHours}h
+              <span className="text-[11px] text-zinc-500 font-mono hidden sm:inline">
+                &middot; {subject.estimatedHours}h
               </span>
               {subject.hasRevisionDue && (
                 <Badge
                   variant="destructive"
-                  className="text-[10px] font-medium py-0 px-1.5 flex items-center gap-1"
+                  className="text-[10px] font-semibold py-0.5 px-2 flex items-center gap-1 font-mono rounded-md"
                 >
                   <AlertTriangle className="h-2.5 w-2.5" />
                   <span>{subject.totalDue} Revision Due</span>
@@ -57,19 +57,19 @@ export function SubjectTrackCard({ subject, onSelect }: SubjectTrackCardProps) {
 
         {/* Right: Stats Count + Chevron */}
         <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-800/60 pl-2">
-          <div className="flex items-center gap-3 text-[12px] text-zinc-400">
+          <div className="flex items-center gap-3 text-[12px] text-zinc-400 font-mono">
             <div>
-              <span className="font-semibold text-zinc-200 font-mono">
+              <span className="font-semibold text-zinc-200">
                 {subject.totalTopics}
               </span>{" "}
-              <span>Topics</span>
+              <span className="text-zinc-500 text-[11px] font-sans">Topics</span>
             </div>
             <span className="text-zinc-700">&middot;</span>
             <div>
-              <span className="font-semibold text-zinc-200 font-mono">
+              <span className="font-semibold text-zinc-200">
                 {subject.totalItems}
               </span>{" "}
-              <span>Qs</span>
+              <span className="text-zinc-500 text-[11px] font-sans">Qs</span>
             </div>
           </div>
           <ChevronRight className="h-4 w-4 text-zinc-500 group-hover:text-zinc-200 group-hover:translate-x-0.5 transition-all duration-200" />

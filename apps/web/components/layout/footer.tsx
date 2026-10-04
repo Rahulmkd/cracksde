@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -10,12 +11,17 @@ export function Footer() {
           <div className="sm:col-span-2 md:col-span-1 space-y-3">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-[15px] font-semibold tracking-tight text-zinc-100 hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+              aria-label="CracksDE Home"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 shadow-sm shadow-blue-600/20 text-white font-semibold text-[13px]">
-                ⚡
-              </div>
-              <span className="font-bold tracking-tight text-zinc-100">
+              <Image
+                src="/cracksde_logo.png"
+                alt="CracksDE Logo"
+                width={32}
+                height={32}
+                className="h-8 w-auto object-contain"
+              />
+              <span className="font-bold tracking-tight text-zinc-100 text-[16px]">
                 Crack<span className="text-blue-500 ml-0.5">SDE</span>
               </span>
             </Link>
@@ -139,7 +145,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-zinc-500">
-          <p>&copy; {new Date().getFullYear()} Crack SDE Platform. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} CracksDE Platform. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span>Structured SDE Interview Preparation</span>
           </div>

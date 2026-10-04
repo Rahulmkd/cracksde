@@ -4,9 +4,9 @@ import { ProfileOverview } from "@/features/profile/components/profile-overview"
 import { ProfileSkeleton } from "@/features/profile/components/profile-skeleton";
 
 export const metadata: Metadata = {
-  title: "My Profile | CrackSDE",
+  title: "My Profile",
   description:
-    "Manage your developer profile, career aspirations, technical roadmap progress, and study preferences on CrackSDE.",
+    "Manage your developer profile, career aspirations, technical roadmap progress, and study preferences on CracksDE.",
 };
 
 export default function ProfilePage() {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { signUp, useSession } from "@/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -84,14 +85,20 @@ export function RegisterForm() {
       <div className="w-full max-w-md space-y-4 animate-in fade-in-50 duration-200">
         <Card className="border border-zinc-800/80 bg-zinc-900/40 p-5 sm:p-6 shadow-card">
           <CardHeader className="text-center space-y-1.5 p-0 pb-5">
-            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 shadow-sm shadow-blue-600/20 text-white font-semibold text-[13px]">
-              ⚡
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/15 border border-blue-500/20 shadow-sm">
+              <Image
+                src="/cracksde_logo.png"
+                alt="CracksDE Logo"
+                width={28}
+                height={28}
+                className="h-7 w-7 object-contain"
+              />
             </div>
             <CardTitle className="text-[18px] font-semibold leading-tight tracking-tight text-zinc-100">
               Create an account
             </CardTitle>
             <CardDescription className="text-[12px] font-normal leading-normal text-zinc-400">
-              Get started with your personalized SDE preparation sprint
+              Get started with your personalized CracksDE preparation sprint
             </CardDescription>
           </CardHeader>
 

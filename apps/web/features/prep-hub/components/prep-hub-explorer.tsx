@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, Suspense } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { BookOpen, ChevronRight, Code2, AlertTriangle } from "lucide-react";
+import { BookOpen, ChevronRight, AlertTriangle } from "lucide-react";
 import { DailyPlanner } from "@/components/layout/daily-planner";
+import { Badge } from "@/components/ui/badge";
 import {
   useRoadmapSubjects,
   useRoadmapSubjectDetail,
@@ -16,8 +17,9 @@ import { toast } from "sonner";
 import { SubjectTrackCard } from "./subject-track-card";
 import { TopicDrawerModal } from "./topic-drawer-modal";
 import { TopicQuestionsList } from "./topic-questions-list";
-import { QuestionSolveModal } from "./question-solve-modal";
 import { RevisionStatusCard } from "./revision-status-card";
+import { ProblemNoteModal } from "@/features/practice/components/random-problem-card";
+import type { PracticeProblemDto } from "@/features/practice/types";
 import type { RoadmapItemDto, PrepHubOverallStats } from "../types";
 
 export function PrepHubExplorer() {
@@ -63,61 +65,6 @@ export function PrepHubExplorer() {
 
   const solveMutation = useSolveQuestion();
 
-  // Solve / Review Modal State
-  const [activeReviewItem, setActiveReviewItem] = useState<RoadmapItemDto | null>(null);
-
-  const handleOpenReviewModal = (item: RoadmapItemDto) => {
-    setActiveReviewItem(item);
-  };
-
-  const handleRecordSolve = async (isCorrect: boolean, notes: string) => {
-    if (!activeReviewItem) return;
-
-    if (!isAuthenticated) {
-      toast.error("Please log in to record progress and schedule revisions.");
-      return;
-    }
-
-    try {
-      const result = await solveMutation.mutateAsync({
-        itemId: activeReviewItem.id,
-        isCorrect,
-        notes: notes.trim() || undefined,
-      });
-
-      if (isCorrect) {
-        toast.success(`🎉 ${result.message}`);
-      } else {
-        toast.info(`⚠️ ${result.message}`);
-      }
-      setActiveReviewItem(null);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update progress");
-    }
-  };
-
-  // Fast Quick-Solve Toggle
-  const handleQuickSolve = async (item: RoadmapItemDto, e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (!isAuthenticated) {
-      toast.error("Please log in to track your revision progress.");
-      return;
-    }
-
-    const nextIsCorrect = !(item.progress && item.progress.solveCount > 0 && !item.progress.isDue);
-
-    try {
-      const result = await solveMutation.mutateAsync({
-        itemId: item.id,
-        isCorrect: nextIsCorrect,
-      });
-      toast.success(result.message);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update progress");
-    }
-  };
-
   // Current Subject Object
   const currentSubject = useMemo(() => {
     if (!selectedSubjectSlug || !subjects) return null;
@@ -129,6 +76,66 @@ export function PrepHubExplorer() {
     if (!selectedTopicSlug || !subjectDetail) return null;
     return subjectDetail.topics.find((t) => t.slug === selectedTopicSlug) || null;
   }, [selectedTopicSlug, subjectDetail]);
+
+  // Active Problem Note Modal State (Reusing Practice Page Table Modal)
+  const [activeProblem, setActiveProblem] = useState<PracticeProblemDto | null>(null);
+
+  const handleOpenProblem = (item: RoadmapItemDto) => {
+    const isSolved = (item.progress?.solveCount ?? 0) > 0;
+    setActiveProblem({
+      id: String(item.id),
+      itemId: item.id,
+      itemNo: item.itemNo || item.id,
+      title: item.title,
+      slug: item.slug || String(item.id),
+      type: item.type || "problem",
+      difficulty: item.difficulty || "medium",
+      estimatedMinutes: item.estimatedMinutes || 20,
+      subject: currentSubject?.name || item.subjectName || item.subjectSlug?.toUpperCase() || "DSA",
+      subjectSlug: currentSubject?.slug || item.subjectSlug || "dsa",
+      topic: currentTopic?.name || item.topicName || item.topicSlug || "Core",
+      topicSlug: currentTopic?.slug || item.topicSlug || "core",
+      subtopic: item.subtopicName || undefined,
+      solved: isSolved,
+      bookmarked: false,
+      userStatus: item.progress?.isDue ? "due" : isSolved ? "solved" : "not_solved",
+      userStatusText: item.progress?.isDue ? "Due Today" : isSolved ? "Solved" : "Not Solved",
+      solveCount: item.progress?.solveCount ?? 0,
+      revisionStatusText: item.progress?.revisionStatusText || "",
+      isDue: item.progress?.isDue ?? false,
+      lastSolvedAt: item.progress?.lastSolvedAt,
+      nextRevisionAt: item.progress?.nextRevisionAt,
+      progress: item.progress,
+    });
+  };
+
+  const handleSaveProblemNotes = async (markAsSolved: boolean, notes: string) => {
+    if (!activeProblem) return;
+
+    if (!isAuthenticated) {
+      toast.error("Please log in to record progress and notes.");
+      return;
+    }
+
+    try {
+      const result = await solveMutation.mutateAsync({
+        itemId: activeProblem.itemId,
+        isCorrect: markAsSolved,
+        notes: notes.trim() || undefined,
+      });
+
+      if (markAsSolved && !activeProblem.solved) {
+        toast.success(`🎉 Problem solved! Notes saved`);
+      } else if (!markAsSolved && activeProblem.solved) {
+        toast.info("Problem marked as unsolved.");
+      } else {
+        toast.success("Notes saved successfully!");
+      }
+      setActiveProblem(null);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update progress");
+    }
+  };
 
   // Overall Stats across all subjects
   const overallStats: PrepHubOverallStats = useMemo(() => {
@@ -155,13 +162,13 @@ export function PrepHubExplorer() {
   }, [subjects]);
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200">
+    <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200 select-none">
       {/* 2-Column Responsive Layout: Main Area (Left) + Right Sidebar (Daily Planner) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ======================================================================= */}
         {/* MAIN COLUMN (LEFT / 8-9 COLS): PREP HUB FLOW */}
         {/* ======================================================================= */}
-        <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+        <div className="lg:col-span-8 xl:col-span-9 space-y-4">
           {/* 1. Breadcrumbs Navigation */}
           <div className="flex items-center gap-2 text-[12px] text-zinc-400">
             <button
@@ -202,77 +209,52 @@ export function PrepHubExplorer() {
 
           {/* 2. Level 1: Subjects List View (Root) */}
           {!selectedSubjectSlug && (
-            <div className="space-y-6">
-              {/* Header Hero Card */}
-              <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-5 shadow-subtle hover:border-zinc-700/80 transition-all duration-200">
-                <div
-                  className="absolute inset-0 opacity-[0.04] pointer-events-none"
-                  style={{
-                    backgroundImage: `linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px)`,
-                    backgroundSize: "28px 28px",
-                  }}
-                />
+            <div className="space-y-4">
+              {/* Header Section */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-0.5">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-[20px] font-bold leading-tight tracking-tight text-zinc-100">
+                      Prep Hub
+                    </h1>
+                    <Badge variant="blue" className="text-[10px] font-semibold py-0.5 px-2 font-mono rounded-md">
+                      {overallStats.totalQuestions || 847} Curated Qs
+                    </Badge>
+                  </div>
+                  <p className="text-[12px] font-normal text-zinc-400 leading-normal">
+                    Complete roadmap across all core SDE interview subjects, powered by automated spaced repetition.
+                  </p>
+                </div>
 
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-                  <div className="space-y-3.5 max-w-xl">
-                    <div className="space-y-1">
-                      <h1 className="text-[20px] font-semibold tracking-tight text-zinc-100">
-                        Prep Hub
-                      </h1>
-                      <p className="text-[12px] font-normal text-zinc-400 leading-normal">
-                        Your complete knowledge base and practice roadmap across all core SDE interview subjects, powered by automated spaced repetition.
-                      </p>
-                    </div>
-
-                    {/* Dynamic Statistics Row */}
-                    <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-0.5 text-[12px] text-zinc-400">
-                      <div className="flex items-center gap-1.5 font-normal">
-                        <BookOpen className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-                        <span className="text-zinc-200 font-semibold text-[13px]">
-                          {overallStats.totalSubjects || 6}
-                        </span>
-                        <span className="text-zinc-400 text-[12px]">Curated Subjects</span>
-                      </div>
-
-                      <span className="text-zinc-700 hidden sm:inline">&middot;</span>
-
-                      <div className="flex items-center gap-1.5 font-normal">
-                        <Code2 className="h-3.5 w-3.5 text-blue-400 shrink-0" />
-                        <span className="text-zinc-200 font-semibold text-[13px]">
-                          {overallStats.totalQuestions || 847}
-                        </span>
-                        <span className="text-zinc-400 text-[12px]">Curated Questions</span>
-                      </div>
-
-                      {overallStats.totalDue > 0 && (
-                        <>
-                          <span className="text-zinc-700 hidden sm:inline">&middot;</span>
-                          <div className="flex items-center gap-1.5 font-normal text-amber-400">
-                            <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-                            <span className="font-semibold text-[13px] text-amber-300">
-                              {overallStats.totalDue}
-                            </span>
-                            <span className="text-amber-400 text-[12px]">Revision Due</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                {/* Metric Badges */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="h-8 rounded-lg border border-zinc-800 bg-zinc-950/80 px-3 text-[12px] flex items-center gap-1.5 shadow-subtle font-mono">
+                    <span className="text-zinc-400 font-normal">Tracks:</span>
+                    <strong className="text-blue-400 font-semibold text-[12px]">
+                      {overallStats.totalSubjects || 6}
+                    </strong>
                   </div>
 
-                  {/* Right Header Metric Box */}
-                  <div className="hidden md:flex items-center justify-center shrink-0 pr-2">
-                    <div className="relative flex flex-col items-center p-2.5 rounded-xl border border-zinc-800 bg-zinc-950/80 shadow-card">
-                      <div className="h-14 w-24 rounded-lg border border-zinc-800 bg-zinc-900/90 flex flex-col items-center justify-center text-center p-1.5">
-                        <span className="text-blue-400 font-semibold text-[14px]">
-                          ⚡ {overallStats.totalQuestions || 847}
-                        </span>
-                        <span className="text-[11px] text-zinc-500">Curated Qs</span>
-                      </div>
-                      <div className="mt-1.5 text-[11px] text-zinc-500 font-normal">
-                        Full Coverage
-                      </div>
-                    </div>
+                  <div className="h-8 rounded-lg border border-zinc-800 bg-zinc-950/80 px-3 text-[12px] flex items-center gap-1.5 shadow-subtle font-mono">
+                    <span className="text-zinc-400 font-normal">Solved:</span>
+                    <strong className="text-emerald-400 font-semibold text-[12px]">
+                      {overallStats.totalSolved || 0}
+                    </strong>
+                    <span className="text-zinc-600">/</span>
+                    <span className="text-zinc-400 font-normal">
+                      {overallStats.totalQuestions || 847}
+                    </span>
                   </div>
+
+                  {overallStats.totalDue > 0 && (
+                    <div className="h-8 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 text-[12px] flex items-center gap-1.5 text-amber-300 shadow-subtle font-mono">
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
+                      <span className="font-semibold text-[12px] text-amber-300">
+                        {overallStats.totalDue}
+                      </span>
+                      <span className="text-amber-400/90 text-[11px] font-sans">Due</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -280,16 +262,16 @@ export function PrepHubExplorer() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h2 className="text-[15px] font-semibold tracking-tight text-zinc-100">
-                    Explore Subjects
+                    Core Tracks
                   </h2>
-                  <span className="text-[12px] text-zinc-500">
-                    {subjects?.length || 0} Core Tracks
+                  <span className="text-[12px] font-mono text-zinc-500">
+                    {subjects?.length || 0} Tracks Available
                   </span>
                 </div>
 
                 {isLoadingSubjects ? (
-                  <div className="grid gap-3">
-                    {[1, 2, 3, 4].map((n) => (
+                  <div className="grid gap-2.5">
+                    {[1, 2, 3, 4, 5, 6].map((n) => (
                       <div
                         key={n}
                         className="h-20 rounded-xl border border-zinc-800/80 bg-zinc-900/20 animate-pulse"
@@ -297,7 +279,7 @@ export function PrepHubExplorer() {
                     ))}
                   </div>
                 ) : (
-                  <div className="grid gap-3">
+                  <div className="grid gap-2.5">
                     {subjects?.map((sub) => (
                       <SubjectTrackCard
                         key={sub.id}
@@ -331,9 +313,7 @@ export function PrepHubExplorer() {
               topicQuestionsData={topicQuestionsData}
               isLoading={isLoadingQuestions}
               onBack={() => setNavigation(selectedSubjectSlug, null)}
-              onOpenReviewModal={handleOpenReviewModal}
-              onQuickSolve={handleQuickSolve}
-              isSolvePending={solveMutation.isPending}
+              onOpenProblem={handleOpenProblem}
             />
           )}
         </div>
@@ -351,21 +331,19 @@ export function PrepHubExplorer() {
                 ) {
                   setNavigation(item.subjectSlug, item.topicSlug);
                 }
-                handleOpenReviewModal(item);
+                handleOpenProblem(item);
               }}
             />
           </div>
         </aside>
       </div>
 
-      {/* 5. Interactive Solve & Spaced Repetition Modal */}
-      <QuestionSolveModal
-        item={activeReviewItem}
-        subjectSlug={selectedSubjectSlug}
-        currentTopic={currentTopic}
-        isOpen={Boolean(activeReviewItem)}
-        onClose={() => setActiveReviewItem(null)}
-        onRecordSolve={handleRecordSolve}
+      {/* 5. Practice Problem Note Modal Reused */}
+      <ProblemNoteModal
+        problem={activeProblem}
+        isOpen={Boolean(activeProblem)}
+        onClose={() => setActiveProblem(null)}
+        onSaveNotes={handleSaveProblemNotes}
         isPending={solveMutation.isPending}
       />
     </div>

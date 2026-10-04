@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Zap } from "lucide-react";
@@ -165,12 +166,16 @@ export function OnboardingWizard() {
               href="/dashboard"
               className="flex items-center gap-2 text-[14px] font-semibold tracking-tight text-zinc-100"
             >
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold text-[12px] shadow-sm shadow-blue-600/20">
-                ⚡
-              </span>
+              <Image
+                src="/cracksde_logo.png"
+                alt="CracksDE Logo"
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain rounded-md"
+              />
               <span>
                 Planly <span className="text-zinc-500 font-normal text-[12px]">by</span>{" "}
-                <span className="text-zinc-100 font-semibold">Crack SDE</span>
+                <span className="text-zinc-100 font-semibold">CracksDE</span>
               </span>
             </Link>
           </div>
@@ -196,12 +201,16 @@ export function OnboardingWizard() {
             href="/dashboard"
             className="flex items-center gap-2 text-[14px] font-semibold tracking-tight text-zinc-100"
           >
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-600 text-white font-semibold text-[12px] shadow-sm shadow-blue-600/20">
-              ⚡
-            </span>
+            <Image
+              src="/cracksde_logo.png"
+              alt="CracksDE Logo"
+              width={24}
+              height={24}
+              className="h-6 w-6 object-contain rounded-md"
+            />
             <span>
               Planly <span className="text-zinc-500 font-normal text-[12px]">by</span>{" "}
-              <span className="text-zinc-100 font-semibold">Crack SDE</span>
+              <span className="text-zinc-100 font-semibold">CracksDE</span>
             </span>
           </Link>
         </div>
