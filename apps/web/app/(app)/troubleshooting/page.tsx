@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { api } from "@/services/api-client";
 
 export default function TroubleshootingPage() {
   const queryClient = useQueryClient();
@@ -36,13 +37,13 @@ export default function TroubleshootingPage() {
   const handleTestApi = async () => {
     setTestingApi(true);
     try {
-      const res = await fetch("/api/health");
-      if (res.ok) {
+      const res = await api.get<{ success?: boolean; data?: { status: string } }>("/api/health");
+      if (res && (res.success || res.data?.status === "ok")) {
         setApiStatus("ok");
         toast.success("API server is healthy and responding (200 OK)");
       } else {
         setApiStatus("error");
-        toast.error(`API health check returned HTTP ${res.status}`);
+        toast.error("API health check returned unexpected response");
       }
     } catch {
       setApiStatus("error");

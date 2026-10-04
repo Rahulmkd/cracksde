@@ -1,5 +1,5 @@
 {
-  "name": "@starter/web",
+  "name": "@cracksde/web",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cracksde/shared": "*",
     "@tailwindcss/typography": "^0.5.15",
     "@tanstack/react-query": "^5.60.0",
     "@tiptap/extension-link": "^2.11.0",

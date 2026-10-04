@@ -270,7 +270,7 @@ export function TopicQuestionsList({
         <div className="grid grid-cols-12 gap-3 border-b border-zinc-800/80 bg-zinc-950/60 px-4 py-2 text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
           <div className="col-span-1 text-center">Status</div>
           <div className="col-span-6 sm:col-span-5">Question / Concept</div>
-          <div className="col-span-3 sm:col-span-4">Revision Status</div>
+          <div className="col-span-3 sm:col-span-4">Revision</div>
           <div className="col-span-2 text-right pr-2">Action</div>
         </div>
 

@@ -33,7 +33,7 @@ app.use("/api", routes);
 // Error handling
 app.use(errorHandler);
 
-app.listen(env.PORT, () => {
+app.listen(env.PORT, "0.0.0.0", () => {
   console.log(`\n🚀 API server running at http://localhost:${env.PORT}`);
   console.log(`📋 Health check: http://localhost:${env.PORT}/api/health`);
   console.log(`🔐 Auth endpoint: http://localhost:${env.PORT}/api/auth\n`);

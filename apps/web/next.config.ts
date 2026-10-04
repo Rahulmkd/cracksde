@@ -1,9 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Allow API requests to backend
+  transpilePackages: ["@cracksde/shared"],
   async rewrites() {
-    return [];
+    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
+    if (!apiUrl) {
+      return [];
+    }
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${apiUrl}/api/:path*`,
+      },
+    ];
   },
 };
 
