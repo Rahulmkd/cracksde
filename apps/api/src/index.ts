@@ -15,6 +15,9 @@ import { errorHandler } from "./middleware/error-handler.js";
 
 const app = express();
 
+// Trust reverse proxy (Render, Vercel, Cloudflare)
+app.set("trust proxy", 1);
+
 // Security
 app.use(helmet());
 
