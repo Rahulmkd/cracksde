@@ -10,6 +10,7 @@ export const updateStudyPlanSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   startDate: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}/)).optional(),
   dailyHours: z.coerce.number().min(1).max(24).optional(),
+  selectedSubjects: z.array(z.string()).optional(),
 });
 
 export type UpdateStudyTaskInput = z.infer<typeof updateStudyTaskSchema>;

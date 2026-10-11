@@ -8,10 +8,8 @@ export const updateProfileSchema = z.object({
     .optional(),
   image: z
     .string()
-    .url("Invalid avatar image URL")
     .nullable()
-    .optional()
-    .or(z.literal("")),
+    .optional(),
   headline: z
     .string()
     .max(255, "Headline cannot exceed 255 characters")
@@ -74,6 +72,10 @@ export const updateProfileSchema = z.object({
     .or(z.literal("")),
   emailNotifications: z.boolean().optional(),
   weeklyDigest: z.boolean().optional(),
+  hasActivePlan: z.boolean().optional(),
+  planName: z.string().max(255).nullable().optional(),
+  planStartDate: z.string().nullable().optional(),
+  selectedSubjects: z.array(z.string()).optional(),
 });
 
 export type UpdateProfileSchema = z.infer<typeof updateProfileSchema>;

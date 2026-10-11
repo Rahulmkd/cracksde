@@ -44,7 +44,7 @@ const STATUS_FILTERS = [
   { label: "Unsolved", val: "unsolved" },
 ] as const;
 
-export function getDifficultyBadge(diff?: string) {
+export function getDifficultyBadge(diff?: string | null) {
   const d = (diff || "Medium").toLowerCase();
   if (d.includes("basic") || d.includes("easy")) {
     return (
@@ -157,7 +157,7 @@ export function RevisionStatusBadge({
     nextRevisionAt: nextRevisionAt || null,
     revisionStatusText: revisionText || "",
     itemId: 0,
-    solvedAt: null,
+    status: isDue ? "needs_revision" : (solveCount ? "completed" : "not_started"),
     lastSolvedAt: null,
     notes: null,
   });

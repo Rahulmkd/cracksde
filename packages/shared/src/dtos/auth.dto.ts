@@ -4,6 +4,7 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   message?: string;
+  details?: unknown;
 }
 
 /** User object returned from auth endpoints */

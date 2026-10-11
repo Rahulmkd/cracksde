@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "predev": "npm run build --workspace=@cracksde/shared",
     "dev": "npx concurrently --kill-others \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "npm run dev --workspace=@cracksde/api",
     "dev:web": "npm run dev --workspace=@cracksde/web",
