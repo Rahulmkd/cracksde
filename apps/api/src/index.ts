@@ -18,6 +18,14 @@ const app = express();
 // Trust reverse proxy (Render, Vercel, Cloudflare)
 app.set("trust proxy", 1);
 
+// Normalize repeated slashes in request URLs (e.g. //api/... -> /api/...)
+app.use((req, _res, next) => {
+  if (req.url.startsWith("//")) {
+    req.url = req.url.replace(/^\/+/, "/");
+  }
+  next();
+});
+
 // Security
 app.use(helmet());
 

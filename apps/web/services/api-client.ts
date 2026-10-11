@@ -8,7 +8,12 @@ export class ApiClient {
   private baseUrl: string;
 
   constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
+    this.baseUrl = baseUrl.replace(/\/+$/, "");
+  }
+
+  private getFullUrl(endpoint: string): string {
+    const cleanPath = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+    return `${this.baseUrl}${cleanPath}`;
   }
 
   private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
@@ -29,7 +34,7 @@ export class ApiClient {
       config.body = JSON.stringify(body);
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, config);
+    const response = await fetch(this.getFullUrl(endpoint), config);
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ error: "Request failed" }));
