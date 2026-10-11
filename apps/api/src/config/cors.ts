@@ -10,18 +10,30 @@ export const corsOptions: CorsOptions = {
       return callback(null, true);
     }
 
+    // Auto-allow all Vercel deployments and localhost
+    if (
+      origin.endsWith(".vercel.app") ||
+      origin.includes("vercel.app") ||
+      origin.includes("localhost") ||
+      origin.includes("127.0.0.1")
+    ) {
+      return callback(null, true);
+    }
+
     // Check direct equality or wildcard
     if (allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
       return callback(null, true);
     }
 
-    // Check wildcard subdomain pattern like *.vercel.app
+    // Check wildcard subdomain pattern like *.vercel.app or https://*.vercel.app
     const isMatched = allowedOrigins.some((allowed) => {
-      if (allowed.startsWith("*.")) {
-        const rootDomain = allowed.slice(2);
-        return origin.endsWith(rootDomain) || origin.endsWith(`.${rootDomain}`);
+      const cleanAllowed = allowed.replace(/^https?:\/\//, "");
+      const cleanOrigin = origin.replace(/^https?:\/\//, "");
+      if (cleanAllowed.startsWith("*.")) {
+        const rootDomain = cleanAllowed.slice(2);
+        return cleanOrigin.endsWith(rootDomain) || cleanOrigin.endsWith(`.${rootDomain}`);
       }
-      return false;
+      return cleanOrigin === cleanAllowed;
     });
 
     if (isMatched) {
@@ -32,7 +44,14 @@ export const corsOptions: CorsOptions = {
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Cookie",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+  ],
   exposedHeaders: ["Set-Cookie"],
 };
 

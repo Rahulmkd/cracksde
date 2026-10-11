@@ -3,6 +3,8 @@ import cors from "cors";
 import helmet from "helmet";
 import { env } from "./config/env.js";
 import { corsOptions } from "./config/cors.js";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "./lib/auth.js";
 import { authRouter } from "./modules/auth/index.js";
 import routes from "./routes/index.js";
 import { errorHandler } from "./middleware/error-handler.js";
@@ -20,7 +22,11 @@ app.use(helmet());
 // CORS
 app.use(cors(corsOptions));
 
-// Better Auth handler — MUST be mounted before express.json()
+// Better Auth handler — MUST be mounted directly on app before express.json()
+// Mounting directly preserves the /api/auth prefix so Better Auth routes match correctly
+app.all("/api/auth/*splat", toNodeHandler(auth));
+app.all("/api/auth", toNodeHandler(auth));
+app.all("/api/auth/*", toNodeHandler(auth));
 app.use("/api", authRouter);
 
 // Body parsing — after auth handler

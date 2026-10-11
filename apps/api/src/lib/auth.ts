@@ -3,7 +3,16 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma.js";
 import { env } from "../config/env.js";
 
-const trustedOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean);
+const customOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean);
+const trustedOrigins = Array.from(
+  new Set([
+    ...customOrigins,
+    "*.vercel.app",
+    "https://*.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5001",
+  ])
+);
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
