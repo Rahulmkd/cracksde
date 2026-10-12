@@ -1,69 +1,113 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSession, signIn, signUp, signOut as rawSignOut } from "@/lib/auth-client";
-import { authService } from "@/services/auth-service";
+import { authClient, signIn, signUp, signOut as rawSignOut } from "@/lib/auth-client";
+import { useAuthStore } from "@/store/auth-store";
 import { usePlannerStore } from "@/store/planner-store";
 
 export function useAuthSession() {
-  const { data: session, isPending, error } = useSession();
+  const user = useAuthStore((s) => s.user);
+  const session = useAuthStore((s) => s.session);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const isLoggingIn = useAuthStore((s) => s.isLoggingIn);
+  const isLoggingOut = useAuthStore((s) => s.isLoggingOut);
+  const error = useAuthStore((s) => s.error);
   const queryClient = useQueryClient();
-  const userId = session?.user?.id ?? null;
-  const prevUserIdRef = useRef<string | null | undefined>(undefined);
 
-  useEffect(() => {
-    // Only synchronize once auth check has resolved (!isPending)
-    if (isPending) return;
-
-    if (prevUserIdRef.current === undefined) {
-      prevUserIdRef.current = userId;
-      usePlannerStore.getState().syncUser(userId);
-      return;
-    }
-
-    // Detect actual user switch or logout (e.g. user_A -> user_B or user_A -> null)
-    if (prevUserIdRef.current !== userId) {
-      const hadPreviousUser = Boolean(prevUserIdRef.current);
-      prevUserIdRef.current = userId;
-
-      if (hadPreviousUser) {
-        queryClient.clear();
-      } else {
-        queryClient.invalidateQueries();
+  const handleSignInEmail = async (data: { email: string; password: string }) => {
+    useAuthStore.getState().setLoggingIn(true);
+    try {
+      const res = await authClient.signIn.email(data);
+      if (res?.error) {
+        useAuthStore.getState().setLoggingIn(false);
+        return res;
       }
 
-      usePlannerStore.getState().syncUser(userId);
+      if (res?.data?.user) {
+        // Immediate synchronous global auth state update
+        useAuthStore.getState().setSession(res.data.user, (res.data as any)?.session ?? null);
+        usePlannerStore.getState().syncUser(res.data.user.id);
+        queryClient.invalidateQueries();
+        try {
+          authClient.$store?.notify?.("$sessionSignal");
+        } catch {}
+      }
+      return res;
+    } catch (err: any) {
+      useAuthStore.getState().setLoggingIn(false);
+      throw err;
+    }
+  };
+
+  const handleSignUpEmail = async (data: { name: string; email: string; password: string }) => {
+    useAuthStore.getState().setLoggingIn(true);
+    try {
+      const res = await authClient.signUp.email(data);
+      if (res?.error) {
+        useAuthStore.getState().setLoggingIn(false);
+        return res;
+      }
+
+      if (res?.data?.user) {
+        // Immediate synchronous global auth state update
+        useAuthStore.getState().setSession(res.data.user, (res.data as any)?.session ?? null);
+        usePlannerStore.getState().syncUser(res.data.user.id);
+        queryClient.invalidateQueries();
+        try {
+          authClient.$store?.notify?.("$sessionSignal");
+        } catch {}
+      }
+      return res;
+    } catch (err: any) {
+      useAuthStore.getState().setLoggingIn(false);
+      throw err;
+    }
+  };
+
+  const handleSignOut = async () => {
+    useAuthStore.getState().setLoggingOut(true);
+    try {
+      // 1. Invalidate and clear react-query cache immediately
+      queryClient.clear();
+
+      // 2. Clear planner store and local caches immediately
+      usePlannerStore.getState().resetStore();
       if (typeof window !== "undefined") {
         try {
+          localStorage.removeItem("cracksde-daily-planner-storage");
           localStorage.removeItem("cracksde_planly_expanded_sprints");
           localStorage.removeItem("cracksde_planly_expanded_days");
         } catch {}
       }
-    }
-  }, [userId, isPending, queryClient]);
 
-  const handleSignOut = async () => {
-    queryClient.clear();
-    usePlannerStore.getState().resetStore();
-    if (typeof window !== "undefined") {
+      // 3. Clear auth store immediately across all subscribing components
+      useAuthStore.getState().clearSession();
+
+      // 4. Invalidate session cookie on server
+      await authClient.signOut();
+
       try {
-        localStorage.removeItem("cracksde-daily-planner-storage");
-        localStorage.removeItem("cracksde_planly_expanded_sprints");
-        localStorage.removeItem("cracksde_planly_expanded_days");
+        authClient.$store?.notify?.("$sessionSignal");
       } catch {}
+
+      return { success: true };
+    } catch (err: any) {
+      useAuthStore.getState().setLoggingOut(false);
+      throw err;
     }
-    return authService.signOut();
   };
 
   return {
-    user: session?.user ?? null,
-    session: session?.session ?? null,
-    isAuthenticated: !!session?.user,
-    isLoading: isPending,
+    user,
+    session,
+    isAuthenticated,
+    isLoading,
+    isLoggingIn,
+    isLoggingOut,
     error,
-    signInEmail: authService.signInEmail,
-    signUpEmail: authService.signUpEmail,
+    signInEmail: handleSignInEmail,
+    signUpEmail: handleSignUpEmail,
     signOut: handleSignOut,
     signIn,
     signUp,
@@ -72,3 +116,4 @@ export function useAuthSession() {
 }
 
 export const useAuth = useAuthSession;
+

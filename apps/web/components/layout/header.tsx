@@ -95,7 +95,7 @@ function GoldHexagonIcon({ className = "h-4 w-4" }: { className?: string }) {
 export function Header() {
   const { sidebarOpen, toggleSidebar } = useUIStore();
   const { points, streak } = usePlannerStore();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
@@ -200,14 +200,16 @@ export function Header() {
                   user?.name ? `${user.name} - Account Menu` : "Account Menu"
                 }
               >
-                {user?.image ? (
+                {isLoading && !user ? (
+                  <div className="h-full w-full bg-zinc-800 animate-pulse" />
+                ) : user?.image ? (
                   <img
                     src={user.image}
                     alt={user.name || "User"}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-opacity duration-200"
                   />
                 ) : (
-                  <span>{userInitials}</span>
+                  <span className="transition-opacity duration-200">{userInitials}</span>
                 )}
               </button>
 

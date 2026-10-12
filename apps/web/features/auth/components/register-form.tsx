@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { signUp, useSession } from "@/lib/auth-client";
+import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,23 +14,26 @@ import { toast } from "sonner";
 
 export function RegisterForm() {
   const router = useRouter();
-  const { data: session, isPending: sessionLoading } = useSession();
+  const { isAuthenticated, isLoading: sessionLoading, signUpEmail, isLoggingIn } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+
+  const isSubmitting = formLoading || isLoggingIn;
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (session && !sessionLoading) {
+    if (isAuthenticated && !sessionLoading) {
       router.replace("/dashboard");
     }
-  }, [session, sessionLoading, router]);
+  }, [isAuthenticated, sessionLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError("");
 
     if (password !== confirmPassword) {
@@ -45,26 +48,32 @@ export function RegisterForm() {
       return;
     }
 
-    setLoading(true);
+    setFormLoading(true);
 
-    const { error: authError } = await signUp.email({
-      name,
-      email,
-      password,
-    });
+    try {
+      const res = await signUpEmail({
+        name,
+        email,
+        password,
+      });
 
-    setLoading(false);
-
-    if (authError) {
-      const msg = authError.message || "Registration failed";
+      if (res?.error) {
+        const msg = res.error.message || "Registration failed";
+        setError(msg);
+        toast.error(msg);
+        setFormLoading(false);
+      } else {
+        toast.success("Account created successfully!");
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      const msg = err?.message || "Registration failed";
       setError(msg);
       toast.error(msg);
-    } else {
-      toast.success("Account created successfully!");
-      router.push("/dashboard");
-      router.refresh();
+      setFormLoading(false);
     }
   };
+
 
   if (sessionLoading) {
     return (
@@ -176,11 +185,14 @@ export function RegisterForm() {
 
               <Button
                 type="submit"
-                disabled={loading}
-                className="w-full h-8 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-2"
+                disabled={isSubmitting}
+                className="w-full h-8 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-2 transition-all"
               >
-                {loading ? (
-                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                {formLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>Creating account...</span>
+                  </div>
                 ) : (
                   "Create Account"
                 )}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/use-auth";
@@ -32,9 +32,12 @@ export function UserDropdown({
   className,
 }: UserDropdownProps) {
   const router = useRouter();
-  const { signOut } = useAuth();
+  const { signOut, isLoggingOut } = useAuth();
+  const [localLoggingOut, setLocalLoggingOut] = useState(false);
   const { theme, resolvedTheme, setTheme } = useTheme();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const isPendingLogout = localLoggingOut || isLoggingOut;
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -84,15 +87,19 @@ export function UserDropdown({
   };
 
   const handleLogout = async () => {
-    onClose();
+    if (isPendingLogout) return;
+    setLocalLoggingOut(true);
     try {
       await signOut();
+      onClose();
       toast.success("Logged out successfully");
       router.push("/login");
     } catch {
+      setLocalLoggingOut(false);
       toast.error("Failed to log out");
     }
   };
+
 
   // Placement positioning classes
   const placementClasses = {
@@ -215,10 +222,17 @@ export function UserDropdown({
           type="button"
           role="menuitem"
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors group focus-visible:outline-none focus-visible:bg-rose-500/10"
+          disabled={isPendingLogout}
+          className="flex w-full items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors group focus-visible:outline-none focus-visible:bg-rose-500/10 disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          <LogOut className="h-4 w-4 text-rose-400 group-hover:text-rose-300 transition-colors shrink-0 stroke-[1.8]" />
-          <span className="flex-1 text-left">Logout</span>
+          {isPendingLogout ? (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-rose-400 border-t-transparent shrink-0" />
+          ) : (
+            <LogOut className="h-4 w-4 text-rose-400 group-hover:text-rose-300 transition-colors shrink-0 stroke-[1.8]" />
+          )}
+          <span className="flex-1 text-left">
+            {isPendingLogout ? "Logging out..." : "Logout"}
+          </span>
         </button>
       </div>
     </div>

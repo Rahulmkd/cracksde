@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { signIn, useSession } from "@/lib/auth-client";
+import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,63 +14,79 @@ import { toast } from "sonner";
 
 export function LoginForm() {
   const router = useRouter();
-  const { data: session, isPending: sessionLoading } = useSession();
+  const { isAuthenticated, isLoading: sessionLoading, signInEmail, isLoggingIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  const isSubmitting = formLoading || demoLoading || isLoggingIn;
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (session && !sessionLoading) {
+    if (isAuthenticated && !sessionLoading) {
       router.replace("/dashboard");
     }
-  }, [session, sessionLoading, router]);
+  }, [isAuthenticated, sessionLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError("");
-    setLoading(true);
+    setFormLoading(true);
 
-    const { error: authError } = await signIn.email({
-      email,
-      password,
-    });
+    try {
+      const res = await signInEmail({
+        email,
+        password,
+      });
 
-    setLoading(false);
-
-    if (authError) {
-      const msg = authError.message || "Invalid credentials";
+      if (res?.error) {
+        const msg = res.error.message || "Invalid credentials";
+        setError(msg);
+        toast.error(msg);
+        setFormLoading(false);
+      } else {
+        toast.success("Signed in successfully");
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      const msg = err?.message || "An unexpected error occurred";
       setError(msg);
       toast.error(msg);
-    } else {
-      toast.success("Signed in successfully");
-      router.push("/dashboard");
-      router.refresh();
+      setFormLoading(false);
     }
   };
 
   const handleDemoLogin = async () => {
+    if (isSubmitting) return;
     setError("");
-    setLoading(true);
+    setDemoLoading(true);
 
-    const { error: authError } = await signIn.email({
-      email: "demo@example.com",
-      password: "Demo@123",
-    });
+    try {
+      const res = await signInEmail({
+        email: "demo@example.com",
+        password: "Demo@123",
+      });
 
-    setLoading(false);
-
-    if (authError) {
-      const msg = authError.message || "Demo login failed";
+      if (res?.error) {
+        const msg = res.error.message || "Demo login failed";
+        setError(msg);
+        toast.error(msg);
+        setDemoLoading(false);
+      } else {
+        toast.success("Logged in as Demo User");
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      const msg = err?.message || "Demo login failed";
       setError(msg);
       toast.error(msg);
-    } else {
-      toast.success("Logged in as Demo User");
-      router.push("/dashboard");
-      router.refresh();
+      setDemoLoading(false);
     }
   };
+
 
   if (sessionLoading) {
     return (
@@ -152,11 +168,14 @@ export function LoginForm() {
 
               <Button
                 type="submit"
-                disabled={loading}
-                className="w-full h-8 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-1"
+                disabled={isSubmitting}
+                className="w-full h-8 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-1 transition-all"
               >
-                {loading ? (
-                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                {formLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>Signing in...</span>
+                  </div>
                 ) : (
                   "Sign In"
                 )}
@@ -178,10 +197,17 @@ export function LoginForm() {
               type="button"
               variant="outline"
               onClick={handleDemoLogin}
-              disabled={loading}
-              className="w-full h-8 text-[12px] border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200 font-medium"
+              disabled={isSubmitting}
+              className="w-full h-8 text-[12px] border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200 font-medium transition-all"
             >
-              🚀 Instant Demo Login
+              {demoLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-300 border-t-transparent" />
+                  <span>Logging in as Demo...</span>
+                </div>
+              ) : (
+                "🚀 Instant Demo Login"
+              )}
             </Button>
 
             <div className="rounded-lg bg-zinc-950/60 p-2 text-center text-[11px] text-zinc-400 border border-zinc-800/80 font-mono">

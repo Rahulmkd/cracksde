@@ -80,7 +80,6 @@ export function useDeleteAccount() {
       }
       toast.success("Your account and all study data have been permanently deleted.");
       router.push("/login");
-      router.refresh();
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to delete account. Please try again.");

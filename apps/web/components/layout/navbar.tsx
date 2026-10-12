@@ -114,16 +114,20 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {/* Desktop CTA Button */}
           <div className="hidden sm:flex items-center gap-2.5">
-            <Button
-              asChild
-              size="sm"
-              className="h-8 px-4 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all"
-            >
-              <Link href={getStartedHref}>
-                {isAuthenticated ? "Go to Dashboard" : "Get Started"}
-                <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
-              </Link>
-            </Button>
+            {isLoading ? (
+              <div className="h-8 w-[132px] rounded-md bg-zinc-850 animate-pulse border border-zinc-800/80" />
+            ) : (
+              <Button
+                asChild
+                size="sm"
+                className="h-8 px-4 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-200 animate-in fade-in-50"
+              >
+                <Link href={getStartedHref}>
+                  {isAuthenticated ? "Go to Dashboard" : "Get Started"}
+                  <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Toggle Button */}
@@ -180,15 +184,19 @@ export function Navbar() {
               Dashboard
             </Link>
             <div className="pt-2 border-t border-zinc-800/60">
-              <Button
-                asChild
-                className="w-full h-9 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Link href={getStartedHref} onClick={() => setMobileMenuOpen(false)}>
-                  {isAuthenticated ? "Go to Dashboard" : "Get Started"}
-                  <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
-                </Link>
-              </Button>
+              {isLoading ? (
+                <div className="w-full h-9 rounded-md bg-zinc-850 animate-pulse border border-zinc-800/80" />
+              ) : (
+                <Button
+                  asChild
+                  className="w-full h-9 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 animate-in fade-in-50"
+                >
+                  <Link href={getStartedHref} onClick={() => setMobileMenuOpen(false)}>
+                    {isAuthenticated ? "Go to Dashboard" : "Get Started"}
+                    <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                  </Link>
+                </Button>
+              )}
             </div>
           </nav>
         </div>
