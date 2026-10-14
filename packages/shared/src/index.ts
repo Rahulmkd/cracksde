@@ -12,8 +12,10 @@ export * from "./dtos/progress.dto.js";
 export * from "./dtos/roadmap.dto.js";
 export * from "./dtos/practice.dto.js";
 export * from "./dtos/study-plan.dto.js";
+export * from "./dtos/saved-resource.dto.js";
 
 // Schemas
 export * from "./schemas/profile.schema.js";
 export * from "./schemas/roadmap.schema.js";
 export * from "./schemas/study-plan.schema.js";
+export * from "./schemas/saved-resource.schema.js";
