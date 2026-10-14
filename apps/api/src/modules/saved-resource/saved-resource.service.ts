@@ -11,6 +11,7 @@ function toDto(item: any): SavedResourceDto {
     title: item.title,
     domain: item.domain,
     favicon: item.favicon,
+    isBookmarked: Boolean(item.isBookmarked),
     createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : String(item.createdAt),
     updatedAt: item.updatedAt instanceof Date ? item.updatedAt.toISOString() : String(item.updatedAt),
   };
@@ -59,5 +60,29 @@ export class SavedResourceService {
     await SavedResourceRepository.delete(resourceId);
 
     return { message: "Saved resource deleted successfully" };
+  }
+
+  /**
+   * Toggles bookmark state for a saved resource
+   */
+  static async toggleBookmark(
+    userId: string,
+    resourceId: string,
+    explicitState?: boolean
+  ): Promise<SavedResourceDto> {
+    const existing = await SavedResourceRepository.findById(resourceId);
+
+    if (!existing) {
+      throw new NotFoundError("Saved resource not found");
+    }
+
+    if (existing.userId !== userId) {
+      throw new ForbiddenError("You do not have permission to update this saved resource");
+    }
+
+    const nextState = typeof explicitState === "boolean" ? explicitState : !existing.isBookmarked;
+    const updated = await SavedResourceRepository.updateBookmark(resourceId, nextState);
+
+    return toDto(updated);
   }
 }

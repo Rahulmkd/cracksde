@@ -5,10 +5,15 @@ export interface SavedResourceDto {
   title: string;
   domain: string;
   favicon: string | null;
+  isBookmarked: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateSavedResourceDto {
   url: string;
+}
+
+export interface ToggleBookmarkDto {
+  isBookmarked?: boolean;
 }

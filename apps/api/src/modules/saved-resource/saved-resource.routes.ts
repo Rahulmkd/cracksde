@@ -12,5 +12,6 @@ router.post(
   SavedResourceController.createSavedResource
 );
 router.delete("/saved-resources/:id", SavedResourceController.deleteSavedResource);
+router.patch("/saved-resources/:id/bookmark", SavedResourceController.toggleBookmark);
 
 export default router;

@@ -51,4 +51,24 @@ export class SavedResourceRepository {
       where: { id },
     });
   }
+
+  /**
+   * Update the bookmark status of a saved resource
+   */
+  static async updateBookmark(id: string, isBookmarked: boolean) {
+    return prisma.savedResource.update({
+      where: { id },
+      data: { isBookmarked },
+    });
+  }
+
+  /**
+   * Find all bookmarked resources for a user
+   */
+  static async findBookmarkedByUserId(userId: string) {
+    return prisma.savedResource.findMany({
+      where: { userId, isBookmarked: true },
+      orderBy: { updatedAt: "desc" },
+    });
+  }
 }

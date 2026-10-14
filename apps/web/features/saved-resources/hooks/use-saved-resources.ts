@@ -58,3 +58,54 @@ export function useDeleteSavedResource() {
     },
   });
 }
+
+export function useToggleBookmarkResource() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id ?? "anonymous";
+
+  return useMutation({
+    mutationFn: ({ id, isBookmarked }: { id: string; isBookmarked?: boolean }) =>
+      savedResourceService.toggleBookmark(id, isBookmarked),
+    onMutate: async ({ id, isBookmarked }) => {
+      // Cancel outgoing refetches so they don't overwrite optimistic update
+      await queryClient.cancelQueries({ queryKey: ["saved-resources", userId] });
+
+      // Snapshot previous value
+      const previousResources = queryClient.getQueryData<SavedResourceDto[]>([
+        "saved-resources",
+        userId,
+      ]);
+
+      // Optimistically update cache instantly
+      queryClient.setQueryData<SavedResourceDto[]>(["saved-resources", userId], (old) => {
+        if (!old) return [];
+        return old.map((res) => {
+          if (res.id === id) {
+            const nextState =
+              typeof isBookmarked === "boolean" ? isBookmarked : !res.isBookmarked;
+            return { ...res, isBookmarked: nextState };
+          }
+          return res;
+        });
+      });
+
+      return { previousResources };
+    },
+    onError: (error: Error, _vars, context) => {
+      // Rollback to previous state on failure
+      if (context?.previousResources) {
+        queryClient.setQueryData(["saved-resources", userId], context.previousResources);
+      }
+      toast.error(error.message || "Failed to update bookmark status");
+    },
+    onSuccess: (data) => {
+      toast.success(data.isBookmarked ? "Bookmarked sheet" : "Bookmark removed", {
+        duration: 1800,
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["saved-resources", userId] });
+    },
+  });
+}

@@ -69,4 +69,34 @@ export class SavedResourceController {
       next(error);
     }
   }
+
+  /**
+   * PATCH /api/saved-resources/:id/bookmark
+   * Toggles or sets bookmark status on a saved resource
+   */
+  static async toggleBookmark(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const user = await getAuthenticatedUser(req);
+      if (!user) {
+        throw new UnauthorizedError("Authentication required to bookmark resources");
+      }
+
+      const idParam = req.params.id;
+      const id = Array.isArray(idParam) ? idParam[0] : idParam;
+      if (!id) {
+        throw new BadRequestError("Resource ID is required");
+      }
+
+      const { isBookmarked } = req.body || {};
+      const data = await SavedResourceService.toggleBookmark(user.id, id, isBookmarked);
+      sendSuccess(
+        res,
+        data,
+        200,
+        data.isBookmarked ? "Resource bookmarked" : "Bookmark removed"
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
