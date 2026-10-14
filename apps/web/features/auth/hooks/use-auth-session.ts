@@ -25,6 +25,12 @@ export function useAuthSession() {
       }
 
       if (res?.data?.user) {
+        const token = (res.data as any)?.token || (res.data as any)?.session?.token;
+        if (token && typeof window !== "undefined") {
+          try {
+            localStorage.setItem("cracksde_auth_token", token);
+          } catch {}
+        }
         // Immediate synchronous global auth state update
         useAuthStore.getState().setSession(res.data.user, (res.data as any)?.session ?? null);
         usePlannerStore.getState().syncUser(res.data.user.id);
@@ -50,6 +56,12 @@ export function useAuthSession() {
       }
 
       if (res?.data?.user) {
+        const token = (res.data as any)?.token || (res.data as any)?.session?.token;
+        if (token && typeof window !== "undefined") {
+          try {
+            localStorage.setItem("cracksde_auth_token", token);
+          } catch {}
+        }
         // Immediate synchronous global auth state update
         useAuthStore.getState().setSession(res.data.user, (res.data as any)?.session ?? null);
         usePlannerStore.getState().syncUser(res.data.user.id);
@@ -75,6 +87,7 @@ export function useAuthSession() {
       usePlannerStore.getState().resetStore();
       if (typeof window !== "undefined") {
         try {
+          localStorage.removeItem("cracksde_auth_token");
           localStorage.removeItem("cracksde-daily-planner-storage");
           localStorage.removeItem("cracksde_planly_expanded_sprints");
           localStorage.removeItem("cracksde_planly_expanded_days");

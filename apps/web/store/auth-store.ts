@@ -53,6 +53,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error: null,
 
   setSession: (user: AuthUser, session: AuthSession | null) => {
+    if (typeof window !== "undefined" && session?.token) {
+      try {
+        localStorage.setItem("cracksde_auth_token", session.token);
+      } catch {}
+    }
     set({
       user,
       session,
@@ -65,6 +70,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   clearSession: () => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("cracksde_auth_token");
+      } catch {}
+    }
     set({
       user: null,
       session: null,
@@ -92,6 +102,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     if (sessionData?.user) {
+      if (typeof window !== "undefined" && sessionData.session?.token) {
+        try {
+          localStorage.setItem("cracksde_auth_token", sessionData.session.token);
+        } catch {}
+      }
       set({
         user: sessionData.user,
         session: sessionData.session ?? null,
@@ -103,6 +118,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } else {
       // Only set to unauthenticated if we aren't currently in the middle of a login action
       if (!state.isLoggingIn) {
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("cracksde_auth_token");
+          } catch {}
+        }
         set({
           user: null,
           session: null,

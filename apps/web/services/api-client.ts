@@ -7,22 +7,43 @@ export interface RequestOptions extends Omit<RequestInit, "body"> {
 export class ApiClient {
   private baseUrl: string;
 
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl.replace(/\/+$/, "");
+  constructor(baseUrl?: string) {
+    this.baseUrl = (baseUrl || "").replace(/\/+$/, "");
+  }
+
+  private getEffectiveBaseUrl(): string {
+    if (typeof window !== "undefined") {
+      // If baseUrl is unset or points to localhost/127.0.0.1, use window.location.origin (Next.js reverse proxy)
+      // This prevents mobile browsers from failing to reach localhost:5001 on the phone's loopback
+      if (!this.baseUrl || this.baseUrl.includes("localhost") || this.baseUrl.includes("127.0.0.1")) {
+        return window.location.origin;
+      }
+      return this.baseUrl;
+    }
+    return this.baseUrl || process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
   }
 
   private getFullUrl(endpoint: string): string {
     const cleanPath = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-    return `${this.baseUrl}${cleanPath}`;
+    return `${this.getEffectiveBaseUrl()}${cleanPath}`;
   }
 
   private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { body, headers: customHeaders, ...rest } = options;
 
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...customHeaders,
+      ...(customHeaders as Record<string, string>),
     };
+
+    if (typeof window !== "undefined") {
+      try {
+        const token = localStorage.getItem("cracksde_auth_token");
+        if (token && !headers["Authorization"] && !headers["authorization"]) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+      } catch {}
+    }
 
     const config: RequestInit = {
       ...rest,
@@ -35,6 +56,12 @@ export class ApiClient {
     }
 
     const response = await fetch(this.getFullUrl(endpoint), config);
+
+    if (response.status === 401 && typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("cracksde_auth_token");
+      } catch {}
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ error: "Request failed" }));

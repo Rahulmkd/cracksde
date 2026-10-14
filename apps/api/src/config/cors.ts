@@ -10,13 +10,21 @@ export const corsOptions: CorsOptions = {
       return callback(null, true);
     }
 
-    // Auto-allow all Vercel deployments and localhost
-    if (
+    // Auto-allow all Vercel deployments, localhost, local network IPs, and dev tunnels
+    const isLocalOrTunnel =
       origin.endsWith(".vercel.app") ||
       origin.includes("vercel.app") ||
       origin.includes("localhost") ||
-      origin.includes("127.0.0.1")
-    ) {
+      origin.includes("127.0.0.1") ||
+      /https?:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin) ||
+      /https?:\/\/10\.\d+\.\d+\.\d+(:\d+)?$/.test(origin) ||
+      /https?:\/\/172\.(1[6-9]|2\d|3[01])\.\d+\.\d+(:\d+)?$/.test(origin) ||
+      origin.endsWith(".ngrok-free.app") ||
+      origin.endsWith(".ngrok.io") ||
+      origin.endsWith(".trycloudflare.com") ||
+      origin.endsWith(".loca.lt");
+
+    if (isLocalOrTunnel) {
       return callback(null, true);
     }
 
@@ -51,7 +59,8 @@ export const corsOptions: CorsOptions = {
     "X-Requested-With",
     "Accept",
     "Origin",
+    "set-auth-token",
   ],
-  exposedHeaders: ["Set-Cookie"],
+  exposedHeaders: ["Set-Cookie", "set-auth-token"],
 };
 

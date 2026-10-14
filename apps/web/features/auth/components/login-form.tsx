@@ -37,8 +37,9 @@ export function LoginForm() {
     setFormLoading(true);
 
     try {
+      const cleanEmail = email.trim().toLowerCase();
       const res = await signInEmail({
-        email,
+        email: cleanEmail,
         password,
       });
 
@@ -144,7 +145,11 @@ export function LoginForm() {
                   placeholder="you@example.com"
                   required
                   autoComplete="email"
-                  className="text-[12px] h-8"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  inputMode="email"
+                  className="text-[16px] sm:text-[12px] h-9 sm:h-8"
                 />
               </div>
 
@@ -162,14 +167,14 @@ export function LoginForm() {
                   placeholder="••••••••"
                   required
                   autoComplete="current-password"
-                  className="text-[12px] h-8"
+                  className="text-[16px] sm:text-[12px] h-9 sm:h-8"
                 />
               </div>
 
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-8 text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-1 transition-all"
+                className="w-full h-9 sm:h-8 text-[13px] sm:text-[12px] font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm mt-1 transition-all"
               >
                 {formLoading ? (
                   <div className="flex items-center gap-2">
