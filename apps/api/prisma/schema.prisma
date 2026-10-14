@@ -23,6 +23,7 @@ model User {
   accounts      Account[]
   itemProgress  UserItemProgress[]
   profile       UserProfile?
+  savedResources SavedResource[]
 
   @@map("users")
 }
@@ -293,4 +294,24 @@ model UserItemProgress {
   @@index([itemId], map: "idx_user_item_progress_item_id")
   @@index([nextRevisionAt], map: "idx_user_item_progress_next_rev")
   @@map("user_item_progress")
+}
+
+// =====================================================================
+// Domain 5: User Saved Resources & Quick Links
+// =====================================================================
+
+model SavedResource {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  url       String   @db.Text
+  title     String   @db.VarChar(500)
+  domain    String   @db.VarChar(255)
+  favicon   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_saved_resources_user_id")
+  @@index([createdAt], map: "idx_saved_resources_created_at")
+  @@map("saved_resources")
 }

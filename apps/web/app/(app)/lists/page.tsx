@@ -4,18 +4,17 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   ListTodo,
-  CheckCircle2,
-  ChevronRight,
-  Flame,
-  Star,
-  BookOpen,
+  BookmarkPlus,
   ArrowRight,
-  Layers,
-  Sparkles,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { SaveResourceModal } from "@/features/saved-resources/components/save-resource-modal";
+import { SavedResourcesList } from "@/features/saved-resources/components/saved-resources-list";
+import { useSavedResources } from "@/features/saved-resources/hooks/use-saved-resources";
 
 interface ListSheet {
   id: string;
@@ -30,6 +29,10 @@ interface ListSheet {
 }
 
 export default function ListsPage() {
+  const [activeTab, setActiveTab] = useState<string>("sheets");
+  const [saveModalOpen, setSaveModalOpen] = useState<boolean>(false);
+  const { data: savedResources } = useSavedResources();
+
   const sheets: ListSheet[] = [
     {
       id: "crack-sde-core",
@@ -95,79 +98,143 @@ export default function ListsPage() {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[11px] font-medium text-zinc-400">
             <ListTodo className="h-3 w-3 text-blue-400" />
-            <span>Curated Lists</span>
+            <span>Curated Lists & Resources</span>
           </div>
           <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-zinc-100">
             All Problem Sheets
           </h1>
           <p className="text-[12px] font-normal leading-normal text-zinc-400">
-            Structured problem sheets and checklists designed by top engineers to help you crack technical rounds.
+            Structured problem sheets and personal saved resources to accelerate your software engineering interview preparation.
           </p>
+        </div>
+
+        {/* Action Button */}
+        <div className="flex items-center gap-2 self-start sm:self-center">
+          <Button
+            onClick={() => setSaveModalOpen(true)}
+            size="sm"
+            className="h-8 gap-1.5 bg-blue-600 hover:bg-blue-500 text-white font-medium px-3 text-[12px] shadow-sm transition-all"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Save Link</span>
+          </Button>
         </div>
       </div>
 
-      {/* Sheets Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {sheets.map((sheet) => {
-          const progress =
-            sheet.totalProblems > 0
-              ? Math.round((sheet.completedProblems / sheet.totalProblems) * 100)
-              : 0;
-
-          return (
-            <div
-              key={sheet.id}
-              className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3 hover:border-zinc-700/80 hover:bg-zinc-900/60 transition-all duration-200 group flex flex-col justify-between shadow-subtle"
+      {/* Tabs / Filter Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
+        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+          <TabsList className="bg-zinc-900/60 border border-zinc-800 p-0.5 h-8">
+            <TabsTrigger
+              value="sheets"
+              className="text-[12px] px-3 py-1 gap-1.5 data-[state=active]:bg-zinc-800 data-[state=active]:text-zinc-100"
             >
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <Badge variant="blue" className="text-[11px] font-medium py-0 px-2">
-                    {sheet.category}
-                  </Badge>
-                  <span className="text-[11px] text-zinc-500 font-mono">
-                    {sheet.topics} Topics
-                  </span>
-                </div>
+              <ListTodo className="h-3.5 w-3.5" />
+              <span>Problem Sheets</span>
+              <span className="ml-1 rounded-full bg-zinc-800/80 px-1.5 py-0.2 text-[10px] text-zinc-400 font-mono">
+                {sheets.length}
+              </span>
+            </TabsTrigger>
 
-                <div className="space-y-0.5">
-                  <h3 className="text-[14px] font-semibold leading-snug text-zinc-100 group-hover:text-blue-400 transition-colors">
-                    {sheet.title}
-                  </h3>
-                  <div className="text-[11px] text-zinc-500 font-normal">By {sheet.author}</div>
-                </div>
+            <TabsTrigger
+              value="saved"
+              className="text-[12px] px-3 py-1 gap-1.5 data-[state=active]:bg-zinc-800 data-[state=active]:text-zinc-100"
+            >
+              <BookmarkPlus className="h-3.5 w-3.5" />
+              <span>Saved Resources</span>
+              {savedResources && savedResources.length > 0 && (
+                <span className="ml-1 rounded-full bg-blue-500/20 px-1.5 py-0.2 text-[10px] text-blue-400 font-mono">
+                  {savedResources.length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-                <p className="text-[12px] font-normal text-zinc-400 leading-normal line-clamp-2">
-                  {sheet.description}
-                </p>
-              </div>
+        {/* Tab 1: Problem Sheets */}
+        <TabsContent value="sheets" className="mt-0 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {sheets.map((sheet) => {
+              const progress =
+                sheet.totalProblems > 0
+                  ? Math.round((sheet.completedProblems / sheet.totalProblems) * 100)
+                  : 0;
 
-              <div className="space-y-2.5 pt-2.5 border-t border-zinc-800/60">
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-zinc-400 font-normal">Progress</span>
-                    <span className="text-zinc-300 font-mono font-medium">
-                      {sheet.completedProblems} / {sheet.totalProblems}
-                    </span>
-                  </div>
-                  <Progress value={progress} className="h-1.5" />
-                </div>
-
-                <Button
-                  asChild
-                  size="sm"
-                  variant="outline"
-                  className="w-full h-7 text-[12px] font-medium border-zinc-800 bg-zinc-900/80 group-hover:border-blue-500/40 group-hover:text-blue-400"
+              return (
+                <div
+                  key={sheet.id}
+                  className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3 hover:border-zinc-700/80 hover:bg-zinc-900/60 transition-all duration-200 group flex flex-col justify-between shadow-subtle"
                 >
-                  <Link href="/practice">
-                    <span>Open Sheet</span>
-                    <ArrowRight className="h-3 w-3 ml-1" />
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="blue" className="text-[11px] font-medium py-0 px-2">
+                        {sheet.category}
+                      </Badge>
+                      <span className="text-[11px] text-zinc-500 font-mono">
+                        {sheet.topics} Topics
+                      </span>
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <h3 className="text-[14px] font-semibold leading-snug text-zinc-100 group-hover:text-blue-400 transition-colors">
+                        {sheet.title}
+                      </h3>
+                      <div className="text-[11px] text-zinc-500 font-normal">By {sheet.author}</div>
+                    </div>
+
+                    <p className="text-[12px] font-normal text-zinc-400 leading-normal line-clamp-2">
+                      {sheet.description}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2.5 pt-2.5 border-t border-zinc-800/60">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-zinc-400 font-normal">Progress</span>
+                        <span className="text-zinc-300 font-mono font-medium">
+                          {sheet.completedProblems} / {sheet.totalProblems}
+                        </span>
+                      </div>
+                      <Progress value={progress} className="h-1.5" />
+                    </div>
+
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="outline"
+                      className="w-full h-7 text-[12px] font-medium border-zinc-800 bg-zinc-900/80 group-hover:border-blue-500/40 group-hover:text-blue-400"
+                    >
+                      <Link href="/practice">
+                        <span>Open Sheet</span>
+                        <ArrowRight className="h-3 w-3 ml-1" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        {/* Tab 2: Saved Resources */}
+        <TabsContent value="saved" className="mt-0 space-y-4">
+          <SavedResourcesList
+            onOpenSaveModal={() => setSaveModalOpen(true)}
+          />
+        </TabsContent>
+      </Tabs>
+
+      {/* Save Resource Modal */}
+      <SaveResourceModal
+        open={saveModalOpen}
+        onOpenChange={(isOpen) => {
+          setSaveModalOpen(isOpen);
+          // If modal was closed after saving, activate the saved tab so the user sees the new card
+          if (!isOpen) {
+            setActiveTab("saved");
+          }
+        }}
+      />
     </div>
   );
 }
