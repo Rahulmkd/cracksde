@@ -55,16 +55,21 @@ export function SavedResourcesList({ onOpenSaveModal }: SavedResourcesListProps)
         {[1, 2, 3].map((n) => (
           <div
             key={n}
-            className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3"
+            className="min-h-[240px] rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 flex flex-col justify-between"
           >
-            <div className="flex justify-between items-center">
-              <Skeleton className="h-5 w-24 bg-zinc-800" />
-              <Skeleton className="h-4 w-16 bg-zinc-800" />
+            <div className="space-y-2.5">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-5 w-24 bg-zinc-800" />
+                <Skeleton className="h-4 w-16 bg-zinc-800" />
+              </div>
+              <div className="space-y-0.5">
+                <Skeleton className="h-5 w-3/4 bg-zinc-800" />
+                <Skeleton className="h-3.5 w-24 bg-zinc-800" />
+              </div>
+              <Skeleton className="h-8 w-full bg-zinc-800" />
             </div>
-            <Skeleton className="h-5 w-full bg-zinc-800" />
-            <Skeleton className="h-4 w-2/3 bg-zinc-800" />
-            <div className="pt-2 border-t border-zinc-800/60 flex justify-between">
-              <Skeleton className="h-7 w-20 bg-zinc-800" />
+            <div className="pt-2.5 border-t border-zinc-800/60 flex items-center justify-between gap-1.5">
+              <Skeleton className="h-7 flex-1 bg-zinc-800" />
               <Skeleton className="h-7 w-7 bg-zinc-800" />
             </div>
           </div>
@@ -95,16 +100,21 @@ export function SavedResourcesList({ onOpenSaveModal }: SavedResourcesListProps)
         {[1, 2, 3].map((n) => (
           <div
             key={n}
-            className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3"
+            className="min-h-[240px] rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 flex flex-col justify-between"
           >
-            <div className="flex justify-between items-center">
-              <Skeleton className="h-5 w-24 bg-zinc-800" />
-              <Skeleton className="h-4 w-16 bg-zinc-800" />
+            <div className="space-y-2.5">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-5 w-24 bg-zinc-800" />
+                <Skeleton className="h-4 w-16 bg-zinc-800" />
+              </div>
+              <div className="space-y-0.5">
+                <Skeleton className="h-5 w-3/4 bg-zinc-800" />
+                <Skeleton className="h-3.5 w-24 bg-zinc-800" />
+              </div>
+              <Skeleton className="h-8 w-full bg-zinc-800" />
             </div>
-            <Skeleton className="h-5 w-full bg-zinc-800" />
-            <Skeleton className="h-4 w-2/3 bg-zinc-800" />
-            <div className="pt-2 border-t border-zinc-800/60 flex justify-between">
-              <Skeleton className="h-7 w-20 bg-zinc-800" />
+            <div className="pt-2.5 border-t border-zinc-800/60 flex items-center justify-between gap-1.5">
+              <Skeleton className="h-7 flex-1 bg-zinc-800" />
               <Skeleton className="h-7 w-7 bg-zinc-800" />
             </div>
           </div>
