@@ -24,6 +24,7 @@ import {
 } from "@/features/saved-resources/hooks/use-saved-resources";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ListsPageSkeleton } from "./loading";
 
 interface ListSheet {
   id: string;
@@ -41,13 +42,19 @@ export default function ListsPage() {
   const [activeTab, setActiveTab] = useState<string>("sheets");
   const [saveModalOpen, setSaveModalOpen] = useState<boolean>(false);
   const [bookmarkedSheetIds, setBookmarkedSheetIds] = useState<string[]>([]);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
-  const { data: savedResources } = useSavedResources();
+  const {
+    data: savedResources,
+    isLoading: isSavedResourcesLoading,
+    isAuthLoading,
+  } = useSavedResources();
   const deleteSavedMutation = useDeleteSavedResource();
   const toggleBookmarkMutation = useToggleBookmarkResource();
 
   // Load bookmarked problem sheet IDs from localStorage
   useEffect(() => {
+    setIsMounted(true);
     try {
       const stored = localStorage.getItem("cracksde_bookmarked_sheets");
       if (stored) {
@@ -153,7 +160,7 @@ export default function ListsPage() {
     return (
       <div
         key={`${keyPrefix}${sheet.id}`}
-        className="rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 hover:border-zinc-700/80 hover:bg-zinc-900/60 transition-all duration-200 group flex flex-col justify-between shadow-subtle"
+        className="min-h-[240px] rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 space-y-3.5 hover:border-zinc-700/80 hover:bg-zinc-900/60 transition-all duration-200 group flex flex-col justify-between shadow-subtle"
       >
         <div className="space-y-2.5">
           <div className="flex items-center justify-between gap-2">
@@ -232,6 +239,13 @@ export default function ListsPage() {
       </div>
     );
   };
+
+  const isDataLoading =
+    !isMounted || isAuthLoading || (isSavedResourcesLoading && !savedResources);
+
+  if (isDataLoading) {
+    return <ListsPageSkeleton />;
+  }
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in-50 duration-200">
